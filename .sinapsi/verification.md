@@ -20,6 +20,12 @@ gate.
 
 ## Latest verification
 
+- 2026-07-22 — Personal-profile migration: `development`, `validation` e `production` hanno
+  SHA identici tra origine organizzativa e `PatrickDev-it/sistemista`; default/ruleset/security
+  features ricreati. Security remoto verde; il primo CI Ubuntu ha esposto 9 test non ermetici.
+  Fix locale: path fixture native, state DB esterno al task workspace, alias basename indipendente
+  dall'OS. Gate locale: **713 passed, 3 skipped**, Ruff/format/Mypy/build/audit/Gitleaks verdi;
+  chiusura subordinata alla PR personale verde.
 - 2026-07-22 — RFC-006 local gate: Mypy **30 → 0 errori** sull'intero runtime; Ruff clean e
   **149 file** conformi; test mirati **74 passed**, suite completa **713 passed, 3 skipped**;
   wheel/sdist `0.1.0a1` verdi; dependency audit senza vulnerabilità note; Gitleaks sulla storia

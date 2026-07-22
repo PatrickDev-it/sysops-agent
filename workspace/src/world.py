@@ -22,7 +22,6 @@ Stdlib only. In-RAM, per-run (architecture.md invariant 1: filesystem is not mem
 
 from __future__ import annotations
 
-import os
 import time
 from dataclasses import dataclass, field
 from enum import Enum
@@ -148,7 +147,10 @@ class Transition:
 def norm_alias(name: str) -> str:
     """Canonical alias: basename, lowercase, no .exe, dashes folded to underscores
     (pip normalizes yt-dlp → yt_dlp; both must resolve to the same node)."""
-    n = os.path.basename((name or "").strip().strip("'\""))
+    # Model output and persisted observations may use a different platform's separator.
+    # `os.path.basename` understands only the host spelling, so Windows paths became one
+    # giant basename on Linux and escaped executable overwrite protection.
+    n = (name or "").strip().strip("'\"").replace("\\", "/").rsplit("/", 1)[-1]
     n = n.lower().removesuffix(".exe")
     return n.replace("-", "_")
 

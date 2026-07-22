@@ -7,8 +7,8 @@ verification predicates, recovery loops, and a redacted audit trail.
 > production-ready, does not provide a security sandbox, and must not be run unattended or
 > against untrusted objectives. Use an isolated disposable machine or VM.
 
-[![CI](https://github.com/Ignoryx/sistemista/actions/workflows/ci.yml/badge.svg?branch=development)](https://github.com/Ignoryx/sistemista/actions/workflows/ci.yml)
-[![Security](https://github.com/Ignoryx/sistemista/actions/workflows/security.yml/badge.svg?branch=development)](https://github.com/Ignoryx/sistemista/actions/workflows/security.yml)
+[![CI](https://github.com/PatrickDev-it/sistemista/actions/workflows/ci.yml/badge.svg?branch=development)](https://github.com/PatrickDev-it/sistemista/actions/workflows/ci.yml)
+[![Security](https://github.com/PatrickDev-it/sistemista/actions/workflows/security.yml/badge.svg?branch=development)](https://github.com/PatrickDev-it/sistemista/actions/workflows/security.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
 ## What it is
@@ -51,7 +51,7 @@ Prerequisites:
   [`workspace/models/README.md`](workspace/models/README.md)
 
 ```powershell
-git clone https://github.com/Ignoryx/sistemista.git
+git clone https://github.com/PatrickDev-it/sistemista.git
 cd sistemista
 py -3.12 -m venv .venv
 .\.venv\Scripts\python -m pip install --upgrade pip
