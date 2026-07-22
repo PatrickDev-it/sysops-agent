@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-Sistemista is an alpha research preview. No released version is currently supported for
+SysOps Agent is an alpha research preview. No released version is currently supported for
 production use. Security fixes are applied to `development` first and promoted only after the
 repository's validation gates pass.
 
@@ -17,7 +17,7 @@ or coordinated disclosure depend on severity and reproducibility; this is not an
 
 ## Threat boundary
 
-Sistemista executes generated commands on the operator's host. The current alpha does not claim:
+SysOps Agent executes generated commands on the operator's host. The current alpha does not claim:
 
 - process, filesystem, network, or privilege isolation;
 - safe unattended operation;

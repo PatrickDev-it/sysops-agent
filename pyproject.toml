@@ -3,13 +3,13 @@ requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "sistemista"
+name = "sysops-agent"
 version = "0.1.0a1"
 description = "Local-first, model-assisted system operations with bounded execution and audit trails"
 readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE", "NOTICE"]
-authors = [{ name = "Sistemista contributors" }]
+authors = [{ name = "SysOps Agent contributors" }]
 requires-python = ">=3.12"
 keywords = ["ai-agent", "llama-cpp", "local-first", "privacy", "sysops"]
 classifiers = [
@@ -65,12 +65,14 @@ warn_redundant_casts = true
 no_error_summary = true
 
 [project.urls]
-Homepage = "https://github.com/PatrickDev-it/sistemista"
-Documentation = "https://github.com/PatrickDev-it/sistemista#readme"
-Issues = "https://github.com/PatrickDev-it/sistemista/issues"
-Source = "https://github.com/PatrickDev-it/sistemista"
+Homepage = "https://github.com/PatrickDev-it/sysops-agent"
+Documentation = "https://github.com/PatrickDev-it/sysops-agent#readme"
+Issues = "https://github.com/PatrickDev-it/sysops-agent/issues"
+Source = "https://github.com/PatrickDev-it/sysops-agent"
 
 [project.scripts]
+sysops-agent = "src.main:cli_entry"
+# Compatibility alias retained during the public-alpha cycle.
 sistemista = "src.main:cli_entry"
 
 # ── Test configuration — the suite's own invariants ──────────────────────────

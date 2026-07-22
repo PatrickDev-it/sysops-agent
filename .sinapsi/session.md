@@ -1132,3 +1132,12 @@ default e security features verificati. `Ignoryx/sistemista` eliminata tramite i
 e verificata inesistente; rimosso anche il remote locale organizzativo. Unico residuo operativo:
 selezionare `PatrickDev-it/sistemista` nel dialogo web **Customize your pins**, non automatizzabile
 tramite API GitHub pubblica.
+
+### English product identity
+
+Repository personale rinominato da `sistemista` a `sysops-agent`, preservando branch, storia,
+ruleset e pin. Identità pubblica aggiornata a **SysOps Agent** in README, metadata Python,
+contribution/security policy e NOTICE; package e comando primario diventano `sysops-agent`.
+L'alias CLI `sistemista` resta temporaneamente per compatibilità durante l'alpha. `origin` punta
+al nuovo URL canonico. Gate locale: Ruff e format verdi, Mypy zero, **713 passed, 3 skipped**,
+wheel/sdist `sysops_agent-0.1.0a1` costruiti in isolamento.
