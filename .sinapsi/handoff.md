@@ -1,31 +1,31 @@
 # Handoff
 
-_Aggiornato: 2026-07-22 — migrazione personale chiusa e copia organizzativa rimossa._
+_Aggiornato: 2026-07-22 — identità pubblica inglese applicata._
 
 ## Stato
 
-Repository canonico: `https://github.com/PatrickDev-it/sistemista`; default `development`, con
-`validation` e `production` protetti. `origin` punta esclusivamente al profilo personale.
-`Ignoryx/sistemista` è stata eliminata e verificata inesistente. La storia pre-pubblicazione resta
-solo nel branch locale `archive/pre-publication`, intenzionalmente mai pubblicato.
+Repository canonico: `https://github.com/PatrickDev-it/sysops-agent`; default `development`, con
+`validation` e `production` protetti. Branch corrente: `docs/sysops-agent-brand`. `origin` punta
+esclusivamente al nuovo URL personale. Il repository resta pinnato dopo la rinomina.
 
-## Migrazione verificata
+La storia pre-pubblicazione resta solo nel branch locale `archive/pre-publication`, mai pubblicato.
+La precedente copia `Ignoryx/sistemista` rimane eliminata e verificata inesistente.
 
-- I tre branch pubblici sono stati replicati inizialmente con SHA identici.
-- PR personale #7 integrata in `development` al commit `04a36b7`.
-- Sei required check verdi: Lint, Ubuntu, Windows, Package, Dependency audit e Gitleaks.
-- Ruleset personale `19557677` attivo su `development`, `validation` e `production`.
-- Discussions, topics, secret scanning, push protection, Dependabot e private reporting attivi.
-- README, package metadata e NOTICE riferiscono il repository personale.
-- La copia organizzativa e il relativo remote locale sono stati rimossi.
+## Rebrand verificato
+
+- Nome pubblico: **SysOps Agent**.
+- Package Python e comando primario: `sysops-agent` / `sysops_agent` negli artifact.
+- Alias CLI `sistemista` mantenuto temporaneamente durante il ciclo alpha.
+- README, URL package, CONTRIBUTING, SECURITY e NOTICE allineati.
+- Branch, storia, ruleset e pin preservati dalla rinomina GitHub.
 
 ## Gate corrente
 
 - Suite locale: **713 passed, 3 skipped**.
-- Ruff, format check e Mypy verdi.
-- Wheel/sdist, pip-audit e Gitleaks verdi.
-- CI multi-OS personale confermata su Ubuntu e Windows.
-- Pin del profilo ancora manuale: GitHub non espone una API pubblica per questa operazione.
+- Ruff: clean; format: **149 file** conformi; Mypy: zero errori.
+- Wheel/sdist `sysops_agent-0.1.0a1` costruiti in isolamento.
+- CI multi-OS, package, audit e Gitleaks restano required check del ruleset.
+- Ruleset personale `19557677` attivo su `development`, `validation` e `production`.
 
 ## RFC chiuse
 
@@ -35,7 +35,7 @@ solo nel branch locale `archive/pre-publication`, intenzionalmente mai pubblicat
 
 ## Release path
 
-1. Pin manuale di `PatrickDev-it/sistemista` tramite **Customize your pins**.
+1. Integrare il rebrand tramite PR verde su `development`.
 2. RFC-007: dependency reproducibility, SBOM e provenance.
 3. RFC-008: backend isolato kernel/VM ed escape suite; blocker production.
 4. RFC-009: benchmark multi-OS, risorse e claim falsificabili.
@@ -54,11 +54,11 @@ chiusura di tutti i publication target e al GO formale.
 ## Comandi canonici
 
 ```powershell
-python -m ruff check .
-python -m ruff format --check .
-python -m mypy
-python -m pytest -q
-python -m build
-python -m pip_audit -r requirements.txt
+.\.venv\Scripts\python -m ruff check .
+.\.venv\Scripts\python -m ruff format --check .
+.\.venv\Scripts\python -m mypy
+.\.venv\Scripts\python -m pytest -q
+.\.venv\Scripts\python -m build
+.\.venv\Scripts\python -m pip_audit -r requirements.txt
 gitleaks git . --log-opts="HEAD" --no-banner --redact
 ```
