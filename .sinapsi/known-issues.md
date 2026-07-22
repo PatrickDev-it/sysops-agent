@@ -5,6 +5,15 @@ Format per entry: `symptom → root cause → fix / how to avoid`. Consult befor
 
 ---
 
+### Un debug dump dichiarato serializzabile conserva key dataclass
+**Sintomo.** `ReasoningContext.debug_dump()` restituisce un dict che `json.dumps` non può codificare.
+**Causa.** `BeliefSystem` usa correttamente `BeliefKey` come identità interna, ma il boundary telemetry
+copiava quelle key senza renderle; inoltre leggeva ancora il vecchio attributo `score` già rimosso.
+**Fix.** Renderizzare le key con `str()` e conservare provenance `support`/`against`; il test deve
+serializzare e rileggere l'intero payload, non limitarsi a verificarne la forma Python.
+
+---
+
 ### GitHub Actions non parte e il dispatch restituisce HTTP 500
 **Sintomo.** CI è registrato dopo la PR bootstrap, Security non compare e `workflow_dispatch`
 restituisce HTTP 500 senza creare run.

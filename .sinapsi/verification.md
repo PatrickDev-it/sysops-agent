@@ -20,6 +20,11 @@ gate.
 
 ## Latest verification
 
+- 2026-07-22 — RFC-006 local gate: Mypy **30 → 0 errori** sull'intero runtime; Ruff clean e
+  **149 file** conformi; test mirati **74 passed**, suite completa **713 passed, 3 skipped**;
+  wheel/sdist `0.1.0a1` verdi; dependency audit senza vulnerabilità note; Gitleaks sulla storia
+  pubblica (16,89 MB) e sul diff RFC (24,30 KB) con zero finding. GitHub Actions resta un
+  blocker esterno mentre l'organizzazione è flagged.
 - 2026-07-22 — RFC-005 local gate: boundary mirato **83 passed**; suite completa
   **712 passed, 3 skipped**; Ruff check clean e **149 file** conformi; wheel/sdist `0.1.0a1`,
   dependency audit e curated-tree Gitleaks verdi. Test di composizione provano il rifiuto
@@ -31,5 +36,5 @@ gate.
   `0.1.0a1` built in isolation with prompts 8/8, KB 8/8, LICENSE and NOTICE; dependency audit
   reports no known vulnerabilities after removal of unused `diskcache`; curated-tree Gitleaks
   scan reports no leaks. Remote Actions and rulesets remain to be verified after first push.
-- Static typing is not yet a release gate: la baseline ha 30 errori Mypy; RFC-006 deve
-  introdurre un ratchet senza soppressioni globali.
+- Static typing è un release gate: Mypy 2.3.0 controlla tutto `workspace/src` con
+  `check_untyped_defs` e baseline zero-error, senza soppressioni globali.

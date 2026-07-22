@@ -52,7 +52,17 @@ dev = [
     "pytest-timeout>=2.3",
     "ruff==0.14.5",
     "pip-audit>=2.7",
+    "mypy==2.3.0",
+    "types-PyYAML==6.0.12.20260518",
 ]
+
+[tool.mypy]
+python_version = "3.12"
+files = ["workspace/src"]
+check_untyped_defs = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+no_error_summary = true
 
 [project.urls]
 Homepage = "https://github.com/Ignoryx/sistemista"

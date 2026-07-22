@@ -52,6 +52,7 @@ patch: the project's shape (above), the last sessions at a glance, and a short r
      agent at the end of every patch, at the same time it appends session.md. Drop the
      11th; the full history is in session.md and, once archived, in archive/. -->
 
+- 2026-07-22 — Chiusa RFC-006: Mypy 30→0, 713 test verdi e runtime netto -26 LOC.
 - 2026-07-22 — Implementata RFC-005 fail-closed: 712 test verdi; promozione bloccata da Actions HTTP 500.
 - 2026-07-22 — Pubblicato Ignoryx/sistemista: tre branch, security features e ruleset attivi; CI remota da provare.
 - 2026-07-22 — Chiuso gate locale RFC-004: 692 test, lint/build/audit/secrets verdi, baseline OSS pronta.
@@ -64,9 +65,9 @@ patch: the project's shape (above), the last sessions at a glance, and a short r
      at the end of every patch. If it grows past 10 lines it has stopped being a summary. -->
 
 - Repository pubblico: `Ignoryx/sistemista`; storia privata preservata solo in archive locale.
-- RFC-005 implementata: only-SAFE, no env opt-out, dynamic sink e host mutation fail-closed.
-- Gate locale: 712 passed/3 skipped; Ruff/format, build, audit e Gitleaks verdi.
+- RFC-005 integrata; RFC-006 chiusa localmente con Mypy 30→0 senza suppress globali.
+- Gate locale: 713 passed/3 skipped; Ruff/format/type, build, audit e Gitleaks verdi.
 - Wheel/sdist `0.1.0a1` verdi con 8 prompt, 8 KB YAML, LICENSE e NOTICE.
 - `development` default; `validation`/`production` protetti da ruleset e security features.
 - GitHub Actions bloccato: dispatch CI HTTP 500, Security non indicizzato con org flagged.
-- Prossimo passo: integrare RFC-005 su development; validation attende Actions remoti verdi.
+- Prossimo passo: integrare RFC-006 su development, poi RFC-007 SBOM/provenance.

@@ -35,7 +35,7 @@ def record_run(
         # Resolved per call so a relocated `config.VAR` takes the telemetry with it.
         telemetry_dir = config.TELEMETRY_DIR
         telemetry_dir.mkdir(parents=True, exist_ok=True)
-        record = {
+        record: dict[str, object] = {
             "run_id": state.run_id,
             "goal": goal,
             "verdict": verdict,

@@ -19,6 +19,7 @@ import os
 import shutil
 import sys
 from pathlib import Path
+from typing import Callable
 
 from .. import trace
 from . import predicates
@@ -294,7 +295,9 @@ def list_dir(path: str, cwd: Path) -> tuple[bool, str]:
 
 # ── Dispatch table — executor calls by name ───────────────────────────────────
 
-TOOLS = {
+Tool = Callable[..., tuple[bool, str]]
+
+TOOLS: dict[str, Tool] = {
     "write_file": write_file,
     "read_file": read_file,
     "append_file": append_file,
@@ -307,7 +310,7 @@ TOOLS = {
 }
 
 
-def _normalize_args(fn, name: str, args: list[str]) -> tuple[list[str] | None, str]:
+def _normalize_args(fn: Tool, name: str, args: list[str]) -> tuple[list[str] | None, str]:
     """Reconcile the arg count the model produced with the tool's real signature.
 
     The `|`-delimited tool syntax makes two failure modes routine from a 3B model:

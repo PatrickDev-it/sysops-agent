@@ -4,6 +4,7 @@ import re
 import sys
 import threading
 import time
+from typing import Any
 
 from .. import trace
 from .confinement import Confinement, ConfinementViolation
@@ -55,6 +56,8 @@ class Terminal:
         self._buf: list[str] = []
         self._raw_buf: list[bytes] = []  # raw PTY bytes for pyte/VirtualScreen
         self._cwd = cwd
+        self._pty: Any = None
+        self._master = -1
 
         if sys.platform == "win32":
             from winpty import PtyProcess  # type: ignore
@@ -195,6 +198,7 @@ class Terminal:
         # outputting immediately and we must not lose its first prompt.
         time.sleep(0.3)
         self.clear_buffer()
+        return None
 
     def read_ring(self, max_chars: int = 4096) -> str:
         """Return last max_chars of accumulated buffer WITHOUT clearing it."""

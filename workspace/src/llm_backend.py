@@ -26,11 +26,11 @@ import http.client
 import json
 import signal
 import subprocess
-import sys
 import time
 import urllib.error
 import urllib.request
 from dataclasses import dataclass, field
+from types import FrameType
 
 from .config import LLAMA_SERVER_BIN, REQUEST_TIMEOUT_S
 
@@ -266,13 +266,17 @@ class _Registry:
             for sig in (signal.SIGINT, signal.SIGTERM):
                 try:
                     prev = signal.getsignal(sig)
-                    signal.signal(
-                        sig,
-                        lambda s, f, _p=prev: (
-                            self.stop_all(),
-                            _p(s, f) if callable(_p) else sys.exit(130),
-                        ),
-                    )
+
+                    def _stop_on_signal(
+                        signum: int, frame: FrameType | None, previous: object = prev
+                    ) -> None:
+                        self.stop_all()
+                        if callable(previous):
+                            previous(signum, frame)
+                        else:
+                            raise SystemExit(130)
+
+                    signal.signal(sig, _stop_on_signal)
                 except (ValueError, OSError):
                     pass  # not on the main thread — atexit still covers us
             self._hooked = True

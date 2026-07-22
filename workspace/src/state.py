@@ -432,7 +432,7 @@ class SystemState:
 
     def set_desired_state(
         self,
-        success_criteria: list[str],
+        success_criteria: list[dict],
         required_capabilities: list[str] | None = None,
         required_behaviors: list[BehaviorSpec] | None = None,
     ) -> None:

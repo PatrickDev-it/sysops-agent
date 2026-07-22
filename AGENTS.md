@@ -58,15 +58,18 @@ search — `complete` is not a promise that the answer is present.
 <!-- sinapsi:end -->
 
 > **Entry point per ogni LLM / coding agent. Leggi questo per primo.** `CLAUDE.md` è solo un bridge a questo file.
-> Last updated: 2026-07-10 · riorganizzazione layout (source/state split, venv in root, suite test unificata)
-> e riallineamento della documentazione al sistema realmente in uso (`.sinapsi/` + `brain/`).
+> Last updated: 2026-07-22 · publication baseline, fail-closed execution policy e typed-runtime
+> ratchet allineati al sistema realmente in uso (`.sinapsi/` + `brain/`).
 
 ---
 
 ## Cos'è questo progetto
 
-**Sistemista** — agente sysops **subagent**: possiede due GGUF di esecuzione (**4B orchestrator** `Qwen3-4B` + **3B coder** `Qwen2.5-Coder`) e *può* prendere in prestito il modello grande del parent come oracolo **opzionale** via HTTP. Il default è **self-contained**: senza oracolo il 4B pianifica e verifica da sé. Target dichiarato: girare agevolmente anche su **8 GB di RAM** via QLora + diskcache + offload (in costruzione — RFC-001).
-Risolve qualsiasi problema di sistema via CLI: conflitti dipendenze, PATH/env, install, config, scaffolding — su qualsiasi OS.
+**Sistemista** — alpha research preview di un agente sysops locale: possiede due GGUF di
+esecuzione (**4B orchestrator** `Qwen3-4B` + **3B coder** `Qwen2.5-Coder`) e può usare un oracolo
+HTTP opzionale. Il percorso self-contained senza oracolo è disponibile, ma target 8 GB RAM,
+portabilità cross-OS e operatività unattended non sono ancora certificati. Il prodotto assiste
+task CLI diagnostici e workspace-scoped; non promette di risolvere qualsiasi problema di sistema.
 
 **Layout a due piani:**
 - **Root = piano di controllo**: governo (`AGENTS.md`, `README.md`, `brain/`) + project root Python
@@ -96,7 +99,8 @@ python -m src.main "<obiettivo>" --workspace <path>
 
 **Test:** un'unica suite, `workspace/tests/` — `conftest.py` è l'owner unico del `sys.path` di test.
 ```powershell
-cd workspace && python -m pytest tests --ignore=tests/certification -q
+python -m mypy
+python -m pytest -q
 ```
 
 ---

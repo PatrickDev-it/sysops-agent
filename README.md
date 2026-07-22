@@ -116,12 +116,14 @@ py -3.12 -m venv .venv
 .\.venv\Scripts\python -m pip install -e ".[dev]"
 .\.venv\Scripts\ruff check .
 .\.venv\Scripts\ruff format --check .
+.\.venv\Scripts\mypy
 .\.venv\Scripts\pytest -q
 .\.venv\Scripts\python -m build
 ```
 
-CI runs lint, formatting, tests on Windows and Ubuntu, package builds, dependency audit, and a
-full-history Gitleaks scan. See [CONTRIBUTING.md](CONTRIBUTING.md) before opening a change.
+CI runs lint, formatting, static typing, tests on Windows and Ubuntu, package builds, dependency
+audit, and a full-history Gitleaks scan. See [CONTRIBUTING.md](CONTRIBUTING.md) before opening a
+change.
 
 ## Branch and release policy
 

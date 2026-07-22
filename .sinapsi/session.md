@@ -1081,3 +1081,23 @@ che i verdetti non-SAFE fermano planner ed executor.
 **Remoto.** CI è registrato dopo la PR bootstrap, ma il dispatch GitHub restituisce HTTP 500 e
 Security non viene indicizzato mentre Ignoryx è flagged. RFC-005 è implementata localmente;
 promozione a `validation` vietata fino a run remoti verdi.
+
+---
+
+## 2026-07-22 — RFC-006: typed runtime ratchet
+
+**Problema.** Il runtime aveva 30 errori Mypy e nessun type gate. I finding esponevano contratti
+divergenti: predicate dict dichiarati come stringhe, `BeliefKey` convertite implicitamente,
+telemetry non JSON-serializzabile, variabili cross-type e un backend web legacy non dichiarato.
+
+**Correzione.** Mypy 2.3.0 + stub PyYAML sono pinned nei dev extras e il job required `Lint`
+controlla tutto `workspace/src` con `check_untyped_defs`. Corretti i confini tipizzati senza
+suppress globali; rimosso `duckduckgo_search`; debug belief conserva evidence provenance.
+
+**Semplificazione.** Runtime netto **-26 LOC**; backend web duplicati -1; metriche confidence
+obsolete -1; owner aggiunti 0; decisioni LLM→deterministiche +0. Il ratchet impedisce nuove
+divergenze, ma non equivale a type completeness strict.
+
+**Validazione.** Mypy **30→0**; Ruff/format verdi su 149 file; test mirati **74 passed**; suite
+**713 passed, 3 skipped**; build isolata, pip-audit e Gitleaks storia+diff verdi. GitHub Actions
+resta bloccato dal flag organizzativo, quindi nessuna promozione a `validation`.

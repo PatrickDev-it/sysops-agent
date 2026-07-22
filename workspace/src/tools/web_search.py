@@ -1,8 +1,7 @@
 """
 Web search tool — no API key required.
 
-Primary: ddgs (DuckDuckGo Search) — pip install ddgs, no API key, well-maintained.
-Fallback: urllib direct HTTP (may hit bot detection on DDG, but still tried).
+Backend: ddgs (DuckDuckGo Search) — pip install ddgs, no API key required.
 
 Returns a ranked list of results as plain text for the supervisor (4B) to reason on.
 """
@@ -96,26 +95,7 @@ def search(query: str, cwd: "Path | None" = None, max_results: int = 6) -> tuple
                     lines.append(f"    {url}")
             return True, "\n".join(lines)
     except ImportError:
-        pass  # fallback below
+        return False, "web_search: ddgs not installed. Run: pip install ddgs"
     except Exception as exc:
         return False, f"web_search (ddgs) failed: {exc}"
-
-    # Fallback: duckduckgo_search (older package name, same thing)
-    try:
-        from duckduckgo_search import DDGS as _DDGS
-
-        with _DDGS() as ddgs:
-            hits = list(ddgs.text(query, max_results=max_results))
-        if hits:
-            lines = [f"SEARCH: {query}"]
-            for i, r in enumerate(hits, 1):
-                title = r.get("title", "").strip()
-                body = r.get("body", "").strip()[:200]
-                lines.append(f"[{i}] {title}\n    {body}")
-            return True, "\n".join(lines)
-    except ImportError:
-        pass
-    except Exception as exc:
-        return False, f"web_search (duckduckgo_search) failed: {exc}"
-
-    return False, ("web_search: ddgs not installed. Run: pip install ddgs")
+    return False, f"web_search: no results for {query!r}"

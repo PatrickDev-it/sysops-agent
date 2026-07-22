@@ -4,6 +4,7 @@ Verification tests for the reasoning system.
 Run: python -m pytest tests/test_reasoning.py -v
 """
 
+import json
 import sys
 
 from src.error_classifier import ErrorClass
@@ -90,6 +91,24 @@ def test_verify_step_extracts_version():
     b = ctx.beliefs.get(_bkey("yt_dlp", "version_known"))
     assert b is not None and b.state == BeliefState.POSSIBLE
     assert b.support.kind is EvidenceKind.OUTPUT_HEURISTIC
+
+
+def test_reasoning_debug_dump_is_json_serializable():
+    ctx = _ctx()
+    ctx.observe_belief(
+        _bkey("python", "exists"),
+        holds=True,
+        kind=EvidenceKind.PROBE_DIRECT,
+        detail="located on PATH",
+    )
+
+    payload = ctx.debug_dump()
+
+    assert json.loads(json.dumps(payload))["beliefs"]["python:exists"] == {
+        "state": "proven",
+        "support": "PROBE_DIRECT",
+        "against": None,
+    }
 
 
 # ── InferenceEngine — failure inference ───────────────────────────────────────

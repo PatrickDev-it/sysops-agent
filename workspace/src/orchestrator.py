@@ -592,7 +592,7 @@ def _uncovered_requirements(
     goal: str,
     plan: list,
     constraints: list[str],
-    success: list[str],
+    success: list[dict],
 ) -> list[str]:
     """Which explicitly-named goal items does the CURRENT plan never mention?
 
@@ -1599,7 +1599,7 @@ class Orchestrator:
         # nothing to prove already-done, so it proceeds.
         _fs_success = predicates.filesystem_criteria(global_success)
         if _fs_success and plan:
-            arts_ok, missing_arts = predicates.evaluate(_fs_success, session.workspace)
+            arts_ok, missing_arts_text = predicates.evaluate(_fs_success, session.workspace)
             if arts_ok:
                 reason = "; ".join(predicates.render(_fs_success))
                 console.print(
@@ -1607,7 +1607,7 @@ class Orchestrator:
                 )
                 console.print(Panel("[bold green]TASK COMPLETE[/]", title="Sistemista"))
                 return RunVerdict.COMPLETE, reason
-            missing_arts = [r.strip() for r in (missing_arts or "").split(";") if r.strip()]
+            missing_arts = [r.strip() for r in (missing_arts_text or "").split(";") if r.strip()]
             console.print(
                 f"[dim]pre-execution: {len(missing_arts)} predicate(s) unmet "
                 f"({'; '.join(missing_arts)[:160]}) — proceeding[/]"
@@ -3391,10 +3391,10 @@ class Orchestrator:
             if entry.is_dir():
                 # Count immediate children for dirs
                 try:
-                    n = sum(1 for _ in entry.iterdir())
+                    item_count: int | str = sum(1 for _ in entry.iterdir())
                 except Exception:
-                    n = "?"
-                dirs.append(f"  dir   {entry.name}/  ({n} items)")
+                    item_count = "?"
+                dirs.append(f"  dir   {entry.name}/  ({item_count} items)")
             else:
                 size = entry.stat().st_size if entry.exists() else 0
                 files.append(f"  file  {entry.name}  ({size}B)")

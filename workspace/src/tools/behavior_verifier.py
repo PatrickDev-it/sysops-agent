@@ -224,9 +224,9 @@ def find_entry_command(workspace: Path, sysstate: SystemState) -> tuple[str, str
         if (workspace / _manifest).exists():
             python = _find_python(sysstate)
             if python:
-                entry = _find_python_entry(workspace)
-                if entry:
-                    return f'"{python}" -m py_compile "{entry}"', "python_manifest"
+                python_entry = _find_python_entry(workspace)
+                if python_entry:
+                    return f'"{python}" -m py_compile "{python_entry}"', "python_manifest"
             break
 
     # 5. Makefile → look for a 'check' or 'build' or 'test' target
@@ -240,21 +240,21 @@ def find_entry_command(workspace: Path, sysstate: SystemState) -> tuple[str, str
                     return f"{make} {t}", f"makefile.{t}"
 
     # 6. Bare Python script with __main__ guard — syntax check it
-    for entry in sorted(workspace.glob("*.py")):
+    for python_path in sorted(workspace.glob("*.py")):
         try:
-            text = entry.read_text(errors="replace")
-            if "__main__" in text or entry.name == "__main__.py":
+            text = python_path.read_text(errors="replace")
+            if "__main__" in text or python_path.name == "__main__.py":
                 python = _find_python(sysstate)
                 if python:
-                    return f'"{python}" -m py_compile "{entry.name}"', "bare_python"
+                    return f'"{python}" -m py_compile "{python_path.name}"', "bare_python"
         except Exception:
             pass
 
     # 7. Bare JavaScript — Node syntax check
-    for entry in sorted(workspace.glob("*.js")):
+    for javascript_path in sorted(workspace.glob("*.js")):
         node = sysstate.find_available(["node"]) or shutil.which("node") or ""
         if node:
-            return f'"{node}" --check "{entry.name}"', "bare_js"
+            return f'"{node}" --check "{javascript_path.name}"', "bare_js"
 
     return "", "not_found"
 

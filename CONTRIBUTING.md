@@ -19,6 +19,7 @@ py -3.12 -m venv .venv
 .\.venv\Scripts\python -m pip install -e ".[dev]"
 .\.venv\Scripts\ruff check .
 .\.venv\Scripts\ruff format --check .
+.\.venv\Scripts\mypy
 .\.venv\Scripts\pytest -q
 .\.venv\Scripts\python -m build
 ```

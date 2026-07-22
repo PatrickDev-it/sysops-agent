@@ -40,6 +40,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import TYPE_CHECKING, Callable, Optional
 
+from .error_classifier import ErrorClass
 from .world import norm_alias
 
 if TYPE_CHECKING:
@@ -591,7 +592,7 @@ def _rule_scope_mismatch_requires_global(
                 if token not in wm.blocked_actions:
                     return Deduction(
                         id=f"scope_blocks_global_verify:{tool}",
-                        premises=[key, venv_prop],
+                        premises=[key, str(venv_prop)],
                         conclusion=(
                             f"{tool} is installed in venv scope — "
                             "global verify will fail, global install required"
@@ -747,94 +748,70 @@ class InferenceEngine:
     def _infer_from_failure(
         self, command, output, error_class, step_type, wm, beliefs, facts
     ) -> list[str]:
-        try:
-            from .error_classifier import ErrorClass
-        except ImportError:
-            ErrorClass = None
-
         conclusions = []
         ec = error_class
 
-        if ErrorClass is not None:
-            if ec == ErrorClass.COMMAND_SYNTAX:
-                h = _cmd_hash(command)
-                wm.block_action(
-                    f"retry_exact:{h}", "COMMAND_SYNTAX — must correct flags before retry"
-                )
-                conclusions.append(f"IMPOSSIBLE: retry unchanged [{command[:50]}]")
+        if ec == ErrorClass.COMMAND_SYNTAX:
+            h = _cmd_hash(command)
+            wm.block_action(f"retry_exact:{h}", "COMMAND_SYNTAX — must correct flags before retry")
+            conclusions.append(f"IMPOSSIBLE: retry unchanged [{command[:50]}]")
 
-            elif ec == ErrorClass.FILE_NOT_FOUND:
-                # Distinguish two cases:
-                # (a) "X is not recognized as a cmdlet" → X itself not installed → refute X:exists
-                # (b) "Cannot find path 'C:\foo'" → X ran but target path missing → do NOT refute X
-                # Also: PowerShell built-ins (Remove-Item, Get-Command, etc.) are ALWAYS available.
-                _out_lower = (output or "").lower()
-                _is_tool_missing = (
-                    "is not recognized as the name of" in _out_lower
-                    or "command not found" in _out_lower
-                )
-                if _is_tool_missing:
-                    tool = _real_tool(command)
-                    # Skip PowerShell cmdlets: Verb-Noun pattern (e.g. Remove-Item, Get-Command)
-                    # They are shell built-ins and can never be "not installed"
-                    import re as _re_ps
-
-                    _is_ps_cmdlet = bool(_re_ps.match(r"^[A-Z][a-z]+-[A-Z][a-z]", tool))
-                    if not _is_ps_cmdlet:
-                        # This is a bare-invocation failure ("<tool> is not recognized"),
-                        # not a proper multi-tier probe (that's what locate()/DISCOVERY
-                        # does — PATH, registry, package manager, bounded fs scan). The
-                        # evidence only proves the tool did not resolve on THIS
-                        # subprocess's PATH by bare name — it says nothing about a
-                        # project-local copy (e.g. a dependency installed into this
-                        # project, invocable via its ecosystem's local runner or a
-                        # qualified path). Refute the claim the evidence actually
-                        # supports — :available_globally (the same proposition
-                        # asserted positively in _extract_facts_from_success below) —
-                        # not the stronger :exists, which would wrongly block every
-                        # future run of a tool that is genuinely present locally.
-                        beliefs.observe(
-                            _bkey(tool, "available_globally"),
-                            holds=False,
-                            kind=EvidenceKind.EXIT_CODE,
-                            detail=f"FILE_NOT_FOUND: {output[:80]}",
-                        )
-                        wm.add_constraint(
-                            f"{tool} did not resolve by bare name — install it, or "
-                            "invoke it via its ecosystem's local runner/qualified path"
-                        )
-                        conclusions.append(
-                            f"REFUTED: {tool}:available_globally (not on PATH by bare name)"
-                        )
-
-            elif ec == ErrorClass.INVALID_EXECUTABLE:
-                path_token = _real_tool(command)
-                wm.block_action(
-                    f"write_file:{path_token}",
-                    "INVALID_EXECUTABLE — write_file forbidden; delete + reinstall only",
-                )
-                wm.add_constraint(f"delete {path_token} before reinstall")
-                conclusions.append(f"IMPOSSIBLE: write_file to corrupt executable {path_token}")
-
-            elif ec == ErrorClass.ENV_SCOPE_MISMATCH:
-                # Use _real_tool to strip $env:VAR=value; prefixes before extraction
+        elif ec == ErrorClass.FILE_NOT_FOUND:
+            # Distinguish a missing command from a command whose target path is absent.
+            _out_lower = (output or "").lower()
+            _is_tool_missing = (
+                "is not recognized as the name of" in _out_lower
+                or "command not found" in _out_lower
+            )
+            if _is_tool_missing:
                 tool = _real_tool(command)
-                beliefs.observe(
-                    _bkey(tool, "available_globally"),
-                    holds=False,
-                    kind=EvidenceKind.EXIT_CODE,
-                    detail=f"ENV_SCOPE_MISMATCH: {output[:80]}",
-                )
-                wm.add_constraint(f"install {tool} to system PATH (global scope required)")
-                conclusions.append(f"CONSTRAINT: {tool} must be globally installed")
+                # PowerShell Verb-Noun commands are built-ins, never installable tools.
+                import re as _re_ps
 
-            elif ec == ErrorClass.NETWORK_ERROR:
-                wm.add_constraint("network unreachable — offline cache or mirror required")
-                conclusions.append("CONSTRAINT: network unavailable")
+                _is_ps_cmdlet = bool(_re_ps.match(r"^[A-Z][a-z]+-[A-Z][a-z]", tool))
+                if not _is_ps_cmdlet:
+                    beliefs.observe(
+                        _bkey(tool, "available_globally"),
+                        holds=False,
+                        kind=EvidenceKind.EXIT_CODE,
+                        detail=f"FILE_NOT_FOUND: {output[:80]}",
+                    )
+                    wm.add_constraint(
+                        f"{tool} did not resolve by bare name — install it, or "
+                        "invoke it via its ecosystem's local runner/qualified path"
+                    )
+                    conclusions.append(
+                        f"REFUTED: {tool}:available_globally (not on PATH by bare name)"
+                    )
 
-            elif ec == ErrorClass.PERMISSION_DENIED:
-                wm.add_constraint(f"permission denied for: {command[:60]}")
-                conclusions.append("CONSTRAINT: elevate privileges or change path")
+        elif ec == ErrorClass.INVALID_EXECUTABLE:
+            path_token = _real_tool(command)
+            wm.block_action(
+                f"write_file:{path_token}",
+                "INVALID_EXECUTABLE — write_file forbidden; delete + reinstall only",
+            )
+            wm.add_constraint(f"delete {path_token} before reinstall")
+            conclusions.append(f"IMPOSSIBLE: write_file to corrupt executable {path_token}")
+
+        elif ec == ErrorClass.ENV_SCOPE_MISMATCH:
+            # Use _real_tool to strip $env:VAR=value; prefixes before extraction
+            tool = _real_tool(command)
+            beliefs.observe(
+                _bkey(tool, "available_globally"),
+                holds=False,
+                kind=EvidenceKind.EXIT_CODE,
+                detail=f"ENV_SCOPE_MISMATCH: {output[:80]}",
+            )
+            wm.add_constraint(f"install {tool} to system PATH (global scope required)")
+            conclusions.append(f"CONSTRAINT: {tool} must be globally installed")
+
+        elif ec == ErrorClass.NETWORK_ERROR:
+            wm.add_constraint("network unreachable — offline cache or mirror required")
+            conclusions.append("CONSTRAINT: network unavailable")
+
+        elif ec == ErrorClass.PERMISSION_DENIED:
+            wm.add_constraint(f"permission denied for: {command[:60]}")
+            conclusions.append("CONSTRAINT: elevate privileges or change path")
 
         if step_type == "DISCOVERY":
             # A DISCOVERY step refutes tool existence ONLY on a genuine
@@ -1092,14 +1069,16 @@ class AttentionManager:
         proven = [b for b in beliefs.all_beliefs() if b.state == BeliefState.PROVEN]
         if proven:
             lines = ["PROVEN_TRUE:"]
-            lines += [f"  ✓ {b.proposition} ({b.score:.2f})" for b in proven[:6]]
+            lines += [f"  ✓ {b.proposition}" for b in proven[:6]]
             sections.append((1, "\n".join(lines)))
 
         # P1 IMPORTANT: episodic recent failures (from persistent memory)
         if recent_failures:
             lines = ["EPISODIC_FAILURES:"]
-            for f in recent_failures[-3:]:
-                lines.append(f"  - {f.get('command', '?')[:50]} → {f.get('outcome', '?')[:40]}")
+            for failure in recent_failures[-3:]:
+                lines.append(
+                    f"  - {failure.get('command', '?')[:50]} → {failure.get('outcome', '?')[:40]}"
+                )
             sections.append((1, "\n".join(lines)))
 
         # P2 USEFUL: semantic facts (typed propositions only)
@@ -1113,8 +1092,8 @@ class AttentionManager:
         ]
         if typed_facts:
             lines = ["KNOWN_FACTS:"]
-            for f in sorted(typed_facts, key=lambda x: x.ts, reverse=True)[:8]:
-                lines.append(f"  {f.key}={f.value} (conf={f.confidence:.1f})")
+            for fact in sorted(typed_facts, key=lambda x: x.ts, reverse=True)[:8]:
+                lines.append(f"  {fact.key}={fact.value} (conf={fact.confidence:.1f})")
             sections.append((2, "\n".join(lines)))
 
         # Assemble within budget (higher priority first)
@@ -1348,8 +1327,8 @@ class ReasoningContext:
     ) -> None:
         self.beliefs.observe(key, holds=holds, kind=kind, detail=detail)
 
-    def query_belief(self, proposition: str) -> Optional[Belief]:
-        return self.beliefs.get(proposition)
+    def query_belief(self, key: BeliefKey) -> Optional[Belief]:
+        return self.beliefs.get(key)
 
     def add_semantic_fact(
         self, key: str, value: str, confidence: float = 1.0, source: str = ""
@@ -1408,8 +1387,12 @@ class ReasoningContext:
             "run_id": self.run_id,
             "step": self.working_memory.current_step,
             "beliefs": {
-                p: {"state": b.state.value, "score": b.score}
-                for p, b in self.beliefs._beliefs.items()
+                str(key): {
+                    "state": belief.state.value,
+                    "support": belief.support.kind.name if belief.support else None,
+                    "against": belief.against.kind.name if belief.against else None,
+                }
+                for key, belief in self.beliefs._beliefs.items()
             },
             "semantic_facts": {
                 k: {"value": f.value, "confidence": f.confidence}
