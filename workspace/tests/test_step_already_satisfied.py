@@ -36,7 +36,10 @@ class _Session:
 def orch(tmp_path, monkeypatch):
     # A step that is NOT skipped runs on: to `memory.save_event`, and then into the coder's
     # retry loop. Both need neutralising or this stops being a unit test.
-    monkeypatch.setattr(config, "MEMORY_DIR", tmp_path / "_memory")
+    # State must not live under the task workspace: workspace-shape normalization is allowed
+    # to hoist unexpected child directories. Linux permits moving an open SQLite file, while
+    # Windows masks that invalid fixture layout by locking it.
+    monkeypatch.setattr(config, "MEMORY_DIR", tmp_path.parent / f"{tmp_path.name}-memory")
     memory.init_db()
 
     # known-issues.md: mocking `_text_call` alone is not enough — `_coder()` is evaluated as

@@ -2,6 +2,8 @@
 legal `\\\\` escape pairs, and the 0.6B planner fell into exactly that hole (857 consecutive
 backslashes, string never closed, 39 of 48 runs dead). Remove the source, not the symptom."""
 
+import sys
+
 import pytest
 from src import workspace_paths as wp
 
@@ -12,7 +14,11 @@ def _reset():
     wp.set_root(None)
 
 
-ROOT = r"C:\Users\ExampleUser\Desktop\Agents\Sistemista\workspace\var\benchmark\oracle_off\workspaces\T01"
+ROOT = (
+    r"C:\Users\ExampleUser\Desktop\Agents\Sistemista\workspace\var\benchmark\oracle_off\workspaces\T01"
+    if sys.platform == "win32"
+    else "/home/example-user/sistemista/workspace/var/benchmark/oracle_off/workspaces/T01"
+)
 
 
 def test_disabled_when_no_root():

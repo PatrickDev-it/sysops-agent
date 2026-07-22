@@ -9,7 +9,7 @@ description = "Local-first, model-assisted system operations with bounded execut
 readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE", "NOTICE"]
-authors = [{ name = "Ignoryx contributors" }]
+authors = [{ name = "Sistemista contributors" }]
 requires-python = ">=3.12"
 keywords = ["ai-agent", "llama-cpp", "local-first", "privacy", "sysops"]
 classifiers = [
@@ -65,10 +65,10 @@ warn_redundant_casts = true
 no_error_summary = true
 
 [project.urls]
-Homepage = "https://github.com/Ignoryx/sistemista"
-Documentation = "https://github.com/Ignoryx/sistemista#readme"
-Issues = "https://github.com/Ignoryx/sistemista/issues"
-Source = "https://github.com/Ignoryx/sistemista"
+Homepage = "https://github.com/PatrickDev-it/sistemista"
+Documentation = "https://github.com/PatrickDev-it/sistemista#readme"
+Issues = "https://github.com/PatrickDev-it/sistemista/issues"
+Source = "https://github.com/PatrickDev-it/sistemista"
 
 [project.scripts]
 sistemista = "src.main:cli_entry"

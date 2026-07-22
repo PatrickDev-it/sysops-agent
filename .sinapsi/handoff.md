@@ -1,58 +1,61 @@
 # Handoff
 
-_Aggiornato: 2026-07-22 — RFC-006 chiusa localmente; integrazione su development in corso._
+_Aggiornato: 2026-07-22 — migrazione profilo personale in verifica PR._
 
 ## Stato
 
-Repository: `https://github.com/Ignoryx/sistemista`; default `development`, con branch
-`validation` e `production` protetti. Branch corrente: `rfc/006-typed-runtime`.
-Storia pre-pubblicazione preservata solo nel branch locale `archive/pre-publication`.
+Repository target: `https://github.com/PatrickDev-it/sistemista`; default `development`, con
+`validation` e `production` protetti. Branch corrente: `ops/personal-profile-migration`.
+`origin` punta al profilo; `ignoryx` è temporaneo e va rimosso dopo la cancellazione remota.
+Storia pre-pubblicazione preservata solo in `archive/pre-publication`, mai pubblicata.
 
-Sistemista è un alpha sysops agent locale dual-GGUF, Python + `llama-server`, mono-utente e
-sequenziale. NAV usa Qwen3-4B; CODER usa Qwen2.5-Coder-3B; oracolo HTTP opzionale.
+## Migrazione verificata
+
+- SHA dei tre branch identici tra repo organizzativa e personale.
+- Default `development`; ruleset personale ID `19557677` attivo sui tre branch.
+- Discussions, topics, secret scanning, push protection, Dependabot e private reporting attivi.
+- Security workflow personale verde: run `29926272395`.
+- CI personale operativo ma prima run rossa: 9 failure Ubuntu non ermetiche ora corrette localmente.
+- README, package metadata e NOTICE aggiornati al profilo personale.
+
+## Fix CI multi-OS
+
+- Fixture workspace-path usa una root nativa su POSIX e Windows.
+- SQLite di test vive fuori dal task workspace, come in produzione.
+- `world.norm_alias` riconosce `/` e `\` indipendentemente dall'host.
+- Gate locale: **713 passed, 3 skipped**; 28 mirati verdi.
+- Ruff/format/Mypy, wheel/sdist, pip-audit e Gitleaks verdi.
+
+## Sequenza obbligatoria
+
+1. Commit/push del branch e PR verso `development` personale.
+2. Attendere CI + Security remoti verdi e integrare tramite ruleset.
+3. Verificare SHA/default/security/ruleset post-merge.
+4. Eliminare definitivamente `Ignoryx/sistemista`, come autorizzato dall'utente.
+5. Rimuovere il remote locale `ignoryx` e verificare assenza repo dall'organizzazione.
+6. Pin profilo: GitHub non espone API pubblica; resta un singolo passaggio UI manuale.
 
 ## RFC chiuse localmente
 
 - RFC-004: baseline OSS, storia pubblica curata, governance e packaging.
-- RFC-005: only-SAFE, classifier fail-closed, no env opt-out, dynamic sink/host mutation bloccati.
-- RFC-006: Mypy 2.3.0 su tutto il runtime, baseline **30→0**, nessun suppress globale.
-- Il boundary resta policy applicativa, non sandbox o isolamento kernel.
-
-## Evidenza locale corrente
-
-- Suite completa: **713 passed, 3 skipped**; mirati RFC-006: **74 passed**.
-- Ruff verde; formatter verde su **149 file**; Mypy **zero errori**.
-- Wheel/sdist `0.1.0a1` e pip-audit verdi.
-- Gitleaks storia pubblica 16,89 MB + diff RFC 24,30 KB: zero finding.
-- Wheel con prompt 8/8, KB YAML 8/8, LICENSE e NOTICE.
-- Benchmark isolato storico: **32/48 = 66,7% ARR**; cross-OS/8 GB non certificati.
-
-## Governance remota
-
-- Ruleset attivo sui tre branch: PR, CODEOWNER review, thread resolution, linear history,
-  sei required check, no delete/force-push; admin bypass solo tramite PR.
-- Secret scanning, push protection, Dependabot security updates e private reporting attivi.
-- PR #2 RFC-005 integrata su `development` al commit `d1967e2`.
-- Blocco esterno: Ignoryx flagged; dispatch CI HTTP 500; Security non indicizzato.
-- Ticket reinstatement aperto; nessuna promozione senza run CI e Security verdi.
+- RFC-005: execution policy fail-closed; non è isolamento kernel.
+- RFC-006: Mypy 2.3.0 su tutto il runtime, baseline **30→0**.
 
 ## Release path
 
-- Integrare RFC-006 su `development` via PR con evidenza locale e bypass tracciato.
 - RFC-007: dependency reproducibility, SBOM e provenance.
 - RFC-008: backend isolato kernel/VM e escape suite, blocker production.
 - RFC-009: benchmark multi-OS, risorse e claim falsificabili.
 - RFC-010: release engineering, signing/attestations, docs finali e GO.
-- `validation`: vietata finché Actions remoti non sono verdi.
+- `validation`: vietata finché CI personale non è verde e RFC-007 non è chiusa.
 - `production`: vietata fino a tutti i publication-target chiusi e GO formale.
 
 ## Rischi P0 aperti
 
-1. `Confinement` è un parser/policy applicativo, non una jail.
+1. `Confinement` è policy applicativa, non una jail.
 2. Manca isolamento kernel/VM/container per input o mutazioni unattended.
 3. `orchestrator.py` e `reasoning.py` restano monoliti; FSM implicita.
-4. Coverage runtime disomogenea; benchmark cross-OS e target 8 GB non certificati.
-5. GitHub Actions non operativo finché persiste il flag organizzativo.
+4. Benchmark cross-OS e target 8 GB non certificati.
 
 ## Comandi canonici
 
