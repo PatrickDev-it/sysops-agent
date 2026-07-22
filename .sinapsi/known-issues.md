@@ -23,8 +23,8 @@ sono configurati, quindi il blocco è nel backend GitHub e richiede il ticket di
 attendere il ripristino e rieseguire CI + Security prima di promuovere a `validation`.
 
 **Risoluzione operativa 2026-07-22.** Il repository personale esegue i workflow: Security è verde
-e CI ha prodotto log reali. Il blocco resta storico per la copia organizzativa, destinata alla
-cancellazione dopo la verifica della migrazione.
+e CI ha prodotto log reali. La copia organizzativa è stata cancellata dopo la PR personale verde;
+questo blocker resta soltanto come record storico della causa.
 
 ---
 
