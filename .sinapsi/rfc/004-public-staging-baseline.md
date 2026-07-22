@@ -1,6 +1,7 @@
 # RFC 004 — Public Staging Baseline
 
-> Stato: **APPROVATA**, 2026-07-22. Priorità P0. Il developer ha autorizzato la
+> Stato: **IMPLEMENTATA LOCALMENTE / VERIFICA REMOTA IN CORSO**, 2026-07-22. Priorità P0.
+> Il developer ha autorizzato la
 > pubblicazione anticipata per ottenere un URL stabile, purché il repository sia
 > presentato come alpha sperimentale e superi i gate minimi sotto.
 
@@ -68,6 +69,15 @@ Adottare la pubblicazione progressiva: prima alpha pubblica minima e onesta su
   amministrativa opzionale.
 - L'organizzazione GitHub attualmente flagged può rendere l'URL non visibile ai terzi;
   questo è un vincolo esterno, non un motivo per abbassare i gate del repository.
+
+## Implementation evidence — 2026-07-22
+
+- `Ignoryx/sistemista` è pubblico con `development` default e branch `validation`/`production`.
+- Ruleset attivo: PR, review CODEOWNER, conversazioni risolte, history lineare, sei status
+  obbligatori, blocco delete e force-push; bypass admin consentito soltanto via PR.
+- Secret scanning, push protection, Dependabot security updates e private reporting abilitati.
+- Gate locale: 692 passed, 3 skipped; Ruff/format, build, pip-audit e Gitleaks verdi.
+- Chiusura RFC subordinata alla prima esecuzione remota verde di CI e Security.
 
 ## Falsification / stop conditions
 

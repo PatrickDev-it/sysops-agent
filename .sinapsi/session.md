@@ -1041,3 +1041,22 @@ batch e classificazione binaria esplicita per asset/GGUF. Evita che `core.autocr
 formattazione repository-wide in diff di contenuto.
 
 Il gate `git diff --check` ha rilevato e rimosso l'unica riga vuota eccedente a EOF in RFC-004.
+
+---
+
+## 2026-07-22 — RFC-004: repository pubblico e governance remota
+
+Creato `https://github.com/Ignoryx/sistemista` via endpoint organizzazione, dopo che il comando
+high-level `repo create` ha restituito un 403 spurio sul lookup `/users/Ignoryx`. Pubblicata solo
+la root commit curata; i 27 commit pre-pubblicazione non sono sul remoto. `development` è default;
+`validation` e `production` esistono allo stesso baseline senza falsa promozione di maturità.
+
+Attivati Apache-2.0 detection, topics, Discussions, private vulnerability reporting, secret
+scanning, push protection e Dependabot security updates. Ruleset `Protected release flow` attivo
+sui tre branch: no delete/force-push, history lineare, PR + CODEOWNER + una review + last-push
+approval + thread resolution, sei check obbligatori; organization admin può bypassare soltanto
+tramite PR, lasciando audit trail.
+
+GitHub non ha creato run per i push che precedevano la selezione del default branch. Aggiunto
+`workflow_dispatch` a CI su un branch operativo: la PR verso `development` verifica ora insieme
+workflow e ruleset prima della chiusura di RFC-004.

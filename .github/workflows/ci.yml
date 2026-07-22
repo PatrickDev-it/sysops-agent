@@ -5,6 +5,7 @@ on:
     branches: [development, validation, production]
   pull_request:
     branches: [development, validation, production]
+  workflow_dispatch:
 
 permissions:
   contents: read

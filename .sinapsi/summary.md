@@ -52,6 +52,7 @@ patch: the project's shape (above), the last sessions at a glance, and a short r
      agent at the end of every patch, at the same time it appends session.md. Drop the
      11th; the full history is in session.md and, once archived, in archive/. -->
 
+- 2026-07-22 — Pubblicato Ignoryx/sistemista: tre branch, security features e ruleset attivi; CI remota da provare.
 - 2026-07-22 — Chiuso gate locale RFC-004: 692 test, lint/build/audit/secrets verdi, baseline OSS pronta.
 - 2026-07-22 — Approvata RFC-004: alpha pubblica minima su development, promozioni bloccate da security e GO gate.
 
@@ -61,10 +62,10 @@ patch: the project's shape (above), the last sessions at a glance, and a short r
      fragile, what the next action is. Rewritten (not appended) from session.md + handoff.md
      at the end of every patch. If it grows past 10 lines it has stopped being a summary. -->
 
-- Root canonica `( 2026 ) Sistemista`; duplicato eliminato e storia privata preservabile in archive locale.
+- Repository pubblico: `Ignoryx/sistemista`; storia privata preservata solo in archive locale.
 - RFC-004 gate locale verde: 692 passed/3 skipped, Ruff e formatter verdi.
 - Gitleaks/pip-audit/diff-check verdi; licenza, governance, line endings e CI pinned presenti.
 - Wheel/sdist `0.1.0a1` verdi con 8 prompt, 8 KB YAML, LICENSE e NOTICE.
 - Benchmark isolato onesto: 32/48 ARR (66,7%); cross-OS/8 GB restano non certificati.
-- Target remoto: `Ignoryx/sistemista`, `development` → `validation` → `production`.
-- Prossimo passo: root commit pubblica, push/ruleset/Actions; poi RFC-005 Secure Execution Boundary.
+- `development` default; `validation`/`production` presenti; ruleset/security features attivi.
+- Prossimo passo: prima PR e Actions verdi; poi RFC-005 Secure Execution Boundary.
