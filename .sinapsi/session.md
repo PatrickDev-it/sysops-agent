@@ -1123,3 +1123,12 @@ il checkout usa il nuovo repository come `origin`. Lo storico pubblico resta int
 **Validazione locale.** **713 passed, 3 skipped**; 28 test mirati verdi; Ruff/format/Mypy,
 wheel/sdist, pip-audit e Gitleaks verdi. Cancellazione della copia organizzativa subordinata alla
 PR personale CI+Security verde; pin del profilo richiede l'interfaccia GitHub, non esiste API pubblica.
+
+### Chiusura migrazione remota
+
+PR personale [#7](https://github.com/PatrickDev-it/sistemista/pull/7) integrata in `development`
+con Lint, Ubuntu, Windows, Package, Dependency audit e Gitleaks verdi. Ruleset `19557677` attivo;
+default e security features verificati. `Ignoryx/sistemista` eliminata tramite il credential helper
+e verificata inesistente; rimosso anche il remote locale organizzativo. Unico residuo operativo:
+selezionare `PatrickDev-it/sistemista` nel dialogo web **Customize your pins**, non automatizzabile
+tramite API GitHub pubblica.
