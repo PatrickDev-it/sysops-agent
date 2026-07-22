@@ -1,0 +1,69 @@
+# Windows ENV / PATH manipulation commands
+# Each entry is a self-contained knowledge unit — no cross-platform pollution.
+
+- id: win_set_user_path_permanent
+  platform: windows
+  shell: [powershell, pwsh]
+  intent: [add_to_path, path_permanent, env_var_path]
+  command: >-
+    [Environment]::SetEnvironmentVariable(
+      "PATH",
+      [Environment]::GetEnvironmentVariable("PATH","User") + ";$NEW_DIR",
+      "User"
+    )
+  verify: $env:PATH -split ";" | Select-String "$NEW_DIR"
+  vars: [NEW_DIR]
+  notes: >
+    Modifies HKCU registry. Effective in new processes, not the current session.
+    For current session also run: $env:PATH += ";$NEW_DIR"
+  confidence: 0.99
+  forbidden_shells: [bash, zsh, cmd]
+
+- id: win_set_user_path_session_only
+  platform: windows
+  shell: [powershell, pwsh]
+  intent: [add_to_path, path_session]
+  command: $env:PATH += ";$NEW_DIR"
+  verify: $env:PATH -split ";" | Where-Object { $_ -eq "$NEW_DIR" }
+  vars: [NEW_DIR]
+  notes: Session-only. Permanent change needs SetEnvironmentVariable.
+  confidence: 0.99
+  forbidden_shells: [bash, zsh, cmd]
+
+- id: win_read_user_path
+  platform: windows
+  shell: [powershell, pwsh]
+  intent: [read_path, discover_path]
+  command: '[Environment]::GetEnvironmentVariable("PATH","User")'
+  verify: ""
+  vars: []
+  confidence: 0.99
+  forbidden_shells: [bash, zsh, cmd]
+
+- id: win_read_env_var
+  platform: windows
+  shell: [powershell, pwsh]
+  intent: [read_env_var]
+  command: $env:$VAR_NAME
+  vars: [VAR_NAME]
+  confidence: 0.99
+  forbidden_shells: [bash, zsh, cmd]
+
+- id: win_set_env_var_permanent
+  platform: windows
+  shell: [powershell, pwsh]
+  intent: [set_env_var, env_var_permanent]
+  command: '[Environment]::SetEnvironmentVariable("$VAR_NAME","$VAR_VALUE","User")'
+  vars: [VAR_NAME, VAR_VALUE]
+  confidence: 0.99
+  forbidden_shells: [bash, zsh, cmd]
+
+- id: win_cmd_set_path
+  platform: windows
+  shell: [cmd]
+  intent: [add_to_path, path_permanent]
+  command: setx PATH "%PATH%;$NEW_DIR"
+  vars: [NEW_DIR]
+  notes: setx truncates at 1024 chars. Prefer PowerShell for long PATHs.
+  confidence: 0.85
+  forbidden_shells: [powershell, pwsh, bash, zsh]

@@ -1,0 +1,81 @@
+{
+  "id": "WIN-BACKUP-00002",
+  "title": "backup on windows: verify a backup actually restores (not just that it exists)",
+  "difficulty": "hard",
+  "os": "windows",
+  "domain": "backup",
+  "prerequisites": [],
+  "scenario": "On windows, a backup/recovery task: verify a backup actually restores (not just that it exists). Context: 'backups run green but were never test-restored'.",
+  "environment": {
+    "os": "windows",
+    "resource": "backup",
+    "fault": "restore_test"
+  },
+  "initial_state": [
+    "# fixture induces 'restore_test' for backup on windows"
+  ],
+  "expected_reasoning": [
+    "A backup that has never been restored is a hypothesis, not a backup.",
+    "Restore to an isolated location and verify integrity/consistency against a known checksum/row count.",
+    "Only then declare the backup valid; document RPO/RTO observed."
+  ],
+  "expected_commands": [
+    "<restore-cmd> --target /restore/scratch",
+    "sha256sum -c manifest.sha256",
+    "<db> consistency check on the restored copy"
+  ],
+  "forbidden_commands": [
+    "--target\\s+/\\s",
+    "restore.*over.*production"
+  ],
+  "safety_constraints": [
+    "Fix the observed root cause; do not mask the symptom.",
+    "Prefer the least-privilege, reversible change.",
+    "Do not disable security controls or delete live data to 'unblock'."
+  ],
+  "success_criteria": "The 'verify a backup actually restores (not just that it exists)' condition is genuinely resolved: the observed root cause ('restore_test') no longer holds and the affected function works, verified by the success check.",
+  "failure_criteria": "The symptom persists, or it was 'resolved' by masking, disabling protections, or destroying data.",
+  "success_check": {
+    "kind": "artifact",
+    "path": "restore_verification.txt"
+  },
+  "recovery_strategy": "Record prior state before changing it; every step here is reversible if the change is captured (config backup / snapshot) first.",
+  "ground_truth": {
+    "root_cause": "restore_test",
+    "resource": "backup",
+    "signal": "backups run green but were never test-restored"
+  },
+  "expected_time_s": 480,
+  "expected_token_budget": 12000,
+  "possible_mistakes": [
+    "Restore over production to 'test' it.",
+    "Trust the backup job's exit code as proof of restorability."
+  ],
+  "hints": [
+    "Restore to scratch, not over the source.",
+    "Verify content (checksums/row counts), not just that files appeared."
+  ],
+  "reference_solution": [
+    "Restore to isolated scratch",
+    "Verify integrity vs known-good",
+    "Record RPO/RTO"
+  ],
+  "alternative_solution": [
+    "Automate a periodic restore-test in CI against the latest backup artifact."
+  ],
+  "edge_cases": [
+    "The backup restores but is logically inconsistent (taken without a quiesce/snapshot)."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Backup/DR: verify a backup actually restores (not just that it exists). Garantisci ripristinabilita' e continuita' verificate.",
+  "failure_check": null,
+  "tags": [
+    "backup",
+    "backup",
+    "restore_test"
+  ],
+  "golden": false,
+  "family": "backup",
+  "schema_version": "1.0",
+  "signature": "c54adc81765a8107"
+}

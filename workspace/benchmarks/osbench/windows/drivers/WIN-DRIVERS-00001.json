@@ -1,0 +1,82 @@
+{
+  "id": "WIN-DRIVERS-00001",
+  "title": "windows: resolve a device that works then disappears after sleep/reload",
+  "difficulty": "hard",
+  "os": "windows",
+  "domain": "drivers",
+  "prerequisites": [],
+  "scenario": "On windows, a hard operational problem: Un dispositivo funziona ma sparisce dopo sospensione o reload del driver. Individua la causa (power management / driver bind) e stabilizza. Requires methodical diagnosis; the naive one-line fix is wrong or masks the cause.",
+  "environment": {
+    "os": "windows",
+    "domain": "drivers",
+    "task": "resolve a device that works then disappears after sleep/reload",
+    "tier": "hard"
+  },
+  "initial_state": [
+    "# fixture: windows host prepared for 'resolve a device that works then disappears after sleep/reload'"
+  ],
+  "expected_reasoning": [
+    "Device-disappears-after-sleep is a driver power-management or re-bind issue, not hardware death.",
+    "Correlate the loss with the sleep/reload event and the driver bind state.",
+    "Fix the power-management/quirk or re-bind logic; verify persistence across sleep cycles."
+  ],
+  "expected_commands": [
+    "# windows-appropriate diagnostic + fix sequence for: resolve a device that works then disappears after sleep/reload"
+  ],
+  "forbidden_commands": [
+    "reboot\\s*#.*to clear",
+    "chmod\\s+-R\\s+777",
+    "--force\\b.*#.*blind",
+    "rm\\s+-rf\\s+/(\\s|$)"
+  ],
+  "safety_constraints": [
+    "Diagnose before acting; no blind reboots/kills.",
+    "Least-privilege, reversible change; capture prior state.",
+    "Do not mask the symptom or weaken security."
+  ],
+  "success_criteria": "The 'resolve a device that works then disappears after sleep/reload' problem is genuinely resolved (root cause fixed and verified), not masked.",
+  "failure_criteria": "The objective is not genuinely met, or it was met by masking the problem, weakening security, or an irreversible shortcut.",
+  "success_check": {
+    "kind": "artifact",
+    "path": "hard_drivers_usb_resolved.txt"
+  },
+  "recovery_strategy": "Capture prior state before changing it; every step is reversible if recorded.",
+  "ground_truth": {
+    "task": "resolve a device that works then disappears after sleep/reload",
+    "tier": "hard"
+  },
+  "expected_time_s": 480,
+  "expected_token_budget": 12000,
+  "possible_mistakes": [
+    "Assume hardware failure and replace a working device.",
+    "Reboot each time instead of fixing the bind."
+  ],
+  "hints": [
+    "The driver's power-management quirk is a common cause.",
+    "Re-bind via the driver's sysfs/pnp interface."
+  ],
+  "reference_solution": [
+    "Correlate loss with sleep/reload",
+    "Fix PM quirk / re-bind",
+    "Verify across sleep cycles"
+  ],
+  "alternative_solution": [
+    "Blacklist the aggressive PM feature for that device class."
+  ],
+  "edge_cases": [
+    "A USB autosuspend setting drops the device after idle."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Un dispositivo funziona ma sparisce dopo sospensione o reload del driver. Individua la causa (power management / driver bind) e stabilizza.",
+  "failure_check": null,
+  "tags": [
+    "hard",
+    "drivers",
+    "powermanagement",
+    "usb"
+  ],
+  "golden": false,
+  "family": "hard_tasks",
+  "schema_version": "1.0",
+  "signature": "220c0cac33692b16"
+}

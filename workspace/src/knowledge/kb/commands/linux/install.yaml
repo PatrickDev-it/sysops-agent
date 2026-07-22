@@ -1,0 +1,94 @@
+# Linux install commands — apt, dnf, pacman, pip
+
+- id: linux_apt_install
+  platform: linux
+  distros: [ubuntu, debian, mint, pop_os]
+  shell: [bash, zsh, sh]
+  intent: [install_package, install_global]
+  command: sudo apt-get install -y $PACKAGE
+  verify: dpkg -l $PACKAGE
+  vars: [PACKAGE]
+  confidence: 0.95
+  requires: [apt]
+  forbidden_shells: [powershell, pwsh, cmd]
+
+- id: linux_apt_update
+  platform: linux
+  distros: [ubuntu, debian, mint, pop_os]
+  shell: [bash, zsh, sh]
+  intent: [update_package_list, refresh_repos]
+  command: sudo apt-get update
+  vars: []
+  confidence: 0.98
+  requires: [apt]
+  forbidden_shells: [powershell, pwsh, cmd]
+
+- id: linux_apt_remove
+  platform: linux
+  distros: [ubuntu, debian, mint, pop_os]
+  shell: [bash, zsh, sh]
+  intent: [uninstall_package, remove_package]
+  command: sudo apt-get remove -y $PACKAGE
+  vars: [PACKAGE]
+  confidence: 0.95
+  requires: [apt]
+
+- id: linux_dnf_install
+  platform: linux
+  distros: [fedora, rhel, centos, rocky]
+  shell: [bash, zsh, sh]
+  intent: [install_package, install_global]
+  command: sudo dnf install -y $PACKAGE
+  verify: dnf list installed $PACKAGE
+  vars: [PACKAGE]
+  confidence: 0.95
+  requires: [dnf]
+  forbidden_shells: [powershell, pwsh, cmd]
+
+- id: linux_pacman_install
+  platform: linux
+  distros: [arch, manjaro, endeavouros]
+  shell: [bash, zsh, sh]
+  intent: [install_package, install_global]
+  command: sudo pacman -S --noconfirm $PACKAGE
+  verify: pacman -Q $PACKAGE
+  vars: [PACKAGE]
+  confidence: 0.93
+  requires: [pacman]
+  forbidden_shells: [powershell, pwsh, cmd]
+
+- id: linux_pip_install_user
+  platform: linux
+  shell: [bash, zsh, sh]
+  intent: [install_python_package, install_user]
+  command: pip install --user $PACKAGE
+  verify: pip show $PACKAGE
+  vars: [PACKAGE]
+  notes: Installs to ~/.local/lib/pythonX.Y/site-packages. ~/.local/bin must be on PATH.
+  confidence: 0.93
+  requires: [pip]
+  forbidden_shells: [powershell, pwsh, cmd]
+
+- id: linux_pip_install_global
+  platform: linux
+  shell: [bash, zsh, sh]
+  intent: [install_python_package, install_global]
+  command: sudo pip install $PACKAGE
+  verify: pip show $PACKAGE
+  vars: [PACKAGE]
+  notes: Requires sudo. Not recommended on distros that manage Python via system package manager.
+  confidence: 0.75
+  requires: [pip]
+  forbidden_shells: [powershell, pwsh, cmd]
+
+- id: linux_pipx_install
+  platform: linux
+  shell: [bash, zsh, sh]
+  intent: [install_python_tool, install_global]
+  command: pipx install $PACKAGE
+  verify: pipx list | grep $PACKAGE
+  vars: [PACKAGE]
+  notes: Best way to install Python CLI tools globally in isolated environments.
+  confidence: 0.92
+  requires: [pipx]
+  forbidden_shells: [powershell, pwsh, cmd]

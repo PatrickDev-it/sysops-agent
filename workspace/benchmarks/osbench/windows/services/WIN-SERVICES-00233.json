@@ -1,0 +1,116 @@
+{
+  "id": "WIN-SERVICES-00233",
+  "title": "BITS on windows: compound failure — wrong_env + missing_dependency",
+  "difficulty": "principal",
+  "os": "windows",
+  "domain": "services",
+  "prerequisites": [],
+  "scenario": "A production BITS (updates) on windows will not start. Two independent faults are present at once: a required environment variable / EnvironmentFile is missing AND a required unit/socket is not started. the missing env var points at a dependency endpoint that is itself down. A naive restart or fixing only one cause leaves it broken.",
+  "environment": {
+    "os": "windows",
+    "service_manager": "scm",
+    "unit": "BITS",
+    "role": "updates",
+    "faults": [
+      "wrong_env",
+      "missing_dependency"
+    ],
+    "compound": true
+  },
+  "initial_state": [
+    "# fixture induces BOTH 'wrong_env' and 'missing_dependency' on BITS"
+  ],
+  "expected_reasoning": [
+    "Symptom: `BITS` stays failed even after a naive restart — a single-cause assumption is wrong here.",
+    "Read the evidence fully: `Get-WinEvent -LogName System -MaxEvents 120 | Where-Object Message -match 'BITS'` shows TWO distinct signals ('environment variable not set' and 'dependency job failed').",
+    "Interaction: the missing env var points at a dependency endpoint that is itself down.",
+    "Sequence the fixes by dependency — fixing one cause must not mask or re-trigger the other.",
+    "First address 'wrong_env': find the missing variable from the error; set it in the EnvironmentFile / unit.",
+    "Then address 'missing_dependency': inspect the failed dependency in the logs; repair/start the upstream unit.",
+    "Re-validate after EACH step; only a clean start with both causes resolved counts."
+  ],
+  "expected_commands": [
+    "Get-Service 'BITS' | Format-List *",
+    "Get-WinEvent -LogName System -MaxEvents 120 | Where-Object Message -match 'BITS'",
+    "Get-BitsTransfer",
+    "Restart-Service 'BITS'"
+  ],
+  "forbidden_commands": [
+    "Requires=.*--force",
+    "echo.*>>\\s*/etc/environment.*reboot",
+    "export\\s+.*&&\\s*systemctl",
+    "reboot\\s*#.*to clear",
+    "systemctl\\s+mask",
+    "systemctl\\s+mask\\b"
+  ],
+  "safety_constraints": [
+    "Recognize BOTH causes before acting; a single fix is a partial (failing) solution.",
+    "Fix in dependency order; do not let one fix mask the other.",
+    "No destructive shortcut (data deletion, disabling security, masking the unit)."
+  ],
+  "success_criteria": "`BITS` starts cleanly and stays active (and listens on 0 if applicable) with BOTH 'wrong_env' and 'missing_dependency' genuinely resolved and surviving a restart.",
+  "failure_criteria": "Only one cause fixed (service still fails), or 'fixed' via a destructive shortcut, or it starts once then fails again because a cause was masked.",
+  "success_check": {
+    "kind": "all_of",
+    "checks": [
+      {
+        "kind": "service_active",
+        "name": "BITS"
+      }
+    ]
+  },
+  "recovery_strategy": "Env changes live in a drop-in/EnvironmentFile; revert to restore. Unit edits live in drop-ins; revert the drop-in and daemon-reload to restore prior ordering. Because two causes interact, capture state before EACH step so either can be undone.",
+  "ground_truth": {
+    "root_causes": [
+      "wrong_env",
+      "missing_dependency"
+    ],
+    "interaction": "the missing env var points at a dependency endpoint that is itself down",
+    "unit": "BITS",
+    "signals": [
+      "environment variable not set",
+      "dependency job failed"
+    ],
+    "compound": true
+  },
+  "expected_time_s": 2400,
+  "expected_token_budget": 60000,
+  "possible_mistakes": [
+    "export the var in the current shell (lost on restart)",
+    "restart the visible service repeatedly, ignoring the upstream failure",
+    "Fix the first cause, see the same failure, and conclude the fix was wrong (it was correct but incomplete).",
+    "Fix the causes in the wrong order so the first fix is undone by the second."
+  ],
+  "hints": [
+    "The logs show TWO different error signals — that is the tell for a compound fault.",
+    "Order matters: the missing env var points at a dependency endpoint that is itself down."
+  ],
+  "reference_solution": [
+    "Observe both signals: Get-WinEvent -LogName System -MaxEvents 120 | Where-Object Message -match 'BITS'",
+    "Resolve 'wrong_env' first: find the missing variable from the error; set it in the EnvironmentFile / unit",
+    "Then resolve 'missing_dependency': inspect the failed dependency in the logs; repair/start the upstream unit",
+    "Validate after each step: Get-BitsTransfer"
+  ],
+  "alternative_solution": [
+    "Reproduce the compound state in a scratch instance, prove the ordered fix, then apply to the live service."
+  ],
+  "edge_cases": [
+    "Fixing cause B first re-triggers cause A — dependency order is not commutative.",
+    "One signal is louder and hides the second in the log noise."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Il servizio BITS non parte e ci sono DUE cause concomitanti (wrong_env e missing_dependency). Ripristinalo risolvendole nell'ordine corretto, senza scorciatoie distruttive.",
+  "failure_check": null,
+  "tags": [
+    "service",
+    "updates",
+    "compound",
+    "wrong_env",
+    "missing_dependency",
+    "scm"
+  ],
+  "golden": false,
+  "family": "compound_service_windows",
+  "schema_version": "1.0",
+  "signature": "c22e525d56b4dbb3"
+}

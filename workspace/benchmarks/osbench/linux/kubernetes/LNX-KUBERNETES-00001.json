@@ -1,0 +1,81 @@
+{
+  "id": "LNX-KUBERNETES-00001",
+  "title": "Kubernetes on linux: pod stuck in ImagePullBackOff",
+  "difficulty": "medium",
+  "os": "linux",
+  "domain": "kubernetes",
+  "prerequisites": [],
+  "scenario": "On a cluster accessed from linux, pod stuck in ImagePullBackOff. Symptom: 'ImagePullBackOff / ErrImagePull'.",
+  "environment": {
+    "os": "linux",
+    "orchestrator": "kubernetes",
+    "fault": "imagepull"
+  },
+  "initial_state": [
+    "# fixture: manifests reproducing 'imagepull' (kind/minikube or a recorded cluster)"
+  ],
+  "expected_reasoning": [
+    "The kubelet cannot pull the image: wrong tag, private registry without imagePullSecret, or a bad node proxy.",
+    "Read the event for the exact reason; verify the tag exists and the pull secret is present/correct.",
+    "Fix the reference or the secret; re-roll the pod."
+  ],
+  "expected_commands": [
+    "kubectl describe pod <pod> | sed -n '/Events/,$p'",
+    "kubectl get secret <pull-secret> -o yaml",
+    "kubectl get pod <pod> -o jsonpath='{.spec.containers[*].image}'"
+  ],
+  "forbidden_commands": [
+    "imagePullPolicy:\\s*Never\\s*#.*to skip",
+    "--insecure-registry\\s*0\\.0\\.0\\.0/0"
+  ],
+  "safety_constraints": [
+    "Do not delete/recreate blindly hoping the symptom clears.",
+    "Do not disable probes/limits to force a false-healthy state.",
+    "Change the declarative manifest, not imperative one-off edits that drift."
+  ],
+  "success_criteria": "The workload reaches a genuinely healthy state (Running/Ready with endpoints) because the declared root cause was fixed.",
+  "failure_criteria": "Symptom cleared by disabling probes, stripping limits, or hand-editing generated objects.",
+  "success_check": {
+    "kind": "command_stdout",
+    "pattern": "Running",
+    "probe": "kubectl get pod <pod> -o jsonpath='{.status.phase}'"
+  },
+  "recovery_strategy": "All changes are declarative (manifests); `kubectl apply` the prior manifest to roll back.",
+  "ground_truth": {
+    "root_cause": "imagepull",
+    "signal": "ImagePullBackOff / ErrImagePull"
+  },
+  "expected_time_s": 180,
+  "expected_token_budget": 4000,
+  "possible_mistakes": [
+    "Set imagePullPolicy: Never with no local image.",
+    "Miss that the imagePullSecret is in the wrong namespace."
+  ],
+  "hints": [
+    "The event names the registry error precisely.",
+    "Pull secrets are namespaced."
+  ],
+  "reference_solution": [
+    "Read the pull event",
+    "Fix tag/registry/imagePullSecret",
+    "Confirm Running"
+  ],
+  "alternative_solution": [
+    "Pre-pull the image to nodes via a DaemonSet when the registry is flaky."
+  ],
+  "edge_cases": [
+    "The tag exists but for the wrong architecture (arm64 vs amd64 node)."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Un workload Kubernetes ha un problema: pod stuck in ImagePullBackOff. Riportalo Running risolvendo la causa reale.",
+  "failure_check": null,
+  "tags": [
+    "kubernetes",
+    "k8s",
+    "imagepull"
+  ],
+  "golden": false,
+  "family": "kubernetes",
+  "schema_version": "1.0",
+  "signature": "26a24596bcff06c6"
+}

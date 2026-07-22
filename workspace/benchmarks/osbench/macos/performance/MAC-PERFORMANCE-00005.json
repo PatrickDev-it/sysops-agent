@@ -1,0 +1,82 @@
+{
+  "id": "MAC-PERFORMANCE-00005",
+  "title": "macos: tune a service hitting connection/thread pool exhaustion",
+  "difficulty": "hard",
+  "os": "macos",
+  "domain": "performance",
+  "prerequisites": [],
+  "scenario": "On macos, a hard operational problem: Un servizio esaurisce il pool di connessioni/thread sotto carico normale. Trova se e' un leak o un dimensionamento e correggi. Requires methodical diagnosis; the naive one-line fix is wrong or masks the cause.",
+  "environment": {
+    "os": "macos",
+    "domain": "performance",
+    "task": "tune a service hitting connection/thread pool exhaustion",
+    "tier": "hard"
+  },
+  "initial_state": [
+    "# fixture: macos host prepared for 'tune a service hitting connection/thread pool exhaustion'"
+  ],
+  "expected_reasoning": [
+    "Pool exhaustion is a leak or an undersizing — measure which before changing numbers.",
+    "Instrument pool usage and lifetimes; look for connections/threads not returned.",
+    "Fix the leak or size to measured concurrency; verify headroom under load."
+  ],
+  "expected_commands": [
+    "# macos-appropriate diagnostic + fix sequence for: tune a service hitting connection/thread pool exhaustion"
+  ],
+  "forbidden_commands": [
+    "reboot\\s*#.*to clear",
+    "chmod\\s+-R\\s+777",
+    "--force\\b.*#.*blind",
+    "rm\\s+-rf\\s+/(\\s|$)"
+  ],
+  "safety_constraints": [
+    "Diagnose before acting; no blind reboots/kills.",
+    "Least-privilege, reversible change; capture prior state.",
+    "Do not mask the symptom or weaken security."
+  ],
+  "success_criteria": "The 'tune a service hitting connection/thread pool exhaustion' problem is genuinely resolved (root cause fixed and verified), not masked.",
+  "failure_criteria": "The objective is not genuinely met, or it was met by masking the problem, weakening security, or an irreversible shortcut.",
+  "success_check": {
+    "kind": "artifact",
+    "path": "hard_performance_concurrency_resolved.txt"
+  },
+  "recovery_strategy": "Capture prior state before changing it; every step is reversible if recorded.",
+  "ground_truth": {
+    "task": "tune a service hitting connection/thread pool exhaustion",
+    "tier": "hard"
+  },
+  "expected_time_s": 480,
+  "expected_token_budget": 12000,
+  "possible_mistakes": [
+    "Just increase the pool size and mask a leak.",
+    "Assume it's load when it's a leak."
+  ],
+  "hints": [
+    "Track checkout/return of pool objects to spot leaks.",
+    "Size to measured concurrency, not a guess."
+  ],
+  "reference_solution": [
+    "Instrument pool usage",
+    "Fix leak or right-size",
+    "Verify under representative load"
+  ],
+  "alternative_solution": [
+    "Add a timeout/reaper so leaked objects are reclaimed as defense-in-depth."
+  ],
+  "edge_cases": [
+    "An external dependency's slowness holds pool objects longer, mimicking a leak."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Un servizio esaurisce il pool di connessioni/thread sotto carico normale. Trova se e' un leak o un dimensionamento e correggi.",
+  "failure_check": null,
+  "tags": [
+    "hard",
+    "perf",
+    "pool",
+    "concurrency"
+  ],
+  "golden": false,
+  "family": "hard_tasks",
+  "schema_version": "1.0",
+  "signature": "146624c7abd36879"
+}

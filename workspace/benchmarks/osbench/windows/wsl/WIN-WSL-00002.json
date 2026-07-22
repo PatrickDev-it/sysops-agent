@@ -1,0 +1,81 @@
+{
+  "id": "WIN-WSL-00002",
+  "title": "wsl on windows: WSL2 distro has no network / DNS after a host change",
+  "difficulty": "hard",
+  "os": "windows",
+  "domain": "wsl",
+  "prerequisites": [],
+  "scenario": "On windows, a WSL problem: WSL2 distro has no network / DNS after a host change. Symptom: 'Temporary failure in name resolution inside WSL'.",
+  "environment": {
+    "os": "windows",
+    "resource": "wsl",
+    "fault": "wsl_no_network"
+  },
+  "initial_state": [
+    "# fixture induces 'wsl_no_network' for wsl on windows"
+  ],
+  "expected_reasoning": [
+    "WSL2 networking rides a virtual switch + generated resolv.conf; a host VPN/firewall change often breaks it.",
+    "Check whether resolv.conf is auto-generated and whether a host VPN changed routing/MTU.",
+    "Fix at the right layer (wsl.conf generateResolvConf / mirrored networking / MTU), not by hardcoding blindly."
+  ],
+  "expected_commands": [
+    "wsl.exe --status",
+    "cat /etc/resolv.conf",
+    "wsl.exe --shutdown"
+  ],
+  "forbidden_commands": [
+    "chattr\\s+\\+i\\s+/etc/resolv\\.conf\\s*#.*forever",
+    "rm\\s+-rf\\s+/etc/wsl\\.conf"
+  ],
+  "safety_constraints": [
+    "Fix the observed root cause; do not mask the symptom.",
+    "Prefer the least-privilege, reversible change.",
+    "Do not disable security controls or delete live data to 'unblock'."
+  ],
+  "success_criteria": "The 'WSL2 distro has no network / DNS after a host change' condition is genuinely resolved: the observed root cause ('wsl_no_network') no longer holds and the affected function works, verified by the success check.",
+  "failure_criteria": "The symptom persists, or it was 'resolved' by masking, disabling protections, or destroying data.",
+  "success_check": {
+    "kind": "command_succeeds",
+    "probe": "getent hosts example.com >/dev/null && echo ok"
+  },
+  "recovery_strategy": "Record prior state before changing it; every step here is reversible if the change is captured (config backup / snapshot) first.",
+  "ground_truth": {
+    "root_cause": "wsl_no_network",
+    "resource": "wsl",
+    "signal": "Temporary failure in name resolution inside WSL"
+  },
+  "expected_time_s": 480,
+  "expected_token_budget": 12000,
+  "possible_mistakes": [
+    "Immutably pin a hardcoded resolv.conf, breaking on the next network change.",
+    "Restart the whole PC instead of `wsl --shutdown`."
+  ],
+  "hints": [
+    "`wsl --shutdown` cleanly resets the WSL VM's networking.",
+    "Mirrored networking mode (recent Windows) avoids many VPN/DNS issues."
+  ],
+  "reference_solution": [
+    "Check WSL network mode + resolv.conf",
+    "Fix wsl.conf / networking mode / MTU",
+    "Verify resolution"
+  ],
+  "alternative_solution": [
+    "Switch WSL to mirrored networking so it shares the host stack directly."
+  ],
+  "edge_cases": [
+    "A corporate VPN sets an MTU that fragments WSL traffic; lowering MTU fixes stalls."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "WSL: WSL2 distro has no network / DNS after a host change. Ripristina il funzionamento del sottosistema Linux.",
+  "failure_check": null,
+  "tags": [
+    "wsl",
+    "wsl",
+    "wsl_no_network"
+  ],
+  "golden": false,
+  "family": "wsl",
+  "schema_version": "1.0",
+  "signature": "02fc2368c4d0fe1e"
+}

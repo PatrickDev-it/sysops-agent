@@ -1,0 +1,105 @@
+# Windows install commands — pip, winget, scoop, choco
+# Scope: global vs user vs venv is explicit on every entry.
+
+- id: win_pip_install_global
+  platform: windows
+  shell: [powershell, pwsh, cmd]
+  intent: [install_python_package, install_global]
+  command: pip install $PACKAGE
+  verify: pip show $PACKAGE
+  vars: [PACKAGE]
+  notes: >
+    Installs to the system (or venv-active) Python. If the agent is running
+    inside a venv, this installs to the venv — not global. Use --user or
+    the system pip path explicitly for global installs from within a venv.
+  confidence: 0.90
+  requires: [pip]
+  forbidden_shells: []
+
+- id: win_pip_install_user
+  platform: windows
+  shell: [powershell, pwsh, cmd]
+  intent: [install_python_package, install_user, install_global]
+  command: pip install --user $PACKAGE
+  verify: pip show $PACKAGE
+  vars: [PACKAGE]
+  notes: >
+    Installs to %APPDATA%\Python\PythonXXX\Scripts.
+    After install, that Scripts dir must be on PATH for the tool to be callable.
+    Preferred when no admin rights and no active venv.
+  confidence: 0.95
+  requires: [pip]
+  forbidden_shells: []
+
+- id: win_pip_user_scripts_path
+  platform: windows
+  shell: [powershell, pwsh]
+  intent: [discover_user_scripts_path, find_pip_scripts]
+  command: python -m site --user-site
+  verify: ""
+  vars: []
+  notes: Returns path like C:\Users\X\AppData\Roaming\Python\Python312\site-packages. Scripts dir is at parent\Scripts.
+  confidence: 0.99
+  requires: [python]
+  forbidden_shells: [bash, zsh, cmd]
+
+- id: win_pip_uninstall
+  platform: windows
+  shell: [powershell, pwsh, cmd]
+  intent: [uninstall_python_package, remove_package]
+  command: pip uninstall -y $PACKAGE
+  verify: pip show $PACKAGE
+  vars: [PACKAGE]
+  confidence: 0.98
+  requires: [pip]
+
+- id: win_winget_install
+  platform: windows
+  shell: [powershell, pwsh, cmd]
+  intent: [install_package, install_global]
+  command: winget install --id $PACKAGE_ID --silent --accept-source-agreements --accept-package-agreements
+  verify: winget list --id $PACKAGE_ID
+  vars: [PACKAGE_ID]
+  notes: PACKAGE_ID must be the exact winget manifest id, e.g. "Python.Python.3"
+  confidence: 0.90
+  requires: [winget]
+  forbidden_shells: []
+
+- id: win_winget_uninstall
+  platform: windows
+  shell: [powershell, pwsh, cmd]
+  intent: [uninstall_package, remove_package]
+  command: winget uninstall --id $PACKAGE_ID --silent
+  vars: [PACKAGE_ID]
+  confidence: 0.90
+  requires: [winget]
+
+- id: win_winget_search
+  platform: windows
+  shell: [powershell, pwsh, cmd]
+  intent: [search_package, find_package]
+  command: winget search $PACKAGE_NAME
+  vars: [PACKAGE_NAME]
+  confidence: 0.98
+  requires: [winget]
+
+- id: win_scoop_install
+  platform: windows
+  shell: [powershell, pwsh]
+  intent: [install_package, install_global]
+  command: scoop install $PACKAGE
+  verify: scoop list | Select-String "$PACKAGE"
+  vars: [PACKAGE]
+  confidence: 0.88
+  requires: [scoop]
+  forbidden_shells: [cmd, bash, zsh]
+
+- id: win_choco_install
+  platform: windows
+  shell: [powershell, pwsh, cmd]
+  intent: [install_package, install_global]
+  command: choco install $PACKAGE -y
+  verify: choco list --local-only $PACKAGE
+  vars: [PACKAGE]
+  confidence: 0.88
+  requires: [choco]

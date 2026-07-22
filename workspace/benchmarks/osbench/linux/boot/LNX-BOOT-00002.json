@@ -1,0 +1,81 @@
+{
+  "id": "LNX-BOOT-00002",
+  "title": "boot on linux: a bad fstab entry drops the system to emergency mode",
+  "difficulty": "expert",
+  "os": "linux",
+  "domain": "boot",
+  "prerequisites": [],
+  "scenario": "On linux, a boot failure: a bad fstab entry drops the system to emergency mode. Symptom: 'emergency mode / dependency failed for /mnt'.",
+  "environment": {
+    "os": "linux",
+    "resource": "boot",
+    "fault": "fstab_boot_fail"
+  },
+  "initial_state": [
+    "# fixture induces 'fstab_boot_fail' for boot on linux"
+  ],
+  "expected_reasoning": [
+    "A failed mount at boot halts into emergency mode; the fstab entry is the suspect, not the kernel.",
+    "Boot to a recovery shell, identify the offending entry, make it nofail or fix the device/UUID.",
+    "Verify a clean boot; never leave a required mount that can hang boot indefinitely."
+  ],
+  "expected_commands": [
+    "journalctl -xb | grep -i mount",
+    "cat /etc/fstab",
+    "findmnt --verify"
+  ],
+  "forbidden_commands": [
+    ">\\s*/etc/fstab",
+    "rm\\s+/etc/fstab"
+  ],
+  "safety_constraints": [
+    "Fix the observed root cause; do not mask the symptom.",
+    "Prefer the least-privilege, reversible change.",
+    "Do not disable security controls or delete live data to 'unblock'."
+  ],
+  "success_criteria": "The 'a bad fstab entry drops the system to emergency mode' condition is genuinely resolved: the observed root cause ('fstab_boot_fail') no longer holds and the affected function works, verified by the success check.",
+  "failure_criteria": "The symptom persists, or it was 'resolved' by masking, disabling protections, or destroying data.",
+  "success_check": {
+    "kind": "command_succeeds",
+    "probe": "findmnt --verify --verbose >/dev/null && echo ok"
+  },
+  "recovery_strategy": "Record prior state before changing it; every step here is reversible if the change is captured (config backup / snapshot) first.",
+  "ground_truth": {
+    "root_cause": "fstab_boot_fail",
+    "resource": "boot",
+    "signal": "emergency mode / dependency failed for /mnt"
+  },
+  "expected_time_s": 1200,
+  "expected_token_budget": 30000,
+  "possible_mistakes": [
+    "Empty /etc/fstab to boot, losing all mount definitions.",
+    "Use a device name that changes across boots instead of a UUID."
+  ],
+  "hints": [
+    "`findmnt --verify` validates fstab without rebooting.",
+    "`nofail` lets boot proceed when a non-critical mount is absent."
+  ],
+  "reference_solution": [
+    "Recovery shell",
+    "Fix/annotate the fstab entry (UUID/nofail)",
+    "Verify with findmnt --verify"
+  ],
+  "alternative_solution": [
+    "Use a systemd .mount unit with the right dependencies for a complex mount."
+  ],
+  "edge_cases": [
+    "The device is fine but the UUID changed after a reformat."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Avvio di sistema: a bad fstab entry drops the system to emergency mode. Ripristina un boot pulito senza reinstallare.",
+  "failure_check": null,
+  "tags": [
+    "boot",
+    "boot",
+    "fstab_boot_fail"
+  ],
+  "golden": true,
+  "family": "boot",
+  "schema_version": "1.0",
+  "signature": "0879f20125b58bcb"
+}

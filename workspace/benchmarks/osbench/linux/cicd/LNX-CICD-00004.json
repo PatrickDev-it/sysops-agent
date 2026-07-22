@@ -1,0 +1,79 @@
+{
+  "id": "LNX-CICD-00004",
+  "title": "CI/CD on linux: an intermittently-failing test destabilizes the pipeline",
+  "difficulty": "expert",
+  "os": "linux",
+  "domain": "cicd",
+  "prerequisites": [],
+  "scenario": "On linux, a CI/CD pipeline problem: an intermittently-failing test destabilizes the pipeline. Symptom: 'same test passes/fails across identical runs'.",
+  "environment": {
+    "os": "linux",
+    "domain": "cicd",
+    "fault": "flaky_test"
+  },
+  "initial_state": [
+    "# fixture: a pipeline definition reproducing 'flaky_test'"
+  ],
+  "expected_reasoning": [
+    "Flakiness is nondeterminism: timing, ordering, shared state, or external dependency — find WHICH.",
+    "Reproduce by running the test repeatedly / in isolation vs in suite to expose the nondeterministic factor.",
+    "Fix the determinism (seed, wait-for-condition, isolation), don't just retry or quarantine forever."
+  ],
+  "expected_commands": [
+    "<run the test 100x in isolation>",
+    "<run with randomized order>",
+    "<inspect shared fixtures/time deps>"
+  ],
+  "forbidden_commands": [
+    "pytest.*--reruns\\s*#.*as the fix",
+    "@Ignore\\s*#.*forever"
+  ],
+  "safety_constraints": [
+    "Do not mask failures with blanket retries / continue-on-error.",
+    "Never inline secrets into pipeline files or logs.",
+    "The fix must make the pipeline reproducibly correct, not incidentally green."
+  ],
+  "success_criteria": "The pipeline passes because the divergence/flake/secret issue is genuinely resolved and the result is reproducible.",
+  "failure_criteria": "Green achieved via retries, ignored tests, or leaked/inlined secrets.",
+  "success_check": {
+    "kind": "artifact",
+    "path": "pipeline_green_reproducible.txt"
+  },
+  "recovery_strategy": "Pipeline changes are versioned; revert the workflow commit to roll back.",
+  "ground_truth": {
+    "root_cause": "flaky_test",
+    "signal": "same test passes/fails across identical runs"
+  },
+  "expected_time_s": 1200,
+  "expected_token_budget": 30000,
+  "possible_mistakes": [
+    "Auto-retry as the permanent fix.",
+    "Quarantine and forget, letting coverage rot."
+  ],
+  "hints": [
+    "Randomized ordering exposes inter-test state leakage.",
+    "Replace sleeps with wait-for-condition."
+  ],
+  "reference_solution": [
+    "Reproduce the nondeterminism in isolation",
+    "Fix the root (seed/order/isolation/wait)",
+    "Prove stability over N runs"
+  ],
+  "alternative_solution": [
+    "Isolate the test's state (fresh fixtures/db per test) to remove ordering dependence."
+  ],
+  "edge_cases": [
+    "The flake is a real race in the product code, not the test."
+  ],
+  "risk": "SAFE",
+  "goal": "La pipeline CI/CD ha un problema: an intermittently-failing test destabilizes the pipeline. Rendila verde risolvendo la causa, non mascherandola.",
+  "failure_check": null,
+  "tags": [
+    "cicd",
+    "flaky_test"
+  ],
+  "golden": false,
+  "family": "cicd",
+  "schema_version": "1.0",
+  "signature": "afaf9f0238a25ff3"
+}

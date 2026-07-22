@@ -1,0 +1,83 @@
+# Windows filesystem operations — PowerShell and cmd variants
+
+- id: win_ps_find_file
+  platform: windows
+  shell: [powershell, pwsh]
+  intent: [find_file, search_file, locate_file]
+  command: Get-ChildItem -Path "$SEARCH_ROOT" -Recurse -Filter "$FILENAME" -ErrorAction SilentlyContinue | Select-Object -First 5 FullName
+  vars: [SEARCH_ROOT, FILENAME]
+  confidence: 0.95
+  forbidden_shells: [bash, zsh, cmd]
+
+- id: win_ps_which
+  platform: windows
+  shell: [powershell, pwsh]
+  intent: [find_executable, which, locate_tool]
+  command: (Get-Command $TOOL_NAME -ErrorAction SilentlyContinue).Source
+  vars: [TOOL_NAME]
+  notes: Portable equivalent of Unix "which". Returns empty if not on PATH.
+  confidence: 0.99
+  forbidden_shells: [bash, zsh, cmd]
+
+- id: win_ps_test_path
+  platform: windows
+  shell: [powershell, pwsh]
+  intent: [check_exists, test_path]
+  command: Test-Path "$TARGET_PATH"
+  vars: [TARGET_PATH]
+  confidence: 0.99
+  forbidden_shells: [bash, zsh, cmd]
+
+- id: win_ps_remove_item
+  platform: windows
+  shell: [powershell, pwsh]
+  intent: [delete_file, delete_directory, remove]
+  command: Remove-Item -Path "$TARGET_PATH" -Recurse -Force -ErrorAction SilentlyContinue
+  vars: [TARGET_PATH]
+  confidence: 0.95
+  forbidden_shells: [bash, zsh, cmd]
+
+- id: win_ps_copy_item
+  platform: windows
+  shell: [powershell, pwsh]
+  intent: [copy_file, copy]
+  command: Copy-Item -Path "$SOURCE" -Destination "$DEST" -Force
+  vars: [SOURCE, DEST]
+  confidence: 0.97
+  forbidden_shells: [bash, zsh, cmd]
+
+- id: win_ps_move_item
+  platform: windows
+  shell: [powershell, pwsh]
+  intent: [move_file, rename_file, move]
+  command: Move-Item -Path "$SOURCE" -Destination "$DEST" -Force
+  vars: [SOURCE, DEST]
+  confidence: 0.97
+  forbidden_shells: [bash, zsh, cmd]
+
+- id: win_ps_mkdir
+  platform: windows
+  shell: [powershell, pwsh]
+  intent: [create_directory, mkdir]
+  command: New-Item -Path "$DIR_PATH" -ItemType Directory -Force
+  vars: [DIR_PATH]
+  confidence: 0.99
+  forbidden_shells: [bash, zsh, cmd]
+
+- id: win_ps_read_file
+  platform: windows
+  shell: [powershell, pwsh]
+  intent: [read_file, cat_file, view_file]
+  command: Get-Content -Path "$FILE_PATH"
+  vars: [FILE_PATH]
+  confidence: 0.99
+  forbidden_shells: [bash, zsh, cmd]
+
+- id: win_ps_list_dir
+  platform: windows
+  shell: [powershell, pwsh]
+  intent: [list_files, ls, dir]
+  command: Get-ChildItem -Path "$DIR_PATH"
+  vars: [DIR_PATH]
+  confidence: 0.99
+  forbidden_shells: [bash, zsh, cmd]

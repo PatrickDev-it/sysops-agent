@@ -1,0 +1,82 @@
+{
+  "id": "WIN-NETWORKING-00004",
+  "title": "windows: diagnose intermittent packet loss to one host",
+  "difficulty": "hard",
+  "os": "windows",
+  "domain": "networking",
+  "prerequisites": [],
+  "scenario": "On windows, a hard operational problem: Diagnostica una perdita di pacchetti intermittente verso un solo host e individua l'hop responsabile. Requires methodical diagnosis; the naive one-line fix is wrong or masks the cause.",
+  "environment": {
+    "os": "windows",
+    "domain": "networking",
+    "task": "diagnose intermittent packet loss to one host",
+    "tier": "hard"
+  },
+  "initial_state": [
+    "# fixture: windows host prepared for 'diagnose intermittent packet loss to one host'"
+  ],
+  "expected_reasoning": [
+    "Intermittent loss to ONE host localizes the fault to a path segment, not the whole network.",
+    "Use a hop-by-hop latency/loss tool over time to find where loss appears.",
+    "Correlate with duplex/MTU/queue drops at that hop before concluding."
+  ],
+  "expected_commands": [
+    "# windows-appropriate diagnostic + fix sequence for: diagnose intermittent packet loss to one host"
+  ],
+  "forbidden_commands": [
+    "reboot\\s*#.*to clear",
+    "chmod\\s+-R\\s+777",
+    "--force\\b.*#.*blind",
+    "rm\\s+-rf\\s+/(\\s|$)"
+  ],
+  "safety_constraints": [
+    "Diagnose before acting; no blind reboots/kills.",
+    "Least-privilege, reversible change; capture prior state.",
+    "Do not mask the symptom or weaken security."
+  ],
+  "success_criteria": "The 'diagnose intermittent packet loss to one host' problem is genuinely resolved (root cause fixed and verified), not masked.",
+  "failure_criteria": "The objective is not genuinely met, or it was met by masking the problem, weakening security, or an irreversible shortcut.",
+  "success_check": {
+    "kind": "artifact",
+    "path": "hard_networking_mtr_resolved.txt"
+  },
+  "recovery_strategy": "Capture prior state before changing it; every step is reversible if recorded.",
+  "ground_truth": {
+    "task": "diagnose intermittent packet loss to one host",
+    "tier": "hard"
+  },
+  "expected_time_s": 480,
+  "expected_token_budget": 12000,
+  "possible_mistakes": [
+    "Blame the application for a network-layer loss.",
+    "Run one ping and declare it fine/broken."
+  ],
+  "hints": [
+    "mtr/pathping over time beats a single ping.",
+    "Loss that starts at a hop and persists downstream points at that hop."
+  ],
+  "reference_solution": [
+    "Measure hop-by-hop loss over time",
+    "Localize the hop",
+    "Correlate with MTU/duplex/queue at that hop"
+  ],
+  "alternative_solution": [
+    "Capture a packet trace at both ends to prove where drops occur."
+  ],
+  "edge_cases": [
+    "Asymmetric routing makes the return path the real culprit."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Diagnostica una perdita di pacchetti intermittente verso un solo host e individua l'hop responsabile.",
+  "failure_check": null,
+  "tags": [
+    "hard",
+    "net",
+    "packetloss",
+    "mtr"
+  ],
+  "golden": false,
+  "family": "hard_tasks",
+  "schema_version": "1.0",
+  "signature": "a2b31c0550c90922"
+}

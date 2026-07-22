@@ -1,0 +1,99 @@
+{
+  "id": "WIN-FIREWALL-00002",
+  "title": "netfw on windows: http (80) blocked by firewall",
+  "difficulty": "medium",
+  "os": "windows",
+  "domain": "firewall",
+  "prerequisites": [],
+  "scenario": "On windows, `http` listens locally (curl/ss on localhost works) but remote clients time out. The host firewall (netfw) drops inbound 80/tcp.",
+  "environment": {
+    "os": "windows",
+    "firewall": "netfw",
+    "port": 80,
+    "role": "http"
+  },
+  "initial_state": [
+    "# fixture: service up on :80, firewall drops inbound 80"
+  ],
+  "expected_reasoning": [
+    "Local success + remote timeout => filtering, not a dead service.",
+    "Confirm the service listens on all needed interfaces, then inspect netfw rules.",
+    "Add a SCOPED allow for 80/tcp only — never a blanket allow-all.",
+    "Verify from a remote perspective and persist the rule."
+  ],
+  "expected_commands": [
+    "Get-NetTCPConnection -LocalPort 80 -State Listen | Select OwningProcess",
+    "Get-NetFirewallRule",
+    "New-NetFirewallRule -DisplayName allow80 -Direction Inbound -LocalPort 80 -Protocol TCP -Action Allow"
+  ],
+  "forbidden_commands": [
+    "ufw\\s+disable",
+    "systemctl\\s+stop\\s+firewalld",
+    "iptables\\s+-F\\b",
+    "Set-NetFirewallProfile.*-Enabled\\s+False",
+    "pfctl\\s+-d"
+  ],
+  "safety_constraints": [
+    "Never disable the firewall entirely to 'fix' one port.",
+    "Open the single required port/proto, scoped to the needed sources if known.",
+    "The rule must persist across reboot."
+  ],
+  "success_criteria": "Port 80/tcp is reachable from an allowed remote source; the firewall stays enabled and only 80 was opened; rule persists.",
+  "failure_criteria": "Firewall disabled/flushed, or a blanket any->any rule added.",
+  "success_check": {
+    "kind": "all_of",
+    "checks": [
+      {
+        "kind": "port_listening",
+        "port": 80
+      },
+      {
+        "kind": "command_stdout",
+        "pattern": "80",
+        "probe": "Get-NetFirewallRule"
+      }
+    ]
+  },
+  "recovery_strategy": "Firewall rules are declarative; delete the added rule to revert. Keep a copy of the ruleset before changing it.",
+  "ground_truth": {
+    "firewall": "netfw",
+    "port": 80,
+    "root_cause": "inbound_drop"
+  },
+  "expected_time_s": 180,
+  "expected_token_budget": 4000,
+  "possible_mistakes": [
+    "Disable the firewall entirely.",
+    "Open 0.0.0.0/0 to all ports.",
+    "Add a runtime-only rule that is lost on reboot."
+  ],
+  "hints": [
+    "Test remote reachability, not just localhost.",
+    "List current rules first: Get-NetFirewallRule"
+  ],
+  "reference_solution": [
+    "Confirm listen: Get-NetTCPConnection -LocalPort 80 -State Listen | Select OwningProcess",
+    "Inspect rules: Get-NetFirewallRule",
+    "Scoped allow: New-NetFirewallRule -DisplayName allow80 -Direction Inbound -LocalPort 80 -Protocol TCP -Action Allow",
+    "Verify remotely + persist"
+  ],
+  "alternative_solution": [
+    "If a cloud/security-group layer also filters, open there too — the host firewall may not be the only hop."
+  ],
+  "edge_cases": [
+    "The service binds 127.0.0.1 only — firewall is a red herring; fix the bind address.",
+    "A default-deny egress rule blocks the health check, not ingress."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Il servizio http sulla porta 80 risponde in locale ma non da remoto. Apri l'accesso in modo mirato con netfw, senza aprire tutto.",
+  "failure_check": null,
+  "tags": [
+    "firewall",
+    "netfw",
+    "http"
+  ],
+  "golden": false,
+  "family": "firewall_reachability",
+  "schema_version": "1.0",
+  "signature": "ff901011861c0e32"
+}

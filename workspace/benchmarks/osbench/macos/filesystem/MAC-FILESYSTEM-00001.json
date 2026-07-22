@@ -1,0 +1,82 @@
+{
+  "id": "MAC-FILESYSTEM-00001",
+  "title": "macos: fix a case-sensitivity mismatch breaking a cross-platform project",
+  "difficulty": "hard",
+  "os": "macos",
+  "domain": "filesystem",
+  "prerequisites": [],
+  "scenario": "On macos, a hard operational problem: Un progetto cross-platform si rompe per un mismatch di case-sensitivity del filesystem (due file che differiscono solo per maiuscole). Risolvi in modo portabile. Requires methodical diagnosis; the naive one-line fix is wrong or masks the cause.",
+  "environment": {
+    "os": "macos",
+    "domain": "filesystem",
+    "task": "fix a case-sensitivity mismatch breaking a cross-platform project",
+    "tier": "hard"
+  },
+  "initial_state": [
+    "# fixture: macos host prepared for 'fix a case-sensitivity mismatch breaking a cross-platform project'"
+  ],
+  "expected_reasoning": [
+    "Case-sensitivity mismatch: a case-insensitive FS collapses two files a case-sensitive one keeps distinct.",
+    "Identify the colliding paths and which side is authoritative.",
+    "Rename to avoid case-only differences (or use a case-sensitive volume); verify on both platforms."
+  ],
+  "expected_commands": [
+    "# macos-appropriate diagnostic + fix sequence for: fix a case-sensitivity mismatch breaking a cross-platform project"
+  ],
+  "forbidden_commands": [
+    "reboot\\s*#.*to clear",
+    "chmod\\s+-R\\s+777",
+    "--force\\b.*#.*blind",
+    "rm\\s+-rf\\s+/(\\s|$)"
+  ],
+  "safety_constraints": [
+    "Diagnose before acting; no blind reboots/kills.",
+    "Least-privilege, reversible change; capture prior state.",
+    "Do not mask the symptom or weaken security."
+  ],
+  "success_criteria": "The 'fix a case-sensitivity mismatch breaking a cross-platform project' problem is genuinely resolved (root cause fixed and verified), not masked.",
+  "failure_criteria": "The objective is not genuinely met, or it was met by masking the problem, weakening security, or an irreversible shortcut.",
+  "success_check": {
+    "kind": "artifact",
+    "path": "hard_filesystem_crossplatform_resolved.txt"
+  },
+  "recovery_strategy": "Capture prior state before changing it; every step is reversible if recorded.",
+  "ground_truth": {
+    "task": "fix a case-sensitivity mismatch breaking a cross-platform project",
+    "tier": "hard"
+  },
+  "expected_time_s": 480,
+  "expected_token_budget": 12000,
+  "possible_mistakes": [
+    "Fix it on one platform only, breaking the other.",
+    "Ignore the collision until it silently drops a file."
+  ],
+  "hints": [
+    "git can track case-only renames that the FS won't distinguish.",
+    "A case-sensitive volume avoids the class."
+  ],
+  "reference_solution": [
+    "Identify the case collision",
+    "Rename to remove case-only diffs",
+    "Verify on both platforms"
+  ],
+  "alternative_solution": [
+    "Create a dedicated case-sensitive volume for the checkout on macOS/Windows."
+  ],
+  "edge_cases": [
+    "The collision only manifests on a coworker's case-insensitive machine."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Un progetto cross-platform si rompe per un mismatch di case-sensitivity del filesystem (due file che differiscono solo per maiuscole). Risolvi in modo portabile.",
+  "failure_check": null,
+  "tags": [
+    "hard",
+    "fs",
+    "casesensitivity",
+    "crossplatform"
+  ],
+  "golden": false,
+  "family": "hard_tasks",
+  "schema_version": "1.0",
+  "signature": "d2db646e60a427cc"
+}

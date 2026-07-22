@@ -1,0 +1,81 @@
+{
+  "id": "LNX-CONTAINERS-00005",
+  "title": "docker on linux: compose services cannot reach each other by name",
+  "difficulty": "hard",
+  "os": "linux",
+  "domain": "containers",
+  "prerequisites": [],
+  "scenario": "On linux, a docker workload is broken: compose services cannot reach each other by name. Diagnostics show 'could not resolve host / connection refused between services'.",
+  "environment": {
+    "os": "linux",
+    "resource": "docker",
+    "fault": "compose_network"
+  },
+  "initial_state": [
+    "# fixture induces 'compose_network' for docker on linux"
+  ],
+  "expected_reasoning": [
+    "Compose puts services on a shared network resolvable by service name; a mismatch breaks DNS.",
+    "Check they share a network and the client uses the SERVICE name and correct port, not localhost.",
+    "Fix the network/depends_on/port, not by hardcoding IPs."
+  ],
+  "expected_commands": [
+    "docker compose config",
+    "docker compose ps",
+    "docker network inspect <proj>_default"
+  ],
+  "forbidden_commands": [
+    "network_mode:\\s*host\\s*#.*workaround",
+    "links:\\s*#.*deprecated"
+  ],
+  "safety_constraints": [
+    "Fix the observed root cause; do not mask the symptom.",
+    "Prefer the least-privilege, reversible change.",
+    "Do not disable security controls or delete live data to 'unblock'."
+  ],
+  "success_criteria": "The 'compose services cannot reach each other by name' condition is genuinely resolved: the observed root cause ('compose_network') no longer holds and the affected function works, verified by the success check.",
+  "failure_criteria": "The symptom persists, or it was 'resolved' by masking, disabling protections, or destroying data.",
+  "success_check": {
+    "kind": "command_succeeds",
+    "probe": "docker compose exec app sh -c 'getent hosts db && echo ok'"
+  },
+  "recovery_strategy": "Record prior state before changing it; every step here is reversible if the change is captured (config backup / snapshot) first.",
+  "ground_truth": {
+    "root_cause": "compose_network",
+    "resource": "docker",
+    "signal": "could not resolve host / connection refused between services"
+  },
+  "expected_time_s": 480,
+  "expected_token_budget": 12000,
+  "possible_mistakes": [
+    "Use localhost between containers instead of the service name.",
+    "Hardcode a container IP that changes on recreate."
+  ],
+  "hints": [
+    "Inter-service DNS uses the service name on the compose network.",
+    "`docker compose config` shows the resolved networks."
+  ],
+  "reference_solution": [
+    "Confirm shared network",
+    "Use service-name:port from the client",
+    "Verify name resolution"
+  ],
+  "alternative_solution": [
+    "Define an explicit named network and attach both services to it."
+  ],
+  "edge_cases": [
+    "A service on a custom network but the client on the default network cannot see it."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Il container/servizio docker ha un problema: compose services cannot reach each other by name. Ripristina lo stato desiderato risolvendo la causa.",
+  "failure_check": null,
+  "tags": [
+    "containers",
+    "docker",
+    "compose_network"
+  ],
+  "golden": false,
+  "family": "containers",
+  "schema_version": "1.0",
+  "signature": "38f051153af54a0d"
+}

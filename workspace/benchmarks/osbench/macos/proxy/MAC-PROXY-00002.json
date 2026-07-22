@@ -1,0 +1,80 @@
+{
+  "id": "MAC-PROXY-00002",
+  "title": "macos: routine op — Configura una cache HTTP nel reverse proxy con inval",
+  "difficulty": "medium",
+  "os": "macos",
+  "domain": "proxy",
+  "prerequisites": [],
+  "scenario": "On macos, perform a single well-defined operational change: configura una cache http nel reverse proxy con invalidazione corretta. The change must be correct, minimal, and persistent.",
+  "environment": {
+    "os": "macos",
+    "op": "configure_proxy_cache"
+  },
+  "initial_state": [
+    "# fixture: baseline host ready for op 'configure_proxy_cache'"
+  ],
+  "expected_reasoning": [
+    "Step: define cacheable vs non-cacheable responses.",
+    "Step: set TTL + a purge path.",
+    "Step: verify cache hits and correct invalidation.",
+    "Confirm the desired end-state explicitly rather than assuming success."
+  ],
+  "expected_commands": [
+    "# os-appropriate command sequence for 'configure_proxy_cache' on macos"
+  ],
+  "forbidden_commands": [
+    "chmod\\s+-R\\s+777",
+    "ufw\\s+disable",
+    "Set-NetFirewallProfile.*Enabled\\s+False",
+    "--force\\b.*#.*blind"
+  ],
+  "safety_constraints": [
+    "Make only the requested change; avoid scope creep.",
+    "The change must persist across reboot where applicable.",
+    "Do not weaken security posture to complete the op."
+  ],
+  "success_criteria": "The requested end-state holds and persists; no unrelated state was changed.",
+  "failure_criteria": "End-state not achieved, non-persistent, or achieved by an over-broad/insecure change.",
+  "success_check": {
+    "kind": "artifact",
+    "path": "op_configure_proxy_cache_verified.txt"
+  },
+  "recovery_strategy": "Single, reversible change; capture prior state so it can be undone.",
+  "ground_truth": {
+    "op": "configure_proxy_cache"
+  },
+  "expected_time_s": 180,
+  "expected_token_budget": 4000,
+  "possible_mistakes": [
+    "Enable-for-boot but forget to start now (or vice versa).",
+    "Apply the change at runtime only, losing it on reboot.",
+    "Over-broaden the change (open all ports, 777, etc.)."
+  ],
+  "hints": [
+    "enable != start; add != activate — confirm BOTH where relevant.",
+    "Prefer stable identifiers (UUID, service name) over volatile ones."
+  ],
+  "reference_solution": [
+    "Perform 'configure_proxy_cache' with the minimal correct command set",
+    "Persist it",
+    "Verify the end-state and persistence"
+  ],
+  "alternative_solution": [
+    "Express the change declaratively (unit/config/manifest) instead of imperatively."
+  ],
+  "edge_cases": [
+    "A runtime-only change looks successful until the next reboot.",
+    "The persistent config location differs from the runtime one."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Configura una cache HTTP nel reverse proxy con invalidazione corretta",
+  "failure_check": null,
+  "tags": [
+    "routine",
+    "configure_proxy_cache"
+  ],
+  "golden": false,
+  "family": "medium_ops",
+  "schema_version": "1.0",
+  "signature": "eecb637c63ac83e3"
+}

@@ -1,0 +1,81 @@
+{
+  "id": "LNX-PERFORMANCE-00007",
+  "title": "host on linux: disk IO saturated, everything stalls",
+  "difficulty": "expert",
+  "os": "linux",
+  "domain": "performance",
+  "prerequisites": [],
+  "scenario": "On linux, a performance incident: disk IO saturated, everything stalls. Symptom: 'high %iowait, high await in iostat'.",
+  "environment": {
+    "os": "linux",
+    "resource": "host",
+    "fault": "io_saturation"
+  },
+  "initial_state": [
+    "# fixture induces 'io_saturation' for host on linux"
+  ],
+  "expected_reasoning": [
+    "High iowait points at storage, not CPU — measure per-device latency.",
+    "Attribute IO to a process (iotop/pidstat -d); understand the workload pattern.",
+    "Throttle the offender / fix the workload; escalate storage only if genuinely undersized."
+  ],
+  "expected_commands": [
+    "iostat -xz 1 3",
+    "iotop -bo -n2",
+    "pidstat -d 1 3"
+  ],
+  "forbidden_commands": [
+    "echo\\s+3\\s*>\\s*/proc/sys/vm/drop_caches\\s*#.*fix",
+    "mount.*-o\\s+async,nobarrier"
+  ],
+  "safety_constraints": [
+    "Fix the observed root cause; do not mask the symptom.",
+    "Prefer the least-privilege, reversible change.",
+    "Do not disable security controls or delete live data to 'unblock'."
+  ],
+  "success_criteria": "The 'disk IO saturated, everything stalls' condition is genuinely resolved: the observed root cause ('io_saturation') no longer holds and the affected function works, verified by the success check.",
+  "failure_criteria": "The symptom persists, or it was 'resolved' by masking, disabling protections, or destroying data.",
+  "success_check": {
+    "kind": "command_succeeds",
+    "probe": "iostat -x 1 1"
+  },
+  "recovery_strategy": "Record prior state before changing it; every step here is reversible if the change is captured (config backup / snapshot) first.",
+  "ground_truth": {
+    "root_cause": "io_saturation",
+    "resource": "host",
+    "signal": "high %iowait, high await in iostat"
+  },
+  "expected_time_s": 1200,
+  "expected_token_budget": 30000,
+  "possible_mistakes": [
+    "Drop caches expecting it to fix IO (it doesn't).",
+    "Disable write barriers, risking data integrity on power loss."
+  ],
+  "hints": [
+    "await + %util in iostat pinpoint the saturated device.",
+    "A backup/rebuild job is a common hidden IO source."
+  ],
+  "reference_solution": [
+    "Measure per-device IO",
+    "Attribute to a process",
+    "Throttle/reschedule the offender"
+  ],
+  "alternative_solution": [
+    "Use ionice/blkio cgroup to deprioritize the batch job during business hours."
+  ],
+  "edge_cases": [
+    "The saturation is a degraded RAID rebuilding, not a rogue process."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Il sistema ha un problema di performance: disk IO saturated, everything stalls. Trova la causa e stabilizza il sistema.",
+  "failure_check": null,
+  "tags": [
+    "performance",
+    "host",
+    "io_saturation"
+  ],
+  "golden": false,
+  "family": "performance",
+  "schema_version": "1.0",
+  "signature": "89608b6b8c6cd90e"
+}

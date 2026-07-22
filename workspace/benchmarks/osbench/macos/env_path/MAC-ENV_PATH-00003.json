@@ -1,0 +1,82 @@
+{
+  "id": "MAC-ENV_PATH-00003",
+  "title": "shell-env on macos: the wrong binary wins because of PATH order",
+  "difficulty": "medium",
+  "os": "macos",
+  "domain": "env_path",
+  "prerequisites": [],
+  "scenario": "On macos, an environment/PATH problem: the wrong binary wins because of PATH order. Symptom: '`which` resolves to an unexpected path'.",
+  "environment": {
+    "os": "macos",
+    "resource": "shell-env",
+    "fault": "path_order"
+  },
+  "initial_state": [
+    "# fixture induces 'path_order' for shell-env on macos"
+  ],
+  "expected_reasoning": [
+    "`command not found' or wrong version is a PATH ordering/shadowing problem.",
+    "Inspect the effective PATH and where the intended binary lives; find the shadowing entry.",
+    "Fix the order deterministically in the right rc/profile for the shell in use."
+  ],
+  "expected_commands": [
+    "which -a <bin>",
+    "echo $PATH | tr ':' '\\n'",
+    "type -a <bin>"
+  ],
+  "forbidden_commands": [
+    "export\\s+PATH=/usr/bin\\s*#.*nuke",
+    ">\\s*~/.bashrc"
+  ],
+  "safety_constraints": [
+    "Fix the observed root cause; do not mask the symptom.",
+    "Prefer the least-privilege, reversible change.",
+    "Do not disable security controls or delete live data to 'unblock'."
+  ],
+  "success_criteria": "The 'the wrong binary wins because of PATH order' condition is genuinely resolved: the observed root cause ('path_order') no longer holds and the affected function works, verified by the success check.",
+  "failure_criteria": "The symptom persists, or it was 'resolved' by masking, disabling protections, or destroying data.",
+  "success_check": {
+    "kind": "command_stdout",
+    "pattern": "/",
+    "probe": "which <bin>"
+  },
+  "recovery_strategy": "Record prior state before changing it; every step here is reversible if the change is captured (config backup / snapshot) first.",
+  "ground_truth": {
+    "root_cause": "path_order",
+    "resource": "shell-env",
+    "signal": "`which` resolves to an unexpected path"
+  },
+  "expected_time_s": 180,
+  "expected_token_budget": 4000,
+  "possible_mistakes": [
+    "Overwrite PATH entirely, losing needed entries.",
+    "Edit .bashrc for a zsh login shell (wrong rc file)."
+  ],
+  "hints": [
+    "`which -a` lists ALL matches in order — the first wins.",
+    "Login vs interactive shells read different rc files."
+  ],
+  "reference_solution": [
+    "List all matches + PATH",
+    "Reorder in the correct rc file",
+    "Open a fresh shell and verify"
+  ],
+  "alternative_solution": [
+    "Use a version manager's shim directory placed first on PATH instead of hand-editing."
+  ],
+  "edge_cases": [
+    "A per-directory .envrc (direnv) overrides PATH only inside that tree."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Problema di ambiente/PATH: the wrong binary wins because of PATH order. Ripristina un ambiente shell corretto.",
+  "failure_check": null,
+  "tags": [
+    "env_path",
+    "shell-env",
+    "path_order"
+  ],
+  "golden": false,
+  "family": "env_path",
+  "schema_version": "1.0",
+  "signature": "12657ec76ebdeebd"
+}

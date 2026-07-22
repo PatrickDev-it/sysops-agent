@@ -1,0 +1,58 @@
+# Linux ENV / PATH manipulation
+
+- id: linux_export_path_session
+  platform: linux
+  shell: [bash, zsh, sh]
+  intent: [add_to_path, path_session]
+  command: export PATH="$PATH:$NEW_DIR"
+  vars: [NEW_DIR]
+  notes: Session-only. Does not survive shell restart.
+  confidence: 0.99
+  forbidden_shells: [powershell, pwsh, cmd, fish]
+
+- id: linux_bashrc_path_permanent
+  platform: linux
+  shell: [bash]
+  intent: [add_to_path, path_permanent]
+  command: 'echo ''export PATH="$PATH:$NEW_DIR"'' >> ~/.bashrc && source ~/.bashrc'
+  vars: [NEW_DIR]
+  notes: Appends to ~/.bashrc. Works for bash-only sessions.
+  confidence: 0.92
+  forbidden_shells: [powershell, pwsh, cmd, zsh, fish]
+
+- id: linux_zshrc_path_permanent
+  platform: linux
+  shell: [zsh]
+  intent: [add_to_path, path_permanent]
+  command: 'echo ''export PATH="$PATH:$NEW_DIR"'' >> ~/.zshrc && source ~/.zshrc'
+  vars: [NEW_DIR]
+  confidence: 0.92
+  forbidden_shells: [powershell, pwsh, cmd, bash, fish]
+
+- id: linux_profile_path_permanent
+  platform: linux
+  shell: [bash, zsh, sh]
+  intent: [add_to_path, path_permanent, env_var_path]
+  command: 'echo ''export PATH="$PATH:$NEW_DIR"'' >> ~/.profile'
+  vars: [NEW_DIR]
+  notes: Applies to login shells of any POSIX shell. Requires new login to take effect.
+  confidence: 0.88
+  forbidden_shells: [powershell, pwsh, cmd, fish]
+
+- id: linux_read_env_var
+  platform: linux
+  shell: [bash, zsh, sh]
+  intent: [read_env_var]
+  command: echo $VAR_NAME
+  vars: [VAR_NAME]
+  confidence: 0.99
+  forbidden_shells: [powershell, pwsh, cmd]
+
+- id: linux_set_env_var_session
+  platform: linux
+  shell: [bash, zsh, sh]
+  intent: [set_env_var]
+  command: export $VAR_NAME="$VAR_VALUE"
+  vars: [VAR_NAME, VAR_VALUE]
+  confidence: 0.99
+  forbidden_shells: [powershell, pwsh, cmd]

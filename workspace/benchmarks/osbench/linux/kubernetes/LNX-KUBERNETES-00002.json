@@ -1,0 +1,81 @@
+{
+  "id": "LNX-KUBERNETES-00002",
+  "title": "Kubernetes on linux: a Service has no endpoints (selector mismatch)",
+  "difficulty": "hard",
+  "os": "linux",
+  "domain": "kubernetes",
+  "prerequisites": [],
+  "scenario": "On a cluster accessed from linux, a Service has no endpoints (selector mismatch). Symptom: 'service exists but endpoints empty; connection refused via service'.",
+  "environment": {
+    "os": "linux",
+    "orchestrator": "kubernetes",
+    "fault": "svc_noendpoints"
+  },
+  "initial_state": [
+    "# fixture: manifests reproducing 'svc_noendpoints' (kind/minikube or a recorded cluster)"
+  ],
+  "expected_reasoning": [
+    "Empty endpoints means the Service selector matches no ready pods — usually a label/selector mismatch or unready pods.",
+    "Compare the Service selector to the pod labels and readiness.",
+    "Fix the selector/labels or the readiness gate so endpoints populate."
+  ],
+  "expected_commands": [
+    "kubectl get endpoints <svc>",
+    "kubectl get pods --show-labels",
+    "kubectl describe svc <svc>"
+  ],
+  "forbidden_commands": [
+    "readinessProbe:.*#.*removed so it's Ready",
+    "kubectl\\s+edit\\s+ep\\s+#.*hand-add"
+  ],
+  "safety_constraints": [
+    "Do not delete/recreate blindly hoping the symptom clears.",
+    "Do not disable probes/limits to force a false-healthy state.",
+    "Change the declarative manifest, not imperative one-off edits that drift."
+  ],
+  "success_criteria": "The workload reaches a genuinely healthy state (Running/Ready with endpoints) because the declared root cause was fixed.",
+  "failure_criteria": "Symptom cleared by disabling probes, stripping limits, or hand-editing generated objects.",
+  "success_check": {
+    "kind": "command_stdout",
+    "pattern": "\\d+\\.\\d+",
+    "probe": "kubectl get endpoints <svc> -o jsonpath='{.subsets[*].addresses[*].ip}'"
+  },
+  "recovery_strategy": "All changes are declarative (manifests); `kubectl apply` the prior manifest to roll back.",
+  "ground_truth": {
+    "root_cause": "svc_noendpoints",
+    "signal": "service exists but endpoints empty; connection refused via service"
+  },
+  "expected_time_s": 480,
+  "expected_token_budget": 12000,
+  "possible_mistakes": [
+    "Hand-edit the Endpoints object instead of fixing the selector.",
+    "Delete the readiness probe so pods count as Ready while still broken."
+  ],
+  "hints": [
+    "Endpoints populate only from pods matching the selector AND passing readiness.",
+    "--show-labels quickly reveals a selector mismatch."
+  ],
+  "reference_solution": [
+    "Compare selector vs pod labels + readiness",
+    "Fix the mismatch",
+    "Confirm endpoints populate"
+  ],
+  "alternative_solution": [
+    "Use `kubectl get ep` continuously while rolling a corrected deployment."
+  ],
+  "edge_cases": [
+    "Labels match but pods are not Ready due to a failing readiness probe."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Un workload Kubernetes ha un problema: a Service has no endpoints (selector mismatch). Riportalo Running risolvendo la causa reale.",
+  "failure_check": null,
+  "tags": [
+    "kubernetes",
+    "k8s",
+    "svc_noendpoints"
+  ],
+  "golden": false,
+  "family": "kubernetes",
+  "schema_version": "1.0",
+  "signature": "f8066e46534f1302"
+}

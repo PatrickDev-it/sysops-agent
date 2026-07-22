@@ -1,0 +1,81 @@
+{
+  "id": "MAC-ENV_PATH-00004",
+  "title": "shell-env on macos: a syntax error in a shell rc breaks every new shell",
+  "difficulty": "hard",
+  "os": "macos",
+  "domain": "env_path",
+  "prerequisites": [],
+  "scenario": "On macos, an environment/PATH problem: a syntax error in a shell rc breaks every new shell. Symptom: 'login shell errors / commands unavailable in new terminals'.",
+  "environment": {
+    "os": "macos",
+    "resource": "shell-env",
+    "fault": "broken_profile"
+  },
+  "initial_state": [
+    "# fixture induces 'broken_profile' for shell-env on macos"
+  ],
+  "expected_reasoning": [
+    "A bad line in an rc file runs on every shell start, breaking the environment globally for the user.",
+    "Start a shell that skips rc files to regain a working prompt, then locate the offending line.",
+    "Fix the single line; validate by opening a clean shell."
+  ],
+  "expected_commands": [
+    "bash --noprofile --norc",
+    "bash -n ~/.bashrc",
+    "tail -n 20 ~/.bashrc"
+  ],
+  "forbidden_commands": [
+    "rm\\s+~/.bashrc\\s*#.*nuke",
+    ">\\s*~/.zshrc"
+  ],
+  "safety_constraints": [
+    "Fix the observed root cause; do not mask the symptom.",
+    "Prefer the least-privilege, reversible change.",
+    "Do not disable security controls or delete live data to 'unblock'."
+  ],
+  "success_criteria": "The 'a syntax error in a shell rc breaks every new shell' condition is genuinely resolved: the observed root cause ('broken_profile') no longer holds and the affected function works, verified by the success check.",
+  "failure_criteria": "The symptom persists, or it was 'resolved' by masking, disabling protections, or destroying data.",
+  "success_check": {
+    "kind": "command_succeeds",
+    "probe": "bash -n ~/.bashrc && echo ok"
+  },
+  "recovery_strategy": "Record prior state before changing it; every step here is reversible if the change is captured (config backup / snapshot) first.",
+  "ground_truth": {
+    "root_cause": "broken_profile",
+    "resource": "shell-env",
+    "signal": "login shell errors / commands unavailable in new terminals"
+  },
+  "expected_time_s": 480,
+  "expected_token_budget": 12000,
+  "possible_mistakes": [
+    "Delete the whole rc file, losing real configuration.",
+    "Edit rc from inside a shell that itself fails to start."
+  ],
+  "hints": [
+    "`bash -n` syntax-checks without executing.",
+    "--norc gives you a clean shell to do the repair."
+  ],
+  "reference_solution": [
+    "Get a clean shell (--norc)",
+    "Syntax-check + fix the offending line",
+    "Open a fresh login shell to verify"
+  ],
+  "alternative_solution": [
+    "Bisect the rc by sourcing halves until the failing block is isolated."
+  ],
+  "edge_cases": [
+    "The error is in a file the rc sources, not the rc itself."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Problema di ambiente/PATH: a syntax error in a shell rc breaks every new shell. Ripristina un ambiente shell corretto.",
+  "failure_check": null,
+  "tags": [
+    "env_path",
+    "shell-env",
+    "broken_profile"
+  ],
+  "golden": false,
+  "family": "env_path",
+  "schema_version": "1.0",
+  "signature": "aa2b8621125f9724"
+}

@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "sinapsi": {
+      "args": [
+        "serve",
+        ".sinapsi/graph.json"
+      ],
+      "command": "sinapsi"
+    }
+  }
+}

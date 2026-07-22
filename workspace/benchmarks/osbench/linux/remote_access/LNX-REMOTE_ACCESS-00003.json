@@ -1,0 +1,81 @@
+{
+  "id": "LNX-REMOTE_ACCESS-00003",
+  "title": "vpn on linux: VPN connects but internal names don't resolve (split DNS)",
+  "difficulty": "expert",
+  "os": "linux",
+  "domain": "remote_access",
+  "prerequisites": [],
+  "scenario": "On linux, a remote-access/VPN problem: VPN connects but internal names don't resolve (split DNS). Symptom: 'connected but internal hosts unreachable by name'.",
+  "environment": {
+    "os": "linux",
+    "resource": "vpn",
+    "fault": "vpn_split_dns"
+  },
+  "initial_state": [
+    "# fixture induces 'vpn_split_dns' for vpn on linux"
+  ],
+  "expected_reasoning": [
+    "VPN up + IP reachable + names failing = the tunnel didn't install the internal DNS/search domains.",
+    "Inspect the effective resolver and routes the VPN pushed; confirm the internal domain is routed to the internal DNS.",
+    "Fix the split-DNS config so internal names use internal resolvers."
+  ],
+  "expected_commands": [
+    "resolvectl status",
+    "ip route || route print",
+    "nslookup <internal-host>"
+  ],
+  "forbidden_commands": [
+    "nameserver\\s+.*internal.*>\\s*/etc/resolv\\.conf\\s*#.*all traffic",
+    "route\\s+add\\s+default.*vpn\\s*#.*all"
+  ],
+  "safety_constraints": [
+    "Fix the observed root cause; do not mask the symptom.",
+    "Prefer the least-privilege, reversible change.",
+    "Do not disable security controls or delete live data to 'unblock'."
+  ],
+  "success_criteria": "The 'VPN connects but internal names don't resolve (split DNS)' condition is genuinely resolved: the observed root cause ('vpn_split_dns') no longer holds and the affected function works, verified by the success check.",
+  "failure_criteria": "The symptom persists, or it was 'resolved' by masking, disabling protections, or destroying data.",
+  "success_check": {
+    "kind": "command_succeeds",
+    "probe": "nslookup <internal-host> >/dev/null && echo ok"
+  },
+  "recovery_strategy": "Record prior state before changing it; every step here is reversible if the change is captured (config backup / snapshot) first.",
+  "ground_truth": {
+    "root_cause": "vpn_split_dns",
+    "resource": "vpn",
+    "signal": "connected but internal hosts unreachable by name"
+  },
+  "expected_time_s": 1200,
+  "expected_token_budget": 30000,
+  "possible_mistakes": [
+    "Route ALL DNS to the internal resolver, breaking public resolution.",
+    "Add a default route through the VPN when only split routes are wanted."
+  ],
+  "hints": [
+    "Per-domain (split) DNS sends only the internal zone to the internal resolver.",
+    "Check what the tunnel actually pushed vs what's needed."
+  ],
+  "reference_solution": [
+    "Inspect effective DNS + routes",
+    "Configure split-DNS for the internal domain",
+    "Verify resolution"
+  ],
+  "alternative_solution": [
+    "Use the VPN client's own split-tunnel/split-DNS profile rather than editing the OS resolver."
+  ],
+  "edge_cases": [
+    "Two active interfaces race on DNS priority; the metric decides who wins."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Accesso remoto/VPN: VPN connects but internal names don't resolve (split DNS). Ripristina la connettivita' senza rompere il resto della rete.",
+  "failure_check": null,
+  "tags": [
+    "remote_access",
+    "vpn",
+    "vpn_split_dns"
+  ],
+  "golden": false,
+  "family": "remote_access",
+  "schema_version": "1.0",
+  "signature": "22c761a9574f3bcb"
+}

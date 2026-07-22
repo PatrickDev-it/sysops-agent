@@ -1,0 +1,37 @@
+# Runtime state — written per run, disposable. Never source.
+workspace/var/
+
+# External artifacts and throwaway trees. Large/platform-specific binaries and weights stay out,
+# but their bootstrap README (what to fetch, where to put it) is source and must be tracked.
+workspace/models/*
+!workspace/models/README.md
+workspace/bin/*
+!workspace/bin/README.md
+workspace/_sandbox/
+workspace/_attic/
+
+# Scaffolded stress fixtures: 75k+ regenerable files (node_modules of remix/angular/nextjs
+# scaffolds). They are state, not source. Tracking them would bloat every clone; and since
+# Sinapsi reads this file, listing them here also stops their layout.tsx/root.tsx from
+# hijacking the retrieval ranker on generic words ("layout", "root", "app").
+workspace/validation/stress/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage.json
+
+# Packaging build artifacts (setuptools writes ./build/ and *.egg-info at build time).
+build/
+*.egg-info/
+
+.sinapsi/graph.json
+.sinapsi/.watcher
+.sinapsi/orchestration.jsonl
+.sinapsi/journal
+.sinapsi/index.scip
+.sinapsi/scip-python-windows-shim.cjs

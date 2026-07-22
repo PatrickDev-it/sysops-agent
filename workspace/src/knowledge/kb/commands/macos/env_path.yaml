@@ -1,0 +1,30 @@
+# macOS ENV / PATH manipulation
+
+- id: macos_zshrc_path_permanent
+  platform: darwin
+  shell: [zsh]
+  intent: [add_to_path, path_permanent]
+  command: 'echo ''export PATH="$PATH:$NEW_DIR"'' >> ~/.zshrc && source ~/.zshrc'
+  vars: [NEW_DIR]
+  notes: macOS default shell since Catalina is zsh.
+  confidence: 0.94
+  forbidden_shells: [powershell, pwsh, cmd, bash, fish]
+
+- id: macos_bash_profile_path_permanent
+  platform: darwin
+  shell: [bash]
+  intent: [add_to_path, path_permanent]
+  command: 'echo ''export PATH="$PATH:$NEW_DIR"'' >> ~/.bash_profile && source ~/.bash_profile'
+  vars: [NEW_DIR]
+  notes: Use ~/.bash_profile on macOS, not ~/.bashrc, for login shells.
+  confidence: 0.90
+  forbidden_shells: [powershell, pwsh, cmd, zsh, fish]
+
+- id: macos_export_path_session
+  platform: darwin
+  shell: [bash, zsh, sh]
+  intent: [add_to_path, path_session]
+  command: export PATH="$PATH:$NEW_DIR"
+  vars: [NEW_DIR]
+  confidence: 0.99
+  forbidden_shells: [powershell, pwsh, cmd, fish]

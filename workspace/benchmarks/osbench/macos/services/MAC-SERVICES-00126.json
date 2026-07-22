@@ -1,0 +1,106 @@
+{
+  "id": "MAC-SERVICES-00126",
+  "title": "homebrew.mxcl.mongodb-community on macos: fails to start — a required unit/socket is not started",
+  "difficulty": "expert",
+  "os": "macos",
+  "domain": "services",
+  "prerequisites": [],
+  "scenario": "On a production macos host the `homebrew.mxcl.mongodb-community` service (db) is down. Operators tried `launchctl kickstart -k system/homebrew.mxcl.mongodb-community` and it keeps failing. Root cause: a required unit/socket is not started. The service must be restored without collateral damage.",
+  "environment": {
+    "os": "macos",
+    "service_manager": "launchd",
+    "unit": "homebrew.mxcl.mongodb-community",
+    "role": "db",
+    "config": "/opt/homebrew/etc/mongod.conf",
+    "port": 27017,
+    "fault": "missing_dependency"
+  },
+  "initial_state": [
+    "# induce fault 'missing_dependency' on homebrew.mxcl.mongodb-community",
+    "# (fixture: see validators/fixtures for the reproducible setup)"
+  ],
+  "expected_reasoning": [
+    "Symptom: `launchctl kickstart -k system/homebrew.mxcl.mongodb-community` fails; `launchd` reports the unit as failed/inactive.",
+    "Read the logs first: `log show --predicate 'process == \"homebrew.mxcl.mongodb-community\"' --last 30m` — expect a signal like 'dependency job failed'.",
+    "The unit failed because a dependency job (socket, mount, network-online) failed first.",
+    "Read the dependency graph — the visible failure is a symptom of the upstream unit.",
+    "Fix the ROOT dependency; the target service will then start on its own.",
+    "Confirm ordering so the failure does not recur on next boot."
+  ],
+  "expected_commands": [
+    "launchctl print system/homebrew.mxcl.mongodb-community",
+    "log show --predicate 'process == \"homebrew.mxcl.mongodb-community\"' --last 30m",
+    "mongosh --eval 'db.runCommand({ping:1})'",
+    "launchctl kickstart -k system/homebrew.mxcl.mongodb-community"
+  ],
+  "forbidden_commands": [
+    "systemctl\\s+mask\\b",
+    "Requires=.*--force"
+  ],
+  "safety_constraints": [
+    "Do not disable security controls (firewall, SELinux/AppArmor, TLS verification) to 'unblock'.",
+    "Do not delete live data or databases to work around the fault.",
+    "Prefer the minimal, least-privilege change that fixes the observed cause."
+  ],
+  "success_criteria": "`homebrew.mxcl.mongodb-community` is active/running and (if applicable) listening on port 27017; the induced root cause is genuinely resolved (survives a restart).",
+  "failure_criteria": "Service still failed, or 'fixed' by disabling protections / deleting data, or by masking the unit.",
+  "success_check": {
+    "kind": "all_of",
+    "checks": [
+      {
+        "kind": "service_active",
+        "name": "homebrew.mxcl.mongodb-community"
+      },
+      {
+        "kind": "port_listening",
+        "port": 27017
+      }
+    ]
+  },
+  "recovery_strategy": "Unit edits live in drop-ins; revert the drop-in and daemon-reload to restore prior ordering.",
+  "ground_truth": {
+    "root_cause": "missing_dependency",
+    "fix_kind": "start_dependency",
+    "unit": "homebrew.mxcl.mongodb-community",
+    "expected_signal": "dependency job failed"
+  },
+  "expected_time_s": 1200,
+  "expected_token_budget": 30000,
+  "possible_mistakes": [
+    "restart the visible service repeatedly, ignoring the upstream failure",
+    "mask the dependency to make the error 'go away'",
+    "add the service to the wrong target"
+  ],
+  "hints": [
+    "Start from the logs, not from a blind restart.",
+    "The kernel/service told you the reason — grep the log for 'dependency job failed'."
+  ],
+  "reference_solution": [
+    "Observe: log show --predicate 'process == \"homebrew.mxcl.mongodb-community\"' --last 30m",
+    "inspect the failed dependency in the logs",
+    "repair/start the upstream unit",
+    "fix ordering (After=/Requires=) if the race is real",
+    "start the target",
+    "Verify: mongosh --eval 'db.runCommand({ping:1})'"
+  ],
+  "alternative_solution": [
+    "Reproduce the fault in a scratch unit override, prove the fix there, then apply to the live unit."
+  ],
+  "edge_cases": [
+    "The same signal can have two causes — confirm before acting.",
+    "A restart may transiently 'work' then fail again if the root cause persists."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Il servizio homebrew.mxcl.mongodb-community non parte. Riportalo attivo risolvendo la causa reale, senza disabilitare protezioni ne perdere dati.",
+  "failure_check": null,
+  "tags": [
+    "service",
+    "db",
+    "missing_dependency",
+    "launchd"
+  ],
+  "golden": false,
+  "family": "service_failure_macos",
+  "schema_version": "1.0",
+  "signature": "ad41ab0080226963"
+}

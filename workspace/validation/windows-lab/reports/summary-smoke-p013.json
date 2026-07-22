@@ -1,0 +1,17 @@
+{
+  "label": "smoke-p013",
+  "n_cases": 1,
+  "resolved": 1,
+  "arr": 1.0,
+  "ftfr": 0.0,
+  "raf": null,
+  "deviations": 1,
+  "failure_taxonomy": {
+    "UNKNOWN": 2,
+    "FILE_NOT_FOUND": 1,
+    "COMMAND_SYNTAX": 1
+  },
+  "deviation_ids": [
+    "WIN-DNS-00001"
+  ]
+}

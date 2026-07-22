@@ -1,0 +1,83 @@
+{
+  "id": "WIN-NETWORKING-00007",
+  "title": "windows: eliminate intermittent DNS timeouts under load (conntrack/UDP)",
+  "difficulty": "expert",
+  "os": "windows",
+  "domain": "networking",
+  "prerequisites": [],
+  "scenario": "On windows, an expert-level problem demanding deep causal reasoning: Sotto carico, alcune risoluzioni DNS vanno in timeout in modo intermittente. Individua la causa (conntrack/UDP/limiti) e stabilizza. Multiple plausible causes; only evidence separates them.",
+  "environment": {
+    "os": "windows",
+    "domain": "networking",
+    "task": "eliminate intermittent DNS timeouts under load (conntrack/UDP)",
+    "tier": "expert"
+  },
+  "initial_state": [
+    "# fixture: windows host prepared for 'eliminate intermittent DNS timeouts under load (conntrack/UDP)'"
+  ],
+  "expected_reasoning": [
+    "Intermittent DNS-under-load points at UDP/conntrack table limits or ephemeral-port/racy resolver behavior.",
+    "Check conntrack saturation, UDP drops, and the resolver's concurrency/retry behavior under load.",
+    "Fix the specific limit (conntrack size, single-request-reopen) and verify under load."
+  ],
+  "expected_commands": [
+    "# windows-appropriate deep-diagnosis + remediation for: eliminate intermittent DNS timeouts under load (conntrack/UDP)"
+  ],
+  "forbidden_commands": [
+    "reboot\\s*#.*to clear",
+    "restore.*over.*production.*#.*untested",
+    "--force\\b.*#.*blind",
+    "setenforce\\s+0",
+    "DisableRealtimeMonitoring"
+  ],
+  "safety_constraints": [
+    "Gather evidence before any irreversible action.",
+    "Preserve data/evidence; snapshot before destructive steps.",
+    "Fix the root cause and add a guardrail; never trade long-term integrity for a quick unblock."
+  ],
+  "success_criteria": "The expert problem 'eliminate intermittent DNS timeouts under load (conntrack/UDP)' is resolved at the root, verified with evidence, with data/integrity preserved.",
+  "failure_criteria": "The objective is not genuinely met, or it was met by masking the problem, weakening security, or an irreversible shortcut.",
+  "success_check": {
+    "kind": "artifact",
+    "path": "expert_networking_udp_resolved.txt"
+  },
+  "recovery_strategy": "Every irreversible action sits behind a captured rollback point (image/snapshot/backup).",
+  "ground_truth": {
+    "task": "eliminate intermittent DNS timeouts under load (conntrack/UDP)",
+    "tier": "expert"
+  },
+  "expected_time_s": 1200,
+  "expected_token_budget": 30000,
+  "possible_mistakes": [
+    "Blame the upstream DNS for a local conntrack overflow.",
+    "Raise timeouts to mask drops."
+  ],
+  "hints": [
+    "conntrack -S shows table drops.",
+    "The single-request-reopen resolver option fixes a classic UDP race."
+  ],
+  "reference_solution": [
+    "Check conntrack/UDP drops under load",
+    "Fix the limit / resolver option",
+    "Verify no timeouts under load"
+  ],
+  "alternative_solution": [
+    "Move hot lookups to a local caching resolver to cut UDP pressure."
+  ],
+  "edge_cases": [
+    "A specific glibc getaddrinfo A+AAAA race causes the intermittent 5s stalls."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Sotto carico, alcune risoluzioni DNS vanno in timeout in modo intermittente. Individua la causa (conntrack/UDP/limiti) e stabilizza.",
+  "failure_check": null,
+  "tags": [
+    "expert",
+    "dns",
+    "conntrack",
+    "udp"
+  ],
+  "golden": false,
+  "family": "expert_tasks",
+  "schema_version": "1.0",
+  "signature": "ecea5662e7cfadb8"
+}

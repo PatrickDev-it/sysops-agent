@@ -1,0 +1,82 @@
+{
+  "id": "WIN-REMOTE_ACCESS-00002",
+  "title": "windows: fix a bastion/jump-host chain that drops long sessions",
+  "difficulty": "hard",
+  "os": "windows",
+  "domain": "remote_access",
+  "prerequisites": [],
+  "scenario": "On windows, a hard operational problem: Le sessioni via bastion cadono dopo qualche minuto di inattivita'. Diagnostica keepalive/timeout lungo la catena e rendi le sessioni stabili. Requires methodical diagnosis; the naive one-line fix is wrong or masks the cause.",
+  "environment": {
+    "os": "windows",
+    "domain": "remote_access",
+    "task": "fix a bastion/jump-host chain that drops long sessions",
+    "tier": "hard"
+  },
+  "initial_state": [
+    "# fixture: windows host prepared for 'fix a bastion/jump-host chain that drops long sessions'"
+  ],
+  "expected_reasoning": [
+    "Idle-drop points at a keepalive/timeout somewhere in the chain (client, bastion, target, or a NAT).",
+    "Identify which hop times out (NAT idle, ClientAlive, firewall) via the drop pattern.",
+    "Set keepalives at the right layer; don't just crank one side."
+  ],
+  "expected_commands": [
+    "# windows-appropriate diagnostic + fix sequence for: fix a bastion/jump-host chain that drops long sessions"
+  ],
+  "forbidden_commands": [
+    "reboot\\s*#.*to clear",
+    "chmod\\s+-R\\s+777",
+    "--force\\b.*#.*blind",
+    "rm\\s+-rf\\s+/(\\s|$)"
+  ],
+  "safety_constraints": [
+    "Diagnose before acting; no blind reboots/kills.",
+    "Least-privilege, reversible change; capture prior state.",
+    "Do not mask the symptom or weaken security."
+  ],
+  "success_criteria": "The 'fix a bastion/jump-host chain that drops long sessions' problem is genuinely resolved (root cause fixed and verified), not masked.",
+  "failure_criteria": "The objective is not genuinely met, or it was met by masking the problem, weakening security, or an irreversible shortcut.",
+  "success_check": {
+    "kind": "artifact",
+    "path": "hard_remote_access_keepalive_resolved.txt"
+  },
+  "recovery_strategy": "Capture prior state before changing it; every step is reversible if recorded.",
+  "ground_truth": {
+    "task": "fix a bastion/jump-host chain that drops long sessions",
+    "tier": "hard"
+  },
+  "expected_time_s": 480,
+  "expected_token_budget": 12000,
+  "possible_mistakes": [
+    "Blame the target when a NAT idle timeout is the cause.",
+    "Set an aggressive keepalive that hides the real timeout."
+  ],
+  "hints": [
+    "The drop interval hints at which timeout fires.",
+    "ServerAlive/ClientAlive vs NAT idle are different layers."
+  ],
+  "reference_solution": [
+    "Identify the timing/hop of the drop",
+    "Set keepalive at the right layer",
+    "Verify a long idle session survives"
+  ],
+  "alternative_solution": [
+    "Use a session multiplexer (mosh/tmux) so a drop doesn't lose work."
+  ],
+  "edge_cases": [
+    "A corporate NAT with a short UDP/TCP idle is the hidden culprit."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Le sessioni via bastion cadono dopo qualche minuto di inattivita'. Diagnostica keepalive/timeout lungo la catena e rendi le sessioni stabili.",
+  "failure_check": null,
+  "tags": [
+    "hard",
+    "ssh",
+    "bastion",
+    "keepalive"
+  ],
+  "golden": false,
+  "family": "hard_tasks",
+  "schema_version": "1.0",
+  "signature": "b815a51d7ac96132"
+}

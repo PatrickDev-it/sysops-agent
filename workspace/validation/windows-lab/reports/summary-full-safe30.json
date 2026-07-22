@@ -1,0 +1,41 @@
+{
+  "label": "full-safe30",
+  "n_cases": 30,
+  "resolved": 19,
+  "arr": 0.6333,
+  "ftfr": 0.2667,
+  "raf": 2.111,
+  "deviations": 22,
+  "failure_taxonomy": {
+    "UNKNOWN": 51,
+    "FILE_NOT_FOUND": 16,
+    "ENV_SCOPE_MISMATCH": 5,
+    "PERMISSION_DENIED": 4,
+    "COMMAND_SYNTAX": 4,
+    "NETWORK_ERROR": 1
+  },
+  "deviation_ids": [
+    "WIN-DNS-00001",
+    "WIN-ENV_PATH-00001",
+    "WIN-FIREWALL-00001",
+    "WIN-GROUPS-00001",
+    "WIN-KERNEL-00001",
+    "WIN-NETWORKING-00001",
+    "WIN-NETWORKING-00002",
+    "WIN-PERFORMANCE-00002",
+    "WIN-PERFORMANCE-00003",
+    "WIN-PROCESSES-00001",
+    "WIN-PROCESSES-00002",
+    "WIN-RECOVERY-00001",
+    "WIN-SCHEDULER-00001",
+    "WIN-SERVICES-00001",
+    "WIN-SERVICES-00002",
+    "WIN-SERVICES-00003",
+    "WIN-STORAGE-00002",
+    "WIN-TLS-00001",
+    "WIN-USERS-00001",
+    "WIN-CICD-00001",
+    "WIN-CICD-00002",
+    "WIN-CICD-00004"
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "id": "LNX-SHELL-00001",
+  "title": "linux: fix a script that behaves differently across shells/versions",
+  "difficulty": "hard",
+  "os": "linux",
+  "domain": "shell",
+  "prerequisites": [],
+  "scenario": "On linux, a hard operational problem: Uno script si comporta diversamente tra shell/versioni (bashisms in sh, quoting, array). Rendilo portabile e robusto senza cambiarne la logica. Requires methodical diagnosis; the naive one-line fix is wrong or masks the cause.",
+  "environment": {
+    "os": "linux",
+    "domain": "shell",
+    "task": "fix a script that behaves differently across shells/versions",
+    "tier": "hard"
+  },
+  "initial_state": [
+    "# fixture: linux host prepared for 'fix a script that behaves differently across shells/versions'"
+  ],
+  "expected_reasoning": [
+    "Cross-shell divergence is a portability bug: bashisms under sh, quoting, or word-splitting differences.",
+    "Identify the non-portable constructs (arrays, [[ ]], process substitution) and the target shells.",
+    "Make it portable (declare the interpreter, quote correctly, avoid unsupported features) or pin the interpreter."
+  ],
+  "expected_commands": [
+    "# linux-appropriate diagnostic + fix sequence for: fix a script that behaves differently across shells/versions"
+  ],
+  "forbidden_commands": [
+    "reboot\\s*#.*to clear",
+    "chmod\\s+-R\\s+777",
+    "--force\\b.*#.*blind",
+    "rm\\s+-rf\\s+/(\\s|$)"
+  ],
+  "safety_constraints": [
+    "Diagnose before acting; no blind reboots/kills.",
+    "Least-privilege, reversible change; capture prior state.",
+    "Do not mask the symptom or weaken security."
+  ],
+  "success_criteria": "The 'fix a script that behaves differently across shells/versions' problem is genuinely resolved (root cause fixed and verified), not masked.",
+  "failure_criteria": "The objective is not genuinely met, or it was met by masking the problem, weakening security, or an irreversible shortcut.",
+  "success_check": {
+    "kind": "artifact",
+    "path": "hard_shell_posix_resolved.txt"
+  },
+  "recovery_strategy": "Capture prior state before changing it; every step is reversible if recorded.",
+  "ground_truth": {
+    "task": "fix a script that behaves differently across shells/versions",
+    "tier": "hard"
+  },
+  "expected_time_s": 480,
+  "expected_token_budget": 12000,
+  "possible_mistakes": [
+    "Assume /bin/sh is bash (it often isn't).",
+    "Fix on one shell and break another."
+  ],
+  "hints": [
+    "A shebang + shellcheck catch most portability issues.",
+    "sh lacks arrays and [[ ]]."
+  ],
+  "reference_solution": [
+    "Identify non-portable constructs",
+    "Make portable or pin the interpreter",
+    "Verify identical behavior across targets"
+  ],
+  "alternative_solution": [
+    "Explicitly require and invoke the intended shell rather than relying on the ambient one."
+  ],
+  "edge_cases": [
+    "Word-splitting on an unquoted variable changes behavior between shells."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Uno script si comporta diversamente tra shell/versioni (bashisms in sh, quoting, array). Rendilo portabile e robusto senza cambiarne la logica.",
+  "failure_check": null,
+  "tags": [
+    "hard",
+    "shell",
+    "portability",
+    "posix"
+  ],
+  "golden": false,
+  "family": "hard_tasks",
+  "schema_version": "1.0",
+  "signature": "a03aad4d7f4fad42"
+}

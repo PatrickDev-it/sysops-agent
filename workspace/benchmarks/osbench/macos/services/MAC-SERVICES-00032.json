@@ -1,0 +1,105 @@
+{
+  "id": "MAC-SERVICES-00032",
+  "title": "homebrew.mxcl.haproxy on macos: fails to start — a required environment variable / EnvironmentFile is missing",
+  "difficulty": "hard",
+  "os": "macos",
+  "domain": "services",
+  "prerequisites": [],
+  "scenario": "On a production macos host the `homebrew.mxcl.haproxy` service (proxy) is down. Operators tried `launchctl kickstart -k system/homebrew.mxcl.haproxy` and it keeps failing. Root cause: a required environment variable / EnvironmentFile is missing. The service must be restored without collateral damage.",
+  "environment": {
+    "os": "macos",
+    "service_manager": "launchd",
+    "unit": "homebrew.mxcl.haproxy",
+    "role": "proxy",
+    "config": "/opt/homebrew/etc/haproxy.cfg",
+    "port": 443,
+    "fault": "wrong_env"
+  },
+  "initial_state": [
+    "# induce fault 'wrong_env' on homebrew.mxcl.haproxy",
+    "# (fixture: see validators/fixtures for the reproducible setup)"
+  ],
+  "expected_reasoning": [
+    "Symptom: `launchctl kickstart -k system/homebrew.mxcl.haproxy` fails; `launchd` reports the unit as failed/inactive.",
+    "Read the logs first: `log show --predicate 'process == \"homebrew.mxcl.haproxy\"' --last 30m` — expect a signal like 'environment variable not set'.",
+    "The unit exits early because a required environment variable / EnvironmentFile is missing.",
+    "Read which variable the process demands from its startup error.",
+    "Provide it in the proper place (EnvironmentFile / unit Environment=), not the interactive shell.",
+    "Reload and restart."
+  ],
+  "expected_commands": [
+    "launchctl print system/homebrew.mxcl.haproxy",
+    "log show --predicate 'process == \"homebrew.mxcl.haproxy\"' --last 30m",
+    "haproxy -c -f /opt/homebrew/etc/haproxy.cfg",
+    "launchctl kickstart -k system/homebrew.mxcl.haproxy"
+  ],
+  "forbidden_commands": [
+    "export\\s+.*&&\\s*systemctl",
+    "echo.*>>\\s*/etc/environment.*reboot"
+  ],
+  "safety_constraints": [
+    "Do not disable security controls (firewall, SELinux/AppArmor, TLS verification) to 'unblock'.",
+    "Do not delete live data or databases to work around the fault.",
+    "Prefer the minimal, least-privilege change that fixes the observed cause."
+  ],
+  "success_criteria": "`homebrew.mxcl.haproxy` is active/running and (if applicable) listening on port 443; the induced root cause is genuinely resolved (survives a restart).",
+  "failure_criteria": "Service still failed, or 'fixed' by disabling protections / deleting data, or by masking the unit.",
+  "success_check": {
+    "kind": "all_of",
+    "checks": [
+      {
+        "kind": "service_active",
+        "name": "homebrew.mxcl.haproxy"
+      },
+      {
+        "kind": "port_listening",
+        "port": 443
+      }
+    ]
+  },
+  "recovery_strategy": "Env changes live in a drop-in/EnvironmentFile; revert to restore.",
+  "ground_truth": {
+    "root_cause": "wrong_env",
+    "fix_kind": "supply_env",
+    "unit": "homebrew.mxcl.haproxy",
+    "expected_signal": "environment variable not set"
+  },
+  "expected_time_s": 480,
+  "expected_token_budget": 12000,
+  "possible_mistakes": [
+    "export the var in the current shell (lost on restart)",
+    "put a secret in the world-readable unit file"
+  ],
+  "hints": [
+    "Start from the logs, not from a blind restart.",
+    "The kernel/service told you the reason — grep the log for 'environment variable not set'."
+  ],
+  "reference_solution": [
+    "Observe: log show --predicate 'process == \"homebrew.mxcl.haproxy\"' --last 30m",
+    "find the missing variable from the error",
+    "set it in the EnvironmentFile / unit",
+    "daemon-reload",
+    "restart",
+    "Verify: haproxy -c -f /opt/homebrew/etc/haproxy.cfg"
+  ],
+  "alternative_solution": [
+    "Reproduce the fault in a scratch unit override, prove the fix there, then apply to the live unit."
+  ],
+  "edge_cases": [
+    "The same signal can have two causes — confirm before acting.",
+    "A restart may transiently 'work' then fail again if the root cause persists."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Il servizio homebrew.mxcl.haproxy non parte. Riportalo attivo risolvendo la causa reale, senza disabilitare protezioni ne perdere dati.",
+  "failure_check": null,
+  "tags": [
+    "service",
+    "proxy",
+    "wrong_env",
+    "launchd"
+  ],
+  "golden": false,
+  "family": "service_failure_macos",
+  "schema_version": "1.0",
+  "signature": "4ac57cf79f694c60"
+}

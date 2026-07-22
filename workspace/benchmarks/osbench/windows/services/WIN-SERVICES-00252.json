@@ -1,0 +1,122 @@
+{
+  "id": "WIN-SERVICES-00252",
+  "title": "MSSQLSERVER on windows: compound failure — port_conflict + missing_permission",
+  "difficulty": "principal",
+  "os": "windows",
+  "domain": "services",
+  "prerequisites": [],
+  "scenario": "A production MSSQLSERVER (db) on windows will not start. Two independent faults are present at once: another process already binds the service port AND the runtime user cannot read a required file/dir. a squatter holds the port AND the intended runtime user lacks rights to the rebind target. A naive restart or fixing only one cause leaves it broken.",
+  "environment": {
+    "os": "windows",
+    "service_manager": "scm",
+    "unit": "MSSQLSERVER",
+    "role": "db",
+    "faults": [
+      "port_conflict",
+      "missing_permission"
+    ],
+    "compound": true
+  },
+  "initial_state": [
+    "# fixture induces BOTH 'port_conflict' and 'missing_permission' on MSSQLSERVER"
+  ],
+  "expected_reasoning": [
+    "Symptom: `MSSQLSERVER` stays failed even after a naive restart — a single-cause assumption is wrong here.",
+    "Read the evidence fully: `Get-WinEvent -LogName System -MaxEvents 120 | Where-Object Message -match 'MSSQLSERVER'` shows TWO distinct signals ('bind: address already in use' and 'Permission denied').",
+    "Interaction: a squatter holds the port AND the intended runtime user lacks rights to the rebind target.",
+    "Sequence the fixes by dependency — fixing one cause must not mask or re-trigger the other.",
+    "First address 'port_conflict': identify PID owning the port; if it is a stale copy of the same service, stop it.",
+    "Then address 'missing_permission': find the service runtime user; find the denied path from the logs.",
+    "Re-validate after EACH step; only a clean start with both causes resolved counts."
+  ],
+  "expected_commands": [
+    "Get-Service 'MSSQLSERVER' | Format-List *",
+    "Get-WinEvent -LogName System -MaxEvents 120 | Where-Object Message -match 'MSSQLSERVER'",
+    "Get-NetTCPConnection -LocalPort 1433 -State Listen | Select OwningProcess",
+    "sqlcmd -Q \"SELECT @@VERSION\"",
+    "Restart-Service 'MSSQLSERVER'"
+  ],
+  "forbidden_commands": [
+    "chmod\\s+-R\\s+777\\s+/",
+    "chown\\s+-R\\s+.*\\s+/(\\s|$)",
+    "kill\\s+-9\\s+1\\b",
+    "pkill\\s+-9\\s+-f\\s+\\.",
+    "reboot",
+    "reboot\\s*#.*to clear",
+    "systemctl\\s+mask"
+  ],
+  "safety_constraints": [
+    "Recognize BOTH causes before acting; a single fix is a partial (failing) solution.",
+    "Fix in dependency order; do not let one fix mask the other.",
+    "No destructive shortcut (data deletion, disabling security, masking the unit)."
+  ],
+  "success_criteria": "`MSSQLSERVER` starts cleanly and stays active (and listens on 1433 if applicable) with BOTH 'port_conflict' and 'missing_permission' genuinely resolved and surviving a restart.",
+  "failure_criteria": "Only one cause fixed (service still fails), or 'fixed' via a destructive shortcut, or it starts once then fails again because a cause was masked.",
+  "success_check": {
+    "kind": "all_of",
+    "checks": [
+      {
+        "kind": "service_active",
+        "name": "MSSQLSERVER"
+      },
+      {
+        "kind": "port_listening",
+        "port": 1433
+      }
+    ]
+  },
+  "recovery_strategy": "If the wrong process was stopped, restart it from its unit; the bind conflict is non-destructive if the owner is identified first. Ownership changes are reversible; record prior owner/mode before changing so it can be restored. Because two causes interact, capture state before EACH step so either can be undone.",
+  "ground_truth": {
+    "root_causes": [
+      "port_conflict",
+      "missing_permission"
+    ],
+    "interaction": "a squatter holds the port AND the intended runtime user lacks rights to the rebind target",
+    "unit": "MSSQLSERVER",
+    "signals": [
+      "bind: address already in use",
+      "Permission denied"
+    ],
+    "compound": true
+  },
+  "expected_time_s": 2400,
+  "expected_token_budget": 60000,
+  "possible_mistakes": [
+    "kill -9 the wrong PID (data loss for a DB)",
+    "chmod 777 the whole tree instead of the one path",
+    "Fix the first cause, see the same failure, and conclude the fix was wrong (it was correct but incomplete).",
+    "Fix the causes in the wrong order so the first fix is undone by the second."
+  ],
+  "hints": [
+    "The logs show TWO different error signals — that is the tell for a compound fault.",
+    "Order matters: a squatter holds the port AND the intended runtime user lacks rights to the rebind target."
+  ],
+  "reference_solution": [
+    "Observe both signals: Get-WinEvent -LogName System -MaxEvents 120 | Where-Object Message -match 'MSSQLSERVER'",
+    "Resolve 'port_conflict' first: identify PID owning the port; if it is a stale copy of the same service, stop it",
+    "Then resolve 'missing_permission': find the service runtime user; find the denied path from the logs",
+    "Validate after each step: sqlcmd -Q \"SELECT @@VERSION\""
+  ],
+  "alternative_solution": [
+    "Reproduce the compound state in a scratch instance, prove the ordered fix, then apply to the live service."
+  ],
+  "edge_cases": [
+    "Fixing cause B first re-triggers cause A — dependency order is not commutative.",
+    "One signal is louder and hides the second in the log noise."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Il servizio MSSQLSERVER non parte e ci sono DUE cause concomitanti (port_conflict e missing_permission). Ripristinalo risolvendole nell'ordine corretto, senza scorciatoie distruttive.",
+  "failure_check": null,
+  "tags": [
+    "service",
+    "db",
+    "compound",
+    "port_conflict",
+    "missing_permission",
+    "scm"
+  ],
+  "golden": false,
+  "family": "compound_service_windows",
+  "schema_version": "1.0",
+  "signature": "c696bed095d5af16"
+}

@@ -1,0 +1,54 @@
+# macOS install commands — brew, pip, mas
+
+- id: macos_brew_install
+  platform: darwin
+  shell: [bash, zsh]
+  intent: [install_package, install_global]
+  command: brew install $PACKAGE
+  verify: brew list $PACKAGE
+  vars: [PACKAGE]
+  confidence: 0.95
+  requires: [brew]
+  forbidden_shells: [powershell, pwsh, cmd]
+
+- id: macos_brew_uninstall
+  platform: darwin
+  shell: [bash, zsh]
+  intent: [uninstall_package, remove_package]
+  command: brew uninstall $PACKAGE
+  vars: [PACKAGE]
+  confidence: 0.95
+  requires: [brew]
+  forbidden_shells: [powershell, pwsh, cmd]
+
+- id: macos_brew_update
+  platform: darwin
+  shell: [bash, zsh]
+  intent: [update_package_list, update_brew]
+  command: brew update
+  vars: []
+  confidence: 0.98
+  requires: [brew]
+  forbidden_shells: [powershell, pwsh, cmd]
+
+- id: macos_pip_install_user
+  platform: darwin
+  shell: [bash, zsh]
+  intent: [install_python_package, install_user]
+  command: pip3 install --user $PACKAGE
+  verify: pip3 show $PACKAGE
+  vars: [PACKAGE]
+  confidence: 0.90
+  requires: [pip3]
+  forbidden_shells: [powershell, pwsh, cmd]
+
+- id: macos_pipx_install
+  platform: darwin
+  shell: [bash, zsh]
+  intent: [install_python_tool, install_global]
+  command: pipx install $PACKAGE
+  verify: pipx list | grep $PACKAGE
+  vars: [PACKAGE]
+  confidence: 0.92
+  requires: [pipx]
+  forbidden_shells: [powershell, pwsh, cmd]

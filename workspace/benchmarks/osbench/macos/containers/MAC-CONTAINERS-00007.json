@@ -1,0 +1,82 @@
+{
+  "id": "MAC-CONTAINERS-00007",
+  "title": "macos: shrink a bloated image and fix a broken layer cache",
+  "difficulty": "hard",
+  "os": "macos",
+  "domain": "containers",
+  "prerequisites": [],
+  "scenario": "On macos, a hard operational problem: Un'immagine container e' enorme e la cache dei layer non funziona, rallentando ogni build. Riduci la dimensione e ripristina la cache. Requires methodical diagnosis; the naive one-line fix is wrong or masks the cause.",
+  "environment": {
+    "os": "macos",
+    "domain": "containers",
+    "task": "shrink a bloated image and fix a broken layer cache",
+    "tier": "hard"
+  },
+  "initial_state": [
+    "# fixture: macos host prepared for 'shrink a bloated image and fix a broken layer cache'"
+  ],
+  "expected_reasoning": [
+    "Image bloat + cache misses come from build order and layer hygiene, not the base image alone.",
+    "Analyze layer sizes and cache invalidation points; reorder so stable layers precede volatile ones.",
+    "Use multi-stage / cleanup within a layer; verify size drop and cache hits."
+  ],
+  "expected_commands": [
+    "# macos-appropriate diagnostic + fix sequence for: shrink a bloated image and fix a broken layer cache"
+  ],
+  "forbidden_commands": [
+    "reboot\\s*#.*to clear",
+    "chmod\\s+-R\\s+777",
+    "--force\\b.*#.*blind",
+    "rm\\s+-rf\\s+/(\\s|$)"
+  ],
+  "safety_constraints": [
+    "Diagnose before acting; no blind reboots/kills.",
+    "Least-privilege, reversible change; capture prior state.",
+    "Do not mask the symptom or weaken security."
+  ],
+  "success_criteria": "The 'shrink a bloated image and fix a broken layer cache' problem is genuinely resolved (root cause fixed and verified), not masked.",
+  "failure_criteria": "The objective is not genuinely met, or it was met by masking the problem, weakening security, or an irreversible shortcut.",
+  "success_check": {
+    "kind": "artifact",
+    "path": "hard_containers_cache_resolved.txt"
+  },
+  "recovery_strategy": "Capture prior state before changing it; every step is reversible if recorded.",
+  "ground_truth": {
+    "task": "shrink a bloated image and fix a broken layer cache",
+    "tier": "hard"
+  },
+  "expected_time_s": 480,
+  "expected_token_budget": 12000,
+  "possible_mistakes": [
+    "Add a bigger disk instead of fixing the image.",
+    "Delete files in a later layer (space stays in the earlier one)."
+  ],
+  "hints": [
+    "A cleanup in a later layer doesn't shrink earlier layers.",
+    "Order Dockerfile so dependencies cache before code."
+  ],
+  "reference_solution": [
+    "Analyze layers + cache breaks",
+    "Reorder + multi-stage + in-layer cleanup",
+    "Verify size + cache hits"
+  ],
+  "alternative_solution": [
+    "Use a distroless/minimal base and copy only artifacts in."
+  ],
+  "edge_cases": [
+    "A secret baked into an early layer persists even if deleted later."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Un'immagine container e' enorme e la cache dei layer non funziona, rallentando ogni build. Riduci la dimensione e ripristina la cache.",
+  "failure_check": null,
+  "tags": [
+    "hard",
+    "containers",
+    "image",
+    "cache"
+  ],
+  "golden": false,
+  "family": "hard_tasks",
+  "schema_version": "1.0",
+  "signature": "84ca55048cc329a3"
+}

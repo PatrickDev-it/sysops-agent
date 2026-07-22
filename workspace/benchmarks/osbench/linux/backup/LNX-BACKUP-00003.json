@@ -1,0 +1,81 @@
+{
+  "id": "LNX-BACKUP-00003",
+  "title": "backup on linux: design + execute a disaster-recovery failover for a stateful service",
+  "difficulty": "principal",
+  "os": "linux",
+  "domain": "backup",
+  "prerequisites": [],
+  "scenario": "On linux, a backup/recovery task: design + execute a disaster-recovery failover for a stateful service. Context: 'primary lost; must fail over with bounded data loss'.",
+  "environment": {
+    "os": "linux",
+    "resource": "backup",
+    "fault": "dr_failover"
+  },
+  "initial_state": [
+    "# fixture induces 'dr_failover' for backup on linux"
+  ],
+  "expected_reasoning": [
+    "A DR failover is a sequence with a data-loss budget (RPO) and a time budget (RTO) — plan before acting.",
+    "Confirm replica health and lag, fence the dead primary, promote, and repoint clients atomically.",
+    "Validate correctness end-to-end and prevent split-brain before reopening traffic."
+  ],
+  "expected_commands": [
+    "<replica> lag/health check",
+    "<promote replica to primary>",
+    "<repoint clients / update service discovery>"
+  ],
+  "forbidden_commands": [
+    "promote.*without.*fence",
+    "repoint.*before.*promote.*verified"
+  ],
+  "safety_constraints": [
+    "Fix the observed root cause; do not mask the symptom.",
+    "Prefer the least-privilege, reversible change.",
+    "Do not disable security controls or delete live data to 'unblock'."
+  ],
+  "success_criteria": "The 'design + execute a disaster-recovery failover for a stateful service' condition is genuinely resolved: the observed root cause ('dr_failover') no longer holds and the affected function works, verified by the success check.",
+  "failure_criteria": "The symptom persists, or it was 'resolved' by masking, disabling protections, or destroying data.",
+  "success_check": {
+    "kind": "artifact",
+    "path": "failover_runbook_executed.txt"
+  },
+  "recovery_strategy": "Record prior state before changing it; every step here is reversible if the change is captured (config backup / snapshot) first.",
+  "ground_truth": {
+    "root_cause": "dr_failover",
+    "resource": "backup",
+    "signal": "primary lost; must fail over with bounded data loss"
+  },
+  "expected_time_s": 2400,
+  "expected_token_budget": 60000,
+  "possible_mistakes": [
+    "Promote a lagging replica, exceeding the RPO.",
+    "Fail to fence the old primary, causing split-brain."
+  ],
+  "hints": [
+    "Fence first, then promote, then repoint — order prevents split-brain.",
+    "Quantify lag so the data-loss window is known, not assumed."
+  ],
+  "reference_solution": [
+    "Assess replica lag/health",
+    "Fence + promote + repoint atomically",
+    "Validate + document RPO/RTO achieved"
+  ],
+  "alternative_solution": [
+    "If lag is unacceptable, recover the primary in place rather than accept data loss."
+  ],
+  "edge_cases": [
+    "Clients cache the old primary's IP; DNS TTL delays the cutover."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Backup/DR: design + execute a disaster-recovery failover for a stateful service. Garantisci ripristinabilita' e continuita' verificate.",
+  "failure_check": null,
+  "tags": [
+    "backup",
+    "backup",
+    "dr_failover"
+  ],
+  "golden": true,
+  "family": "backup",
+  "schema_version": "1.0",
+  "signature": "2e4f43863d09ff7a"
+}

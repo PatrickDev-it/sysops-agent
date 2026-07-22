@@ -1,0 +1,82 @@
+{
+  "id": "WIN-SCHEDULER-00002",
+  "title": "scheduler on windows: a scheduled job never runs",
+  "difficulty": "medium",
+  "os": "windows",
+  "domain": "scheduler",
+  "prerequisites": [],
+  "scenario": "On windows, a scheduled job problem: a scheduled job never runs. Symptom: 'no output, job silently skipped'.",
+  "environment": {
+    "os": "windows",
+    "resource": "scheduler",
+    "fault": "not_firing"
+  },
+  "initial_state": [
+    "# fixture induces 'not_firing' for scheduler on windows"
+  ],
+  "expected_reasoning": [
+    "A job that 'never runs' is usually a schedule, environment, or permission issue — verify it is registered.",
+    "Check the schedule syntax, the running user, and the job's PATH/env (cron has a minimal env).",
+    "Confirm from the scheduler's own log that it fired; fix the specific gap."
+  ],
+  "expected_commands": [
+    "crontab -l",
+    "systemctl status cron",
+    "grep CRON /var/log/syslog | tail"
+  ],
+  "forbidden_commands": [
+    "\\*\\s+\\*\\s+\\*\\s+\\*\\s+\\*\\s+.*#.*brute force",
+    "chmod\\s+777\\s+/etc/cron"
+  ],
+  "safety_constraints": [
+    "Fix the observed root cause; do not mask the symptom.",
+    "Prefer the least-privilege, reversible change.",
+    "Do not disable security controls or delete live data to 'unblock'."
+  ],
+  "success_criteria": "The 'a scheduled job never runs' condition is genuinely resolved: the observed root cause ('not_firing') no longer holds and the affected function works, verified by the success check.",
+  "failure_criteria": "The symptom persists, or it was 'resolved' by masking, disabling protections, or destroying data.",
+  "success_check": {
+    "kind": "artifact",
+    "path": "/tmp/cronjob.ran"
+  },
+  "recovery_strategy": "Record prior state before changing it; every step here is reversible if the change is captured (config backup / snapshot) first.",
+  "ground_truth": {
+    "root_cause": "not_firing",
+    "resource": "scheduler",
+    "signal": "no output, job silently skipped"
+  },
+  "expected_time_s": 180,
+  "expected_token_budget": 4000,
+  "possible_mistakes": [
+    "Assume cron has your login PATH (it doesn't).",
+    "Edit the wrong user's crontab."
+  ],
+  "hints": [
+    "cron runs with a minimal environment — set PATH inside the job.",
+    "The scheduler log proves whether it fired at all."
+  ],
+  "reference_solution": [
+    "Confirm registration + schedule",
+    "Fix env/PATH/user",
+    "Prove it fired via the scheduler log"
+  ],
+  "alternative_solution": [
+    "Convert to a systemd timer for better logging and dependency handling."
+  ],
+  "edge_cases": [
+    "The job fires but writes to a relative path in a different CWD than expected.",
+    "% in a crontab command must be escaped or it truncates the command."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Un job schedulato ha un problema: a scheduled job never runs. Fallo eseguire correttamente risolvendo la causa.",
+  "failure_check": null,
+  "tags": [
+    "scheduler",
+    "scheduler",
+    "not_firing"
+  ],
+  "golden": false,
+  "family": "scheduler",
+  "schema_version": "1.0",
+  "signature": "a8a5092b3134efa7"
+}

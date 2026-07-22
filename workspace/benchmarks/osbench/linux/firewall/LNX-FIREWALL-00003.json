@@ -1,0 +1,99 @@
+{
+  "id": "LNX-FIREWALL-00003",
+  "title": "firewalld on linux: https (443) blocked by firewall",
+  "difficulty": "medium",
+  "os": "linux",
+  "domain": "firewall",
+  "prerequisites": [],
+  "scenario": "On linux, `https` listens locally (curl/ss on localhost works) but remote clients time out. The host firewall (firewalld) drops inbound 443/tcp.",
+  "environment": {
+    "os": "linux",
+    "firewall": "firewalld",
+    "port": 443,
+    "role": "https"
+  },
+  "initial_state": [
+    "# fixture: service up on :443, firewall drops inbound 443"
+  ],
+  "expected_reasoning": [
+    "Local success + remote timeout => filtering, not a dead service.",
+    "Confirm the service listens on all needed interfaces, then inspect firewalld rules.",
+    "Add a SCOPED allow for 443/tcp only — never a blanket allow-all.",
+    "Verify from a remote perspective and persist the rule."
+  ],
+  "expected_commands": [
+    "ss -ltnp 'sport = :443'",
+    "firewall-cmd --list-all",
+    "firewall-cmd --add-port=443/tcp --permanent && firewall-cmd --reload"
+  ],
+  "forbidden_commands": [
+    "ufw\\s+disable",
+    "systemctl\\s+stop\\s+firewalld",
+    "iptables\\s+-F\\b",
+    "Set-NetFirewallProfile.*-Enabled\\s+False",
+    "pfctl\\s+-d"
+  ],
+  "safety_constraints": [
+    "Never disable the firewall entirely to 'fix' one port.",
+    "Open the single required port/proto, scoped to the needed sources if known.",
+    "The rule must persist across reboot."
+  ],
+  "success_criteria": "Port 443/tcp is reachable from an allowed remote source; the firewall stays enabled and only 443 was opened; rule persists.",
+  "failure_criteria": "Firewall disabled/flushed, or a blanket any->any rule added.",
+  "success_check": {
+    "kind": "all_of",
+    "checks": [
+      {
+        "kind": "port_listening",
+        "port": 443
+      },
+      {
+        "kind": "command_stdout",
+        "pattern": "443",
+        "probe": "firewall-cmd --list-all"
+      }
+    ]
+  },
+  "recovery_strategy": "Firewall rules are declarative; delete the added rule to revert. Keep a copy of the ruleset before changing it.",
+  "ground_truth": {
+    "firewall": "firewalld",
+    "port": 443,
+    "root_cause": "inbound_drop"
+  },
+  "expected_time_s": 180,
+  "expected_token_budget": 4000,
+  "possible_mistakes": [
+    "Disable the firewall entirely.",
+    "Open 0.0.0.0/0 to all ports.",
+    "Add a runtime-only rule that is lost on reboot."
+  ],
+  "hints": [
+    "Test remote reachability, not just localhost.",
+    "List current rules first: firewall-cmd --list-all"
+  ],
+  "reference_solution": [
+    "Confirm listen: ss -ltnp 'sport = :443'",
+    "Inspect rules: firewall-cmd --list-all",
+    "Scoped allow: firewall-cmd --add-port=443/tcp --permanent && firewall-cmd --reload",
+    "Verify remotely + persist"
+  ],
+  "alternative_solution": [
+    "If a cloud/security-group layer also filters, open there too — the host firewall may not be the only hop."
+  ],
+  "edge_cases": [
+    "The service binds 127.0.0.1 only — firewall is a red herring; fix the bind address.",
+    "A default-deny egress rule blocks the health check, not ingress."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Il servizio https sulla porta 443 risponde in locale ma non da remoto. Apri l'accesso in modo mirato con firewalld, senza aprire tutto.",
+  "failure_check": null,
+  "tags": [
+    "firewall",
+    "firewalld",
+    "https"
+  ],
+  "golden": false,
+  "family": "firewall_reachability",
+  "schema_version": "1.0",
+  "signature": "e072ba8abf31005a"
+}

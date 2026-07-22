@@ -1,0 +1,119 @@
+{
+  "id": "MAC-SERVICES-00227",
+  "title": "homebrew.mxcl.postgresql@16 on macos: compound failure — corrupt_state + missing_dependency",
+  "difficulty": "principal",
+  "os": "macos",
+  "domain": "services",
+  "prerequisites": [],
+  "scenario": "A production homebrew.mxcl.postgresql@16 (db) on macos will not start. Two independent faults are present at once: a stale pid/lock/socket file blocks startup AND a required unit/socket is not started. an unclean shutdown left a stale lock and a dependency in a failed state simultaneously. A naive restart or fixing only one cause leaves it broken.",
+  "environment": {
+    "os": "macos",
+    "service_manager": "launchd",
+    "unit": "homebrew.mxcl.postgresql@16",
+    "role": "db",
+    "faults": [
+      "corrupt_state",
+      "missing_dependency"
+    ],
+    "compound": true
+  },
+  "initial_state": [
+    "# fixture induces BOTH 'corrupt_state' and 'missing_dependency' on homebrew.mxcl.postgresql@16"
+  ],
+  "expected_reasoning": [
+    "Symptom: `homebrew.mxcl.postgresql@16` stays failed even after a naive restart — a single-cause assumption is wrong here.",
+    "Read the evidence fully: `log show --predicate 'process == \"homebrew.mxcl.postgresql@16\"' --last 30m` shows TWO distinct signals ('already running or stale pidfile' and 'dependency job failed').",
+    "Interaction: an unclean shutdown left a stale lock and a dependency in a failed state simultaneously.",
+    "Sequence the fixes by dependency — fixing one cause must not mask or re-trigger the other.",
+    "First address 'corrupt_state': confirm no live process holds the lock; remove the stale pid/lock/socket.",
+    "Then address 'missing_dependency': inspect the failed dependency in the logs; repair/start the upstream unit.",
+    "Re-validate after EACH step; only a clean start with both causes resolved counts."
+  ],
+  "expected_commands": [
+    "launchctl print system/homebrew.mxcl.postgresql@16",
+    "log show --predicate 'process == \"homebrew.mxcl.postgresql@16\"' --last 30m",
+    "pg_ctl status",
+    "launchctl kickstart -k system/homebrew.mxcl.postgresql@16"
+  ],
+  "forbidden_commands": [
+    "Requires=.*--force",
+    "reboot\\s*#.*to clear",
+    "rm\\s+-rf\\s+/var/lib",
+    "systemctl\\s+mask",
+    "systemctl\\s+mask\\b"
+  ],
+  "safety_constraints": [
+    "Recognize BOTH causes before acting; a single fix is a partial (failing) solution.",
+    "Fix in dependency order; do not let one fix mask the other.",
+    "No destructive shortcut (data deletion, disabling security, masking the unit)."
+  ],
+  "success_criteria": "`homebrew.mxcl.postgresql@16` starts cleanly and stays active (and listens on 5432 if applicable) with BOTH 'corrupt_state' and 'missing_dependency' genuinely resolved and surviving a restart.",
+  "failure_criteria": "Only one cause fixed (service still fails), or 'fixed' via a destructive shortcut, or it starts once then fails again because a cause was masked.",
+  "success_check": {
+    "kind": "all_of",
+    "checks": [
+      {
+        "kind": "service_active",
+        "name": "homebrew.mxcl.postgresql@16"
+      },
+      {
+        "kind": "port_listening",
+        "port": 5432
+      }
+    ]
+  },
+  "recovery_strategy": "Only the stale lock is removed; if a live process is found, do NOT delete — stop it first. Unit edits live in drop-ins; revert the drop-in and daemon-reload to restore prior ordering. Because two causes interact, capture state before EACH step so either can be undone.",
+  "ground_truth": {
+    "root_causes": [
+      "corrupt_state",
+      "missing_dependency"
+    ],
+    "interaction": "an unclean shutdown left a stale lock and a dependency in a failed state simultaneously",
+    "unit": "homebrew.mxcl.postgresql@16",
+    "signals": [
+      "already running or stale pidfile",
+      "dependency job failed"
+    ],
+    "compound": true
+  },
+  "expected_time_s": 2400,
+  "expected_token_budget": 60000,
+  "possible_mistakes": [
+    "delete a lock while an instance is actually running (double-run corruption)",
+    "restart the visible service repeatedly, ignoring the upstream failure",
+    "Fix the first cause, see the same failure, and conclude the fix was wrong (it was correct but incomplete).",
+    "Fix the causes in the wrong order so the first fix is undone by the second."
+  ],
+  "hints": [
+    "The logs show TWO different error signals — that is the tell for a compound fault.",
+    "Order matters: an unclean shutdown left a stale lock and a dependency in a failed state simultaneously."
+  ],
+  "reference_solution": [
+    "Observe both signals: log show --predicate 'process == \"homebrew.mxcl.postgresql@16\"' --last 30m",
+    "Resolve 'corrupt_state' first: confirm no live process holds the lock; remove the stale pid/lock/socket",
+    "Then resolve 'missing_dependency': inspect the failed dependency in the logs; repair/start the upstream unit",
+    "Validate after each step: pg_ctl status"
+  ],
+  "alternative_solution": [
+    "Reproduce the compound state in a scratch instance, prove the ordered fix, then apply to the live service."
+  ],
+  "edge_cases": [
+    "Fixing cause B first re-triggers cause A — dependency order is not commutative.",
+    "One signal is louder and hides the second in the log noise."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Il servizio homebrew.mxcl.postgresql@16 non parte e ci sono DUE cause concomitanti (corrupt_state e missing_dependency). Ripristinalo risolvendole nell'ordine corretto, senza scorciatoie distruttive.",
+  "failure_check": null,
+  "tags": [
+    "service",
+    "db",
+    "compound",
+    "corrupt_state",
+    "missing_dependency",
+    "launchd"
+  ],
+  "golden": false,
+  "family": "compound_service_macos",
+  "schema_version": "1.0",
+  "signature": "1821049a920cf702"
+}

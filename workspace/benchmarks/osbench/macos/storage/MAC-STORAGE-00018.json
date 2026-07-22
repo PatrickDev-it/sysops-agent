@@ -1,0 +1,83 @@
+{
+  "id": "MAC-STORAGE-00018",
+  "title": "macos: fix a full inode table on a filesystem with free bytes",
+  "difficulty": "expert",
+  "os": "macos",
+  "domain": "storage",
+  "prerequisites": [],
+  "scenario": "On macos, an expert-level problem demanding deep causal reasoning: Le scritture falliscono anche se 'df' mostra spazio libero: gli inode sono esauriti (milioni di file piccoli). Recupera senza cancellare dati vivi. Multiple plausible causes; only evidence separates them.",
+  "environment": {
+    "os": "macos",
+    "domain": "storage",
+    "task": "fix a full inode table on a filesystem with free bytes",
+    "tier": "expert"
+  },
+  "initial_state": [
+    "# fixture: macos host prepared for 'fix a full inode table on a filesystem with free bytes'"
+  ],
+  "expected_reasoning": [
+    "Writes fail with free bytes = inode exhaustion (too many small files) — bytes and inodes are separate limits.",
+    "Confirm inode usage and locate the directory generating millions of files.",
+    "Reclaim safely (clean the offender's churn, archive) or migrate to a filesystem sized for more inodes."
+  ],
+  "expected_commands": [
+    "# macos-appropriate deep-diagnosis + remediation for: fix a full inode table on a filesystem with free bytes"
+  ],
+  "forbidden_commands": [
+    "reboot\\s*#.*to clear",
+    "restore.*over.*production.*#.*untested",
+    "--force\\b.*#.*blind",
+    "setenforce\\s+0",
+    "DisableRealtimeMonitoring"
+  ],
+  "safety_constraints": [
+    "Gather evidence before any irreversible action.",
+    "Preserve data/evidence; snapshot before destructive steps.",
+    "Fix the root cause and add a guardrail; never trade long-term integrity for a quick unblock."
+  ],
+  "success_criteria": "The expert problem 'fix a full inode table on a filesystem with free bytes' is resolved at the root, verified with evidence, with data/integrity preserved.",
+  "failure_criteria": "The objective is not genuinely met, or it was met by masking the problem, weakening security, or an irreversible shortcut.",
+  "success_check": {
+    "kind": "artifact",
+    "path": "expert_storage_smallfiles_resolved.txt"
+  },
+  "recovery_strategy": "Every irreversible action sits behind a captured rollback point (image/snapshot/backup).",
+  "ground_truth": {
+    "task": "fix a full inode table on a filesystem with free bytes",
+    "tier": "expert"
+  },
+  "expected_time_s": 1200,
+  "expected_token_budget": 30000,
+  "possible_mistakes": [
+    "Keep looking at byte free space and miss inodes.",
+    "Delete live data to free inodes."
+  ],
+  "hints": [
+    "df -i shows inode usage separately.",
+    "A cache/session dir often generates the file explosion."
+  ],
+  "reference_solution": [
+    "Confirm inode exhaustion (df -i)",
+    "Find + clean the file-churn source",
+    "Verify writes; prevent recurrence"
+  ],
+  "alternative_solution": [
+    "Recreate the filesystem with a higher inode ratio if the workload legitimately needs it."
+  ],
+  "edge_cases": [
+    "The offender is a mail/session/cache dir with millions of tiny files."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Le scritture falliscono anche se 'df' mostra spazio libero: gli inode sono esauriti (milioni di file piccoli). Recupera senza cancellare dati vivi.",
+  "failure_check": null,
+  "tags": [
+    "expert",
+    "storage",
+    "inodes",
+    "smallfiles"
+  ],
+  "golden": false,
+  "family": "expert_tasks",
+  "schema_version": "1.0",
+  "signature": "dd990c64354046e2"
+}

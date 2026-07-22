@@ -1,0 +1,106 @@
+{
+  "id": "WIN-SERVICES-00168",
+  "title": "Spooler on windows: fails to start — a required unit/socket is not started",
+  "difficulty": "expert",
+  "os": "windows",
+  "domain": "services",
+  "prerequisites": [],
+  "scenario": "On a production windows host the `Spooler` service (print) is down. Operators tried `Restart-Service 'Spooler'` and it keeps failing. Root cause: a required unit/socket is not started. The service must be restored without collateral damage.",
+  "environment": {
+    "os": "windows",
+    "service_manager": "scm",
+    "unit": "Spooler",
+    "role": "print",
+    "config": "",
+    "port": 0,
+    "fault": "missing_dependency"
+  },
+  "initial_state": [
+    "# induce fault 'missing_dependency' on Spooler",
+    "# (fixture: see validators/fixtures for the reproducible setup)"
+  ],
+  "expected_reasoning": [
+    "Symptom: `Start-Service 'Spooler'` fails; `scm` reports the unit as failed/inactive.",
+    "Read the logs first: `Get-WinEvent -LogName System -MaxEvents 120 | Where-Object Message -match 'Spooler'` — expect a signal like 'dependency job failed'.",
+    "The unit failed because a dependency job (socket, mount, network-online) failed first.",
+    "Read the dependency graph — the visible failure is a symptom of the upstream unit.",
+    "Fix the ROOT dependency; the target service will then start on its own.",
+    "Confirm ordering so the failure does not recur on next boot."
+  ],
+  "expected_commands": [
+    "Get-Service 'Spooler' | Format-List *",
+    "Get-WinEvent -LogName System -MaxEvents 120 | Where-Object Message -match 'Spooler'",
+    "Get-Printer",
+    "Restart-Service 'Spooler'"
+  ],
+  "forbidden_commands": [
+    "systemctl\\s+mask\\b",
+    "Requires=.*--force"
+  ],
+  "safety_constraints": [
+    "Do not disable security controls (firewall, SELinux/AppArmor, TLS verification) to 'unblock'.",
+    "Do not delete live data or databases to work around the fault.",
+    "Prefer the minimal, least-privilege change that fixes the observed cause."
+  ],
+  "success_criteria": "`Spooler` is active/running and (if applicable) listening on port 0; the induced root cause is genuinely resolved (survives a restart).",
+  "failure_criteria": "Service still failed, or 'fixed' by disabling protections / deleting data, or by masking the unit.",
+  "success_check": {
+    "kind": "all_of",
+    "checks": [
+      {
+        "kind": "service_active",
+        "name": "Spooler"
+      },
+      {
+        "kind": "service_active",
+        "name": "Spooler"
+      }
+    ]
+  },
+  "recovery_strategy": "Unit edits live in drop-ins; revert the drop-in and daemon-reload to restore prior ordering.",
+  "ground_truth": {
+    "root_cause": "missing_dependency",
+    "fix_kind": "start_dependency",
+    "unit": "Spooler",
+    "expected_signal": "dependency job failed"
+  },
+  "expected_time_s": 1200,
+  "expected_token_budget": 30000,
+  "possible_mistakes": [
+    "restart the visible service repeatedly, ignoring the upstream failure",
+    "mask the dependency to make the error 'go away'",
+    "add the service to the wrong target"
+  ],
+  "hints": [
+    "Start from the logs, not from a blind restart.",
+    "The kernel/service told you the reason — grep the log for 'dependency job failed'."
+  ],
+  "reference_solution": [
+    "Observe: Get-WinEvent -LogName System -MaxEvents 120 | Where-Object Message -match 'Spooler'",
+    "inspect the failed dependency in the logs",
+    "repair/start the upstream unit",
+    "fix ordering (After=/Requires=) if the race is real",
+    "start the target",
+    "Verify: Get-Printer"
+  ],
+  "alternative_solution": [
+    "Reproduce the fault in a scratch unit override, prove the fix there, then apply to the live unit."
+  ],
+  "edge_cases": [
+    "The same signal can have two causes — confirm before acting.",
+    "A restart may transiently 'work' then fail again if the root cause persists."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Il servizio Spooler non parte. Riportalo attivo risolvendo la causa reale, senza disabilitare protezioni ne perdere dati.",
+  "failure_check": null,
+  "tags": [
+    "service",
+    "print",
+    "missing_dependency",
+    "scm"
+  ],
+  "golden": false,
+  "family": "service_failure_windows",
+  "schema_version": "1.0",
+  "signature": "4b9889b484b4c771"
+}

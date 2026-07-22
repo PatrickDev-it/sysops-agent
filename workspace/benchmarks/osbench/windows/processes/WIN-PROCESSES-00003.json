@@ -1,0 +1,82 @@
+{
+  "id": "WIN-PROCESSES-00003",
+  "title": "windows: trace a process stuck in uninterruptible sleep (D state)",
+  "difficulty": "hard",
+  "os": "windows",
+  "domain": "processes",
+  "prerequisites": [],
+  "scenario": "On windows, a hard operational problem: Un processo e' bloccato in stato D (uninterruptible sleep) e non risponde a kill. Trova la risorsa su cui e' bloccato. Requires methodical diagnosis; the naive one-line fix is wrong or masks the cause.",
+  "environment": {
+    "os": "windows",
+    "domain": "processes",
+    "task": "trace a process stuck in uninterruptible sleep (D state)",
+    "tier": "hard"
+  },
+  "initial_state": [
+    "# fixture: windows host prepared for 'trace a process stuck in uninterruptible sleep (D state)'"
+  ],
+  "expected_reasoning": [
+    "D-state means the process waits on the kernel (usually IO/NFS) and can't be killed normally — killing is not the fix.",
+    "Find WHAT it waits on (kernel stack / wchan / the mount or device).",
+    "Fix the underlying blocker (revive the mount/device); the process unblocks itself."
+  ],
+  "expected_commands": [
+    "# windows-appropriate diagnostic + fix sequence for: trace a process stuck in uninterruptible sleep (D state)"
+  ],
+  "forbidden_commands": [
+    "reboot\\s*#.*to clear",
+    "chmod\\s+-R\\s+777",
+    "--force\\b.*#.*blind",
+    "rm\\s+-rf\\s+/(\\s|$)"
+  ],
+  "safety_constraints": [
+    "Diagnose before acting; no blind reboots/kills.",
+    "Least-privilege, reversible change; capture prior state.",
+    "Do not mask the symptom or weaken security."
+  ],
+  "success_criteria": "The 'trace a process stuck in uninterruptible sleep (D state)' problem is genuinely resolved (root cause fixed and verified), not masked.",
+  "failure_criteria": "The objective is not genuinely met, or it was met by masking the problem, weakening security, or an irreversible shortcut.",
+  "success_check": {
+    "kind": "artifact",
+    "path": "hard_processes_io_resolved.txt"
+  },
+  "recovery_strategy": "Capture prior state before changing it; every step is reversible if recorded.",
+  "ground_truth": {
+    "task": "trace a process stuck in uninterruptible sleep (D state)",
+    "tier": "hard"
+  },
+  "expected_time_s": 480,
+  "expected_token_budget": 12000,
+  "possible_mistakes": [
+    "kill -9 a D-state process expecting it to die.",
+    "Reboot before finding the blocked resource."
+  ],
+  "hints": [
+    "/proc/<pid>/stack and wchan reveal the kernel wait.",
+    "A hung NFS/blocked device is the classic cause."
+  ],
+  "reference_solution": [
+    "Read the kernel wait (stack/wchan)",
+    "Identify the blocking resource",
+    "Restore it so the process unblocks"
+  ],
+  "alternative_solution": [
+    "If the device is truly dead, a controlled reboot may be the only exit — after evidence capture."
+  ],
+  "edge_cases": [
+    "The process is fine; a dying disk is the real incident."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Un processo e' bloccato in stato D (uninterruptible sleep) e non risponde a kill. Trova la risorsa su cui e' bloccato.",
+  "failure_check": null,
+  "tags": [
+    "hard",
+    "proc",
+    "dstate",
+    "io"
+  ],
+  "golden": false,
+  "family": "hard_tasks",
+  "schema_version": "1.0",
+  "signature": "21afccc98ddbe401"
+}

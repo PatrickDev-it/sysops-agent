@@ -1,0 +1,13 @@
+Sistemista
+Copyright 2026 Ignoryx contributors
+
+This product is licensed under the Apache License, Version 2.0.
+
+Runtime artifacts are not bundled with this repository. Operators obtain them separately:
+
+- Qwen3-4B-GGUF, Apache License 2.0, Qwen team.
+- Qwen2.5-Coder-3B-Instruct-GGUF, Apache License 2.0, Qwen team.
+- llama.cpp / llama-server, MIT License, ggml authors.
+
+The names and marks of third parties belong to their respective owners. Listing an artifact
+does not imply endorsement.

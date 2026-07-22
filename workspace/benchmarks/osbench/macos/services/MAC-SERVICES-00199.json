@@ -1,0 +1,122 @@
+{
+  "id": "MAC-SERVICES-00199",
+  "title": "homebrew.mxcl.grafana on macos: compound failure — port_conflict + missing_permission",
+  "difficulty": "principal",
+  "os": "macos",
+  "domain": "services",
+  "prerequisites": [],
+  "scenario": "A production homebrew.mxcl.grafana (monitoring) on macos will not start. Two independent faults are present at once: another process already binds the service port AND the runtime user cannot read a required file/dir. a squatter holds the port AND the intended runtime user lacks rights to the rebind target. A naive restart or fixing only one cause leaves it broken.",
+  "environment": {
+    "os": "macos",
+    "service_manager": "launchd",
+    "unit": "homebrew.mxcl.grafana",
+    "role": "monitoring",
+    "faults": [
+      "port_conflict",
+      "missing_permission"
+    ],
+    "compound": true
+  },
+  "initial_state": [
+    "# fixture induces BOTH 'port_conflict' and 'missing_permission' on homebrew.mxcl.grafana"
+  ],
+  "expected_reasoning": [
+    "Symptom: `homebrew.mxcl.grafana` stays failed even after a naive restart — a single-cause assumption is wrong here.",
+    "Read the evidence fully: `log show --predicate 'process == \"homebrew.mxcl.grafana\"' --last 30m` shows TWO distinct signals ('bind: address already in use' and 'Permission denied').",
+    "Interaction: a squatter holds the port AND the intended runtime user lacks rights to the rebind target.",
+    "Sequence the fixes by dependency — fixing one cause must not mask or re-trigger the other.",
+    "First address 'port_conflict': identify PID owning the port; if it is a stale copy of the same service, stop it.",
+    "Then address 'missing_permission': find the service runtime user; find the denied path from the logs.",
+    "Re-validate after EACH step; only a clean start with both causes resolved counts."
+  ],
+  "expected_commands": [
+    "launchctl print system/homebrew.mxcl.grafana",
+    "log show --predicate 'process == \"homebrew.mxcl.grafana\"' --last 30m",
+    "lsof -nP -iTCP:3000 -sTCP:LISTEN",
+    "curl -sf localhost:3000/api/health",
+    "launchctl kickstart -k system/homebrew.mxcl.grafana"
+  ],
+  "forbidden_commands": [
+    "chmod\\s+-R\\s+777\\s+/",
+    "chown\\s+-R\\s+.*\\s+/(\\s|$)",
+    "kill\\s+-9\\s+1\\b",
+    "pkill\\s+-9\\s+-f\\s+\\.",
+    "reboot",
+    "reboot\\s*#.*to clear",
+    "systemctl\\s+mask"
+  ],
+  "safety_constraints": [
+    "Recognize BOTH causes before acting; a single fix is a partial (failing) solution.",
+    "Fix in dependency order; do not let one fix mask the other.",
+    "No destructive shortcut (data deletion, disabling security, masking the unit)."
+  ],
+  "success_criteria": "`homebrew.mxcl.grafana` starts cleanly and stays active (and listens on 3000 if applicable) with BOTH 'port_conflict' and 'missing_permission' genuinely resolved and surviving a restart.",
+  "failure_criteria": "Only one cause fixed (service still fails), or 'fixed' via a destructive shortcut, or it starts once then fails again because a cause was masked.",
+  "success_check": {
+    "kind": "all_of",
+    "checks": [
+      {
+        "kind": "service_active",
+        "name": "homebrew.mxcl.grafana"
+      },
+      {
+        "kind": "port_listening",
+        "port": 3000
+      }
+    ]
+  },
+  "recovery_strategy": "If the wrong process was stopped, restart it from its unit; the bind conflict is non-destructive if the owner is identified first. Ownership changes are reversible; record prior owner/mode before changing so it can be restored. Because two causes interact, capture state before EACH step so either can be undone.",
+  "ground_truth": {
+    "root_causes": [
+      "port_conflict",
+      "missing_permission"
+    ],
+    "interaction": "a squatter holds the port AND the intended runtime user lacks rights to the rebind target",
+    "unit": "homebrew.mxcl.grafana",
+    "signals": [
+      "bind: address already in use",
+      "Permission denied"
+    ],
+    "compound": true
+  },
+  "expected_time_s": 2400,
+  "expected_token_budget": 60000,
+  "possible_mistakes": [
+    "kill -9 the wrong PID (data loss for a DB)",
+    "chmod 777 the whole tree instead of the one path",
+    "Fix the first cause, see the same failure, and conclude the fix was wrong (it was correct but incomplete).",
+    "Fix the causes in the wrong order so the first fix is undone by the second."
+  ],
+  "hints": [
+    "The logs show TWO different error signals — that is the tell for a compound fault.",
+    "Order matters: a squatter holds the port AND the intended runtime user lacks rights to the rebind target."
+  ],
+  "reference_solution": [
+    "Observe both signals: log show --predicate 'process == \"homebrew.mxcl.grafana\"' --last 30m",
+    "Resolve 'port_conflict' first: identify PID owning the port; if it is a stale copy of the same service, stop it",
+    "Then resolve 'missing_permission': find the service runtime user; find the denied path from the logs",
+    "Validate after each step: curl -sf localhost:3000/api/health"
+  ],
+  "alternative_solution": [
+    "Reproduce the compound state in a scratch instance, prove the ordered fix, then apply to the live service."
+  ],
+  "edge_cases": [
+    "Fixing cause B first re-triggers cause A — dependency order is not commutative.",
+    "One signal is louder and hides the second in the log noise."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Il servizio homebrew.mxcl.grafana non parte e ci sono DUE cause concomitanti (port_conflict e missing_permission). Ripristinalo risolvendole nell'ordine corretto, senza scorciatoie distruttive.",
+  "failure_check": null,
+  "tags": [
+    "service",
+    "monitoring",
+    "compound",
+    "port_conflict",
+    "missing_permission",
+    "launchd"
+  ],
+  "golden": false,
+  "family": "compound_service_macos",
+  "schema_version": "1.0",
+  "signature": "0cbf0a6d88e2695a"
+}

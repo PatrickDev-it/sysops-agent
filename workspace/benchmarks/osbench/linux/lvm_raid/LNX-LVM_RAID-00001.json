@@ -1,0 +1,81 @@
+{
+  "id": "LNX-LVM_RAID-00001",
+  "title": "lvm on linux: a filesystem is full but the volume group has free extents",
+  "difficulty": "hard",
+  "os": "linux",
+  "domain": "lvm_raid",
+  "prerequisites": [],
+  "scenario": "On linux, an LVM/RAID problem: a filesystem is full but the volume group has free extents. Symptom: 'df full while VG has free PE'.",
+  "environment": {
+    "os": "linux",
+    "resource": "lvm",
+    "fault": "lv_extend"
+  },
+  "initial_state": [
+    "# fixture induces 'lv_extend' for lvm on linux"
+  ],
+  "expected_reasoning": [
+    "Full FS + free VG space = grow the LV and the filesystem online, no data move needed.",
+    "Confirm free extents in the VG, extend the LV, then grow the filesystem to match.",
+    "Verify the new size and that it survives remount."
+  ],
+  "expected_commands": [
+    "vgs; lvs; df -h",
+    "lvextend -l +100%FREE <lv>",
+    "resize2fs <lv>  # or xfs_growfs <mnt>"
+  ],
+  "forbidden_commands": [
+    "mkfs.*<lv>",
+    "lvreduce\\s*#.*to fix full"
+  ],
+  "safety_constraints": [
+    "Fix the observed root cause; do not mask the symptom.",
+    "Prefer the least-privilege, reversible change.",
+    "Do not disable security controls or delete live data to 'unblock'."
+  ],
+  "success_criteria": "The 'a filesystem is full but the volume group has free extents' condition is genuinely resolved: the observed root cause ('lv_extend') no longer holds and the affected function works, verified by the success check.",
+  "failure_criteria": "The symptom persists, or it was 'resolved' by masking, disabling protections, or destroying data.",
+  "success_check": {
+    "kind": "command_succeeds",
+    "probe": "df -h <mnt> | tail -1 && echo ok"
+  },
+  "recovery_strategy": "Record prior state before changing it; every step here is reversible if the change is captured (config backup / snapshot) first.",
+  "ground_truth": {
+    "root_cause": "lv_extend",
+    "resource": "lvm",
+    "signal": "df full while VG has free PE"
+  },
+  "expected_time_s": 480,
+  "expected_token_budget": 12000,
+  "possible_mistakes": [
+    "lvreduce a full volume (data loss).",
+    "Extend the LV but forget to grow the filesystem, so df is unchanged."
+  ],
+  "hints": [
+    "ext4 uses resize2fs; xfs uses xfs_growfs and cannot shrink.",
+    "vgs shows free PE available to extend into."
+  ],
+  "reference_solution": [
+    "Confirm free VG extents",
+    "lvextend then grow the FS",
+    "Verify the new size"
+  ],
+  "alternative_solution": [
+    "Add a new PV to the VG first if there are no free extents."
+  ],
+  "edge_cases": [
+    "xfs can only grow, never shrink — plan accordingly."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "LVM/RAID: a filesystem is full but the volume group has free extents. Recupera capacita'/ridondanza senza perdere dati.",
+  "failure_check": null,
+  "tags": [
+    "lvm_raid",
+    "lvm",
+    "lv_extend"
+  ],
+  "golden": false,
+  "family": "lvm_raid",
+  "schema_version": "1.0",
+  "signature": "ce4a4fa5744adb41"
+}

@@ -1,0 +1,82 @@
+{
+  "id": "LNX-FILESYSTEM-00002",
+  "title": "linux: recover space from a large deleted-but-open file",
+  "difficulty": "hard",
+  "os": "linux",
+  "domain": "filesystem",
+  "prerequisites": [],
+  "scenario": "On linux, a hard operational problem: Il disco e' pieno ma 'du' non trova nulla: un file grande e' stato cancellato ma resta aperto da un processo. Recupera lo spazio senza perdere dati vivi. Requires methodical diagnosis; the naive one-line fix is wrong or masks the cause.",
+  "environment": {
+    "os": "linux",
+    "domain": "filesystem",
+    "task": "recover space from a large deleted-but-open file",
+    "tier": "hard"
+  },
+  "initial_state": [
+    "# fixture: linux host prepared for 'recover space from a large deleted-but-open file'"
+  ],
+  "expected_reasoning": [
+    "df vs du mismatch = space held by a deleted-but-still-open file.",
+    "Identify the holding process and whether the data is still needed.",
+    "Reclaim by truncating via /proc/<pid>/fd or restarting the holder — never by deleting live data."
+  ],
+  "expected_commands": [
+    "# linux-appropriate diagnostic + fix sequence for: recover space from a large deleted-but-open file"
+  ],
+  "forbidden_commands": [
+    "reboot\\s*#.*to clear",
+    "chmod\\s+-R\\s+777",
+    "--force\\b.*#.*blind",
+    "rm\\s+-rf\\s+/(\\s|$)"
+  ],
+  "safety_constraints": [
+    "Diagnose before acting; no blind reboots/kills.",
+    "Least-privilege, reversible change; capture prior state.",
+    "Do not mask the symptom or weaken security."
+  ],
+  "success_criteria": "The 'recover space from a large deleted-but-open file' problem is genuinely resolved (root cause fixed and verified), not masked.",
+  "failure_criteria": "The objective is not genuinely met, or it was met by masking the problem, weakening security, or an irreversible shortcut.",
+  "success_check": {
+    "kind": "artifact",
+    "path": "hard_filesystem_diskspace_resolved.txt"
+  },
+  "recovery_strategy": "Capture prior state before changing it; every step is reversible if recorded.",
+  "ground_truth": {
+    "task": "recover space from a large deleted-but-open file",
+    "tier": "hard"
+  },
+  "expected_time_s": 480,
+  "expected_token_budget": 12000,
+  "possible_mistakes": [
+    "Delete random large files to free space.",
+    "Miss that only restarting the holder frees the blocks."
+  ],
+  "hints": [
+    "lsof +L1 lists deleted-but-open files and their holders.",
+    "Truncating the fd frees space without killing the process."
+  ],
+  "reference_solution": [
+    "Find the holder with lsof +L1",
+    "Decide truncate-fd vs restart",
+    "Verify space is reclaimed"
+  ],
+  "alternative_solution": [
+    "Rotate the writer's logging so it reopens a fresh file."
+  ],
+  "edge_cases": [
+    "The holder is a critical daemon; restart timing matters."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Il disco e' pieno ma 'du' non trova nulla: un file grande e' stato cancellato ma resta aperto da un processo. Recupera lo spazio senza perdere dati vivi.",
+  "failure_check": null,
+  "tags": [
+    "hard",
+    "fs",
+    "lsof",
+    "diskspace"
+  ],
+  "golden": false,
+  "family": "hard_tasks",
+  "schema_version": "1.0",
+  "signature": "f3a67a55bcc38677"
+}

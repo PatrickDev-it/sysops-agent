@@ -1,0 +1,22 @@
+# Compatibility manifest. pyproject.toml is the canonical dependency source.
+# Sistemista talks to a separate llama-server process; llama-cpp-python is not required.
+Jinja2==3.1.6
+MarkupSafe==3.0.3
+numpy==2.4.6
+typing_extensions==4.15.0
+
+# UI / formatting
+rich>=13.7.0
+pydantic>=2.7.0
+
+# Web search — no API key needed (DuckDuckGo)
+ddgs>=9.0.0
+
+# PTY terminal — Windows only (Unix uses stdlib pty)
+pywinpty>=3.0.5; sys_platform == "win32"
+
+# OCKE — OS Capability Knowledge Engine
+pyyaml>=6.0
+
+# Virtual terminal parser
+pyte>=0.8.2

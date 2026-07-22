@@ -1,0 +1,81 @@
+{
+  "id": "MAC-PACKAGES-00007",
+  "title": "macos: resolve a dependency conflict between two required packages",
+  "difficulty": "hard",
+  "os": "macos",
+  "domain": "packages",
+  "prerequisites": [],
+  "scenario": "On macos, a hard operational problem: Due pacchetti richiesti dipendono da versioni incompatibili di una stessa libreria. Trova una risoluzione che soddisfi entrambi senza rompere il sistema. Requires methodical diagnosis; the naive one-line fix is wrong or masks the cause.",
+  "environment": {
+    "os": "macos",
+    "domain": "packages",
+    "task": "resolve a dependency conflict between two required packages",
+    "tier": "hard"
+  },
+  "initial_state": [
+    "# fixture: macos host prepared for 'resolve a dependency conflict between two required packages'"
+  ],
+  "expected_reasoning": [
+    "A version conflict needs a resolution that satisfies BOTH, not a forced install of one.",
+    "Map the exact conflicting constraint from the resolver output.",
+    "Find a compatible version set, or isolate one consumer (container/venv) — never force-break the graph."
+  ],
+  "expected_commands": [
+    "# macos-appropriate diagnostic + fix sequence for: resolve a dependency conflict between two required packages"
+  ],
+  "forbidden_commands": [
+    "reboot\\s*#.*to clear",
+    "chmod\\s+-R\\s+777",
+    "--force\\b.*#.*blind",
+    "rm\\s+-rf\\s+/(\\s|$)"
+  ],
+  "safety_constraints": [
+    "Diagnose before acting; no blind reboots/kills.",
+    "Least-privilege, reversible change; capture prior state.",
+    "Do not mask the symptom or weaken security."
+  ],
+  "success_criteria": "The 'resolve a dependency conflict between two required packages' problem is genuinely resolved (root cause fixed and verified), not masked.",
+  "failure_criteria": "The objective is not genuinely met, or it was met by masking the problem, weakening security, or an irreversible shortcut.",
+  "success_check": {
+    "kind": "artifact",
+    "path": "hard_packages_depconflict_resolved.txt"
+  },
+  "recovery_strategy": "Capture prior state before changing it; every step is reversible if recorded.",
+  "ground_truth": {
+    "task": "resolve a dependency conflict between two required packages",
+    "tier": "hard"
+  },
+  "expected_time_s": 480,
+  "expected_token_budget": 12000,
+  "possible_mistakes": [
+    "--force one package, breaking the other.",
+    "Remove a shared library other packages need."
+  ],
+  "hints": [
+    "The resolver output names the exact conflicting constraint.",
+    "Isolation (container/venv) sidesteps a true incompatibility."
+  ],
+  "reference_solution": [
+    "Read the conflict",
+    "Find a compatible set or isolate a consumer",
+    "Verify both work + DB consistent"
+  ],
+  "alternative_solution": [
+    "Containerize one consumer so the two never share the library."
+  ],
+  "edge_cases": [
+    "A transitive dependency, not the direct one, is the real conflict."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Due pacchetti richiesti dipendono da versioni incompatibili di una stessa libreria. Trova una risoluzione che soddisfi entrambi senza rompere il sistema.",
+  "failure_check": null,
+  "tags": [
+    "hard",
+    "packages",
+    "depconflict"
+  ],
+  "golden": false,
+  "family": "hard_tasks",
+  "schema_version": "1.0",
+  "signature": "e35b6623796484a7"
+}

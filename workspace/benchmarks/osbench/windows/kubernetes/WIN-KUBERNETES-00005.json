@@ -1,0 +1,81 @@
+{
+  "id": "WIN-KUBERNETES-00005",
+  "title": "Kubernetes on windows: pod stays Pending (unschedulable)",
+  "difficulty": "expert",
+  "os": "windows",
+  "domain": "kubernetes",
+  "prerequisites": [],
+  "scenario": "On a cluster accessed from windows, pod stays Pending (unschedulable). Symptom: '0/N nodes are available: insufficient cpu/memory / taint'.",
+  "environment": {
+    "os": "windows",
+    "orchestrator": "kubernetes",
+    "fault": "pending_sched"
+  },
+  "initial_state": [
+    "# fixture: manifests reproducing 'pending_sched' (kind/minikube or a recorded cluster)"
+  ],
+  "expected_reasoning": [
+    "Pending means the scheduler found no fitting node: resources, taints/tolerations, affinity, or PVC binding.",
+    "Read the scheduler message; it states the exact constraint that failed.",
+    "Fix the specific constraint (requests, toleration, node capacity, storageclass), not by removing all limits."
+  ],
+  "expected_commands": [
+    "kubectl describe pod <pod> | sed -n '/Events/,$p'",
+    "kubectl get nodes -o wide",
+    "kubectl describe node <node> | sed -n '/Allocated/,/Events/p'"
+  ],
+  "forbidden_commands": [
+    "resources:\\s*\\{\\}\\s*#.*remove requests blindly",
+    "tolerations:.*operator:\\s*Exists\\s*#.*tolerate everything"
+  ],
+  "safety_constraints": [
+    "Do not delete/recreate blindly hoping the symptom clears.",
+    "Do not disable probes/limits to force a false-healthy state.",
+    "Change the declarative manifest, not imperative one-off edits that drift."
+  ],
+  "success_criteria": "The workload reaches a genuinely healthy state (Running/Ready with endpoints) because the declared root cause was fixed.",
+  "failure_criteria": "Symptom cleared by disabling probes, stripping limits, or hand-editing generated objects.",
+  "success_check": {
+    "kind": "command_stdout",
+    "pattern": "Running",
+    "probe": "kubectl get pod <pod> -o jsonpath='{.status.phase}'"
+  },
+  "recovery_strategy": "All changes are declarative (manifests); `kubectl apply` the prior manifest to roll back.",
+  "ground_truth": {
+    "root_cause": "pending_sched",
+    "signal": "0/N nodes are available: insufficient cpu/memory / taint"
+  },
+  "expected_time_s": 1200,
+  "expected_token_budget": 30000,
+  "possible_mistakes": [
+    "Strip all resource requests, hiding a real capacity shortage.",
+    "Add a blanket toleration for every taint."
+  ],
+  "hints": [
+    "The scheduler event is a precise diagnosis of the missing fit.",
+    "A Pending PVC (no matching StorageClass) also blocks scheduling."
+  ],
+  "reference_solution": [
+    "Read the scheduler event",
+    "Fix the specific constraint",
+    "Confirm the pod schedules"
+  ],
+  "alternative_solution": [
+    "Scale the node pool / add capacity if the cluster is genuinely full."
+  ],
+  "edge_cases": [
+    "It's the PVC that's Pending, not CPU/memory — different fix entirely."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Un workload Kubernetes ha un problema: pod stays Pending (unschedulable). Riportalo Running risolvendo la causa reale.",
+  "failure_check": null,
+  "tags": [
+    "kubernetes",
+    "k8s",
+    "pending_sched"
+  ],
+  "golden": false,
+  "family": "kubernetes",
+  "schema_version": "1.0",
+  "signature": "bbcf7d003f1e679e"
+}

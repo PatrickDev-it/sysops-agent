@@ -1,0 +1,37 @@
+{
+  "label": "full-safe30-p013",
+  "n_cases": 30,
+  "resolved": 25,
+  "arr": 0.8333,
+  "ftfr": 0.3,
+  "raf": 2.273,
+  "deviations": 21,
+  "failure_taxonomy": {
+    "COMMAND_SYNTAX": 30,
+    "UNKNOWN": 25,
+    "FILE_NOT_FOUND": 17
+  },
+  "deviation_ids": [
+    "WIN-DNS-00001",
+    "WIN-ENV_PATH-00001",
+    "WIN-FIREWALL-00001",
+    "WIN-GROUPS-00001",
+    "WIN-KERNEL-00001",
+    "WIN-NETWORKING-00001",
+    "WIN-NETWORKING-00002",
+    "WIN-PERFORMANCE-00002",
+    "WIN-PROCESSES-00001",
+    "WIN-RECOVERY-00001",
+    "WIN-ROUTING-00001",
+    "WIN-SERVICES-00001",
+    "WIN-SERVICES-00002",
+    "WIN-SERVICES-00003",
+    "WIN-STORAGE-00002",
+    "WIN-TLS-00001",
+    "WIN-USERS-00001",
+    "WIN-CICD-00001",
+    "WIN-CICD-00002",
+    "WIN-CICD-00004",
+    "WIN-SECURITY-00003"
+  ]
+}

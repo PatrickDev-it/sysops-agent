@@ -1,0 +1,51 @@
+# pip — cross-platform tool knowledge
+# These entries carry OS-specific notes but are indexed under the tool, not the OS.
+
+- id: pip_discover_user_scripts_windows
+  platform: windows
+  shell: [powershell, pwsh]
+  intent: [discover_scripts_path, find_pip_scripts]
+  command: python -m site --user-base
+  verify: ""
+  vars: []
+  notes: >
+    Returns base like C:\Users\X\AppData\Roaming\Python.
+    Scripts live at <base>\Python312\Scripts.
+    Append that to PATH with SetEnvironmentVariable.
+  confidence: 0.99
+
+- id: pip_discover_user_scripts_linux
+  platform: linux
+  shell: [bash, zsh, sh]
+  intent: [discover_scripts_path, find_pip_scripts]
+  command: python3 -m site --user-base
+  verify: ""
+  vars: []
+  notes: Returns ~/.local. Scripts live at ~/.local/bin.
+  confidence: 0.99
+
+- id: pip_discover_user_scripts_macos
+  platform: darwin
+  shell: [bash, zsh]
+  intent: [discover_scripts_path, find_pip_scripts]
+  command: python3 -m site --user-base
+  verify: ""
+  vars: []
+  notes: Returns ~/Library/Python/X.Y. Scripts live at ~/Library/Python/X.Y/bin.
+  confidence: 0.99
+
+- id: pip_show_package
+  platform: [windows, linux, darwin]
+  shell: [powershell, pwsh, bash, zsh, sh, cmd]
+  intent: [check_installed, verify_package]
+  command: pip show $PACKAGE
+  vars: [PACKAGE]
+  confidence: 0.99
+
+- id: pip_list_installed
+  platform: [windows, linux, darwin]
+  shell: [powershell, pwsh, bash, zsh, sh, cmd]
+  intent: [list_packages]
+  command: pip list
+  vars: []
+  confidence: 0.99

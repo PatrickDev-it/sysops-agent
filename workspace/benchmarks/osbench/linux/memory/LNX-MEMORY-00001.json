@@ -1,0 +1,83 @@
+{
+  "id": "LNX-MEMORY-00001",
+  "title": "linux: read-only diagnostic — Riporta l'uso di swap/paging in swap.txt",
+  "difficulty": "easy",
+  "os": "linux",
+  "domain": "memory",
+  "prerequisites": [],
+  "scenario": "On linux, gather a specific read-only system fact and record it to `swap.txt`. This is a diagnostic: observe and report accurately, change nothing.",
+  "environment": {
+    "os": "linux",
+    "readonly": true,
+    "artifact": "swap.txt"
+  },
+  "initial_state": [
+    "# no fault; a clean host suffices"
+  ],
+  "expected_reasoning": [
+    "This is a pure OBSERVE task — no system change is warranted.",
+    "Step: read swap/pagefile configuration and usage.",
+    "Write the collected facts verbatim to `swap.txt`."
+  ],
+  "expected_commands": [
+    "swapon --show; free -h | grep -i swap",
+    "# redirect the output into swap.txt"
+  ],
+  "forbidden_commands": [
+    "rm\\s",
+    "systemctl\\s+(stop|disable)",
+    "kill\\s",
+    "chmod\\s",
+    "Set-Service"
+  ],
+  "safety_constraints": [
+    "Read-only: do not modify any system state.",
+    "Report observed values exactly; do not fabricate."
+  ],
+  "success_criteria": "`swap.txt` exists and contains the correct, current values for the requested facts.",
+  "failure_criteria": "`swap.txt` missing, empty, wrong, or the system was modified.",
+  "success_check": {
+    "kind": "artifact",
+    "path": "swap.txt"
+  },
+  "recovery_strategy": "No state changed; nothing to recover.",
+  "ground_truth": {
+    "task": "swap_status",
+    "artifact": "swap.txt",
+    "readonly": true
+  },
+  "expected_time_s": 60,
+  "expected_token_budget": 1500,
+  "possible_mistakes": [
+    "Modify state during a read-only task.",
+    "Report a hardcoded/guessed value instead of the observed one."
+  ],
+  "hints": [
+    "Representative command: swapon --show; free -h | grep -i swap",
+    "Redirect its output to swap.txt."
+  ],
+  "reference_solution": [
+    "Run: swapon --show; free -h | grep -i swap",
+    "Write output to swap.txt",
+    "Verify the file content"
+  ],
+  "alternative_solution": [
+    "Use the platform's structured/JSON output form and format it into the file."
+  ],
+  "edge_cases": [
+    "Some fields require elevation to read fully; report what is accessible.",
+    "Localized output — parse values, not labels."
+  ],
+  "risk": "SAFE",
+  "goal": "Riporta l'uso di swap/paging in swap.txt",
+  "failure_check": null,
+  "tags": [
+    "diagnostic",
+    "readonly",
+    "swap_status"
+  ],
+  "golden": false,
+  "family": "easy_diagnostics",
+  "schema_version": "1.0",
+  "signature": "f657884749639fd2"
+}

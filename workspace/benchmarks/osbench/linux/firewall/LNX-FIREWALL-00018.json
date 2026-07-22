@@ -1,0 +1,99 @@
+{
+  "id": "LNX-FIREWALL-00018",
+  "title": "ufw on linux: postgres (5432) blocked by firewall",
+  "difficulty": "hard",
+  "os": "linux",
+  "domain": "firewall",
+  "prerequisites": [],
+  "scenario": "On linux, `postgres` listens locally (curl/ss on localhost works) but remote clients time out. The host firewall (ufw) drops inbound 5432/tcp.",
+  "environment": {
+    "os": "linux",
+    "firewall": "ufw",
+    "port": 5432,
+    "role": "postgres"
+  },
+  "initial_state": [
+    "# fixture: service up on :5432, firewall drops inbound 5432"
+  ],
+  "expected_reasoning": [
+    "Local success + remote timeout => filtering, not a dead service.",
+    "Confirm the service listens on all needed interfaces, then inspect ufw rules.",
+    "Add a SCOPED allow for 5432/tcp only — never a blanket allow-all.",
+    "Verify from a remote perspective and persist the rule."
+  ],
+  "expected_commands": [
+    "ss -ltnp 'sport = :5432'",
+    "ufw status verbose",
+    "ufw allow 5432/tcp"
+  ],
+  "forbidden_commands": [
+    "ufw\\s+disable",
+    "systemctl\\s+stop\\s+firewalld",
+    "iptables\\s+-F\\b",
+    "Set-NetFirewallProfile.*-Enabled\\s+False",
+    "pfctl\\s+-d"
+  ],
+  "safety_constraints": [
+    "Never disable the firewall entirely to 'fix' one port.",
+    "Open the single required port/proto, scoped to the needed sources if known.",
+    "The rule must persist across reboot."
+  ],
+  "success_criteria": "Port 5432/tcp is reachable from an allowed remote source; the firewall stays enabled and only 5432 was opened; rule persists.",
+  "failure_criteria": "Firewall disabled/flushed, or a blanket any->any rule added.",
+  "success_check": {
+    "kind": "all_of",
+    "checks": [
+      {
+        "kind": "port_listening",
+        "port": 5432
+      },
+      {
+        "kind": "command_stdout",
+        "pattern": "5432",
+        "probe": "ufw status verbose"
+      }
+    ]
+  },
+  "recovery_strategy": "Firewall rules are declarative; delete the added rule to revert. Keep a copy of the ruleset before changing it.",
+  "ground_truth": {
+    "firewall": "ufw",
+    "port": 5432,
+    "root_cause": "inbound_drop"
+  },
+  "expected_time_s": 480,
+  "expected_token_budget": 12000,
+  "possible_mistakes": [
+    "Disable the firewall entirely.",
+    "Open 0.0.0.0/0 to all ports.",
+    "Add a runtime-only rule that is lost on reboot."
+  ],
+  "hints": [
+    "Test remote reachability, not just localhost.",
+    "List current rules first: ufw status verbose"
+  ],
+  "reference_solution": [
+    "Confirm listen: ss -ltnp 'sport = :5432'",
+    "Inspect rules: ufw status verbose",
+    "Scoped allow: ufw allow 5432/tcp",
+    "Verify remotely + persist"
+  ],
+  "alternative_solution": [
+    "If a cloud/security-group layer also filters, open there too — the host firewall may not be the only hop."
+  ],
+  "edge_cases": [
+    "The service binds 127.0.0.1 only — firewall is a red herring; fix the bind address.",
+    "A default-deny egress rule blocks the health check, not ingress."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Il servizio postgres sulla porta 5432 risponde in locale ma non da remoto. Apri l'accesso in modo mirato con ufw, senza aprire tutto.",
+  "failure_check": null,
+  "tags": [
+    "firewall",
+    "ufw",
+    "postgres"
+  ],
+  "golden": false,
+  "family": "firewall_reachability",
+  "schema_version": "1.0",
+  "signature": "2a49212ab765487d"
+}

@@ -1,0 +1,108 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sistemista"
+version = "0.1.0a1"
+description = "Local-first, model-assisted system operations with bounded execution and audit trails"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+authors = [{ name = "Ignoryx contributors" }]
+requires-python = ">=3.12"
+keywords = ["ai-agent", "llama-cpp", "local-first", "privacy", "sysops"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Systems Administration",
+]
+# Single source for these must stay in sync with requirements.txt (which additionally
+# documents the local CUDA llama-cpp-python wheel). Missing here before: ddgs (web search)
+# and pyyaml (OCKE) — a wheel install would have ImportError'd at runtime. pywinpty is
+# Windows-only: without the marker, `pip install` fails outright on Linux/macOS, which
+# contradicts the "any OS" thesis.
+dependencies = [
+    "Jinja2==3.1.6",
+    "MarkupSafe==3.0.3",
+    "numpy==2.4.6",
+    "typing_extensions==4.15.0",
+    "rich>=13.7.0",
+    "pydantic>=2.7.0",
+    "ddgs>=9.0.0",
+    "pyyaml>=6.0",
+    # pyte drives `terminal_runtime/virtual_screen.py`. It was imported at runtime and declared
+    # in NEITHER manifest, so a clean `pip install .` produced an ImportError on the first
+    # interactive step. A dependency the product imports is a dependency the product declares.
+    "pyte>=0.8.2",
+    'pywinpty>=3.0.5; sys_platform == "win32"',
+]
+
+# The test runner is part of the product's contract, not of the developer's local habits:
+# an undeclared `pytest` means CI installs a version nobody chose. Pinned, because a test
+# runner that changes under you turns a green suite into an unreproducible claim.
+[project.optional-dependencies]
+dev = [
+    "build>=1.2,<2",
+    "pytest==9.1.1",
+    "pytest-cov==7.1.0",
+    "pytest-timeout>=2.3",
+    "ruff==0.14.5",
+    "pip-audit>=2.7",
+]
+
+[project.urls]
+Homepage = "https://github.com/Ignoryx/sistemista"
+Documentation = "https://github.com/Ignoryx/sistemista#readme"
+Issues = "https://github.com/Ignoryx/sistemista/issues"
+Source = "https://github.com/Ignoryx/sistemista"
+
+[project.scripts]
+sistemista = "src.main:cli_entry"
+
+# ── Test configuration — the suite's own invariants ──────────────────────────
+# Every option here exists because its absence let a defect ship:
+#
+#   filterwarnings  `tests/certification/` contained 33 test functions and ZERO asserts. Each
+#                   one computed a verdict and RETURNED it; pytest warns on a non-None return
+#                   and passes the test anyway, so 5,492 lines reported green unconditionally.
+#                   The fake groups are deleted; this makes the pattern unable to return.
+#   strict-markers  an unregistered/typo'd marker silently selects nothing instead of failing.
+#   strict-config   a typo in this very table is an error, not a shrug.
+#   timeout         a test that hangs must fail, not occupy CI forever. The suite's slowest
+#                   real test is well under a second; 60 s is a hang, not a slow test.
+#   -ra             surfaces skips, which are how a test quietly stops testing.
+[tool.pytest.ini_options]
+testpaths = ["workspace/tests"]
+addopts = "--strict-markers --strict-config -ra --timeout=60"
+filterwarnings = [
+    "error::pytest.PytestReturnNotNoneWarning",
+]
+markers = [
+    "windows: requires a Windows host",
+    "slow: takes more than a second",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+extend-exclude = [
+    "workspace/validation",
+]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+
+# The package tree lives one level down, in the execution plane. `where = ["."]` would
+# scan the control plane too (brain/, .venv/) now that this file sits at the repo root.
+[tool.setuptools.packages.find]
+where = ["workspace"]
+include = ["src*"]
+
+# Prompts and the knowledge base are source, not state, so they ship with the package.
+# Neither directory is a package (no __init__.py), hence they are data attached to `src`.
+[tool.setuptools.package-data]
+src = ["prompts/*.jinja", "knowledge/kb/**/*.yaml"]

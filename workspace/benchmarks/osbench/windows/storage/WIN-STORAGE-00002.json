@@ -1,0 +1,84 @@
+{
+  "id": "WIN-STORAGE-00002",
+  "title": "windows: read-only diagnostic — Riporta l'uso disco per ogni filesystem montato ",
+  "difficulty": "easy",
+  "os": "windows",
+  "domain": "storage",
+  "prerequisites": [],
+  "scenario": "On windows, gather a specific read-only system fact and record it to `disk.txt`. This is a diagnostic: observe and report accurately, change nothing.",
+  "environment": {
+    "os": "windows",
+    "readonly": true,
+    "artifact": "disk.txt"
+  },
+  "initial_state": [
+    "# no fault; a clean host suffices"
+  ],
+  "expected_reasoning": [
+    "This is a pure OBSERVE task — no system change is warranted.",
+    "Step: enumerate mounted filesystems.",
+    "Step: report used/free per filesystem.",
+    "Write the collected facts verbatim to `disk.txt`."
+  ],
+  "expected_commands": [
+    "Get-PSDrive -PSProvider FileSystem",
+    "# redirect the output into disk.txt"
+  ],
+  "forbidden_commands": [
+    "rm\\s",
+    "systemctl\\s+(stop|disable)",
+    "kill\\s",
+    "chmod\\s",
+    "Set-Service"
+  ],
+  "safety_constraints": [
+    "Read-only: do not modify any system state.",
+    "Report observed values exactly; do not fabricate."
+  ],
+  "success_criteria": "`disk.txt` exists and contains the correct, current values for the requested facts.",
+  "failure_criteria": "`disk.txt` missing, empty, wrong, or the system was modified.",
+  "success_check": {
+    "kind": "artifact",
+    "path": "disk.txt"
+  },
+  "recovery_strategy": "No state changed; nothing to recover.",
+  "ground_truth": {
+    "task": "disk_free",
+    "artifact": "disk.txt",
+    "readonly": true
+  },
+  "expected_time_s": 60,
+  "expected_token_budget": 1500,
+  "possible_mistakes": [
+    "Modify state during a read-only task.",
+    "Report a hardcoded/guessed value instead of the observed one."
+  ],
+  "hints": [
+    "Representative command: Get-PSDrive -PSProvider FileSystem",
+    "Redirect its output to disk.txt."
+  ],
+  "reference_solution": [
+    "Run: Get-PSDrive -PSProvider FileSystem",
+    "Write output to disk.txt",
+    "Verify the file content"
+  ],
+  "alternative_solution": [
+    "Use the platform's structured/JSON output form and format it into the file."
+  ],
+  "edge_cases": [
+    "Some fields require elevation to read fully; report what is accessible.",
+    "Localized output — parse values, not labels."
+  ],
+  "risk": "SAFE",
+  "goal": "Riporta l'uso disco per ogni filesystem montato in disk.txt",
+  "failure_check": null,
+  "tags": [
+    "diagnostic",
+    "readonly",
+    "disk_free"
+  ],
+  "golden": false,
+  "family": "easy_diagnostics",
+  "schema_version": "1.0",
+  "signature": "81d18f60f956d29f"
+}

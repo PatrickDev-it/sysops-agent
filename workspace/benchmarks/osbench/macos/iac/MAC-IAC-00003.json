@@ -1,0 +1,81 @@
+{
+  "id": "MAC-IAC-00003",
+  "title": "iac on macos: an Ansible play is not idempotent (changed every run)",
+  "difficulty": "expert",
+  "os": "macos",
+  "domain": "iac",
+  "prerequisites": [],
+  "scenario": "On macos, an IaC problem: an Ansible play is not idempotent (changed every run). Symptom: 'changed=... on every converge for the same state'.",
+  "environment": {
+    "os": "macos",
+    "resource": "iac",
+    "fault": "ansible_idempotent"
+  },
+  "initial_state": [
+    "# fixture induces 'ansible_idempotent' for iac on macos"
+  ],
+  "expected_reasoning": [
+    "A converged play should report changed=0 on a no-op run; perpetual change means a non-idempotent task.",
+    "Find the offending task (command/shell without creates/changed_when, or a templating churn).",
+    "Make it idempotent (proper module, creates/changed_when), verify a second run is changed=0."
+  ],
+  "expected_commands": [
+    "ansible-playbook site.yml --check --diff",
+    "ansible-playbook site.yml",
+    "ansible-playbook site.yml"
+  ],
+  "forbidden_commands": [
+    "changed_when:\\s*false\\s*#.*hide",
+    "shell:.*#.*instead of a module"
+  ],
+  "safety_constraints": [
+    "Fix the observed root cause; do not mask the symptom.",
+    "Prefer the least-privilege, reversible change.",
+    "Do not disable security controls or delete live data to 'unblock'."
+  ],
+  "success_criteria": "The 'an Ansible play is not idempotent (changed every run)' condition is genuinely resolved: the observed root cause ('ansible_idempotent') no longer holds and the affected function works, verified by the success check.",
+  "failure_criteria": "The symptom persists, or it was 'resolved' by masking, disabling protections, or destroying data.",
+  "success_check": {
+    "kind": "artifact",
+    "path": "ansible_idempotence_proof.txt"
+  },
+  "recovery_strategy": "Record prior state before changing it; every step here is reversible if the change is captured (config backup / snapshot) first.",
+  "ground_truth": {
+    "root_cause": "ansible_idempotent",
+    "resource": "iac",
+    "signal": "changed=... on every converge for the same state"
+  },
+  "expected_time_s": 1200,
+  "expected_token_budget": 30000,
+  "possible_mistakes": [
+    "Slap changed_when: false to fake idempotence.",
+    "Use shell/command where a proper module exists."
+  ],
+  "hints": [
+    "A second converge must be changed=0 — that's the definition.",
+    "command/shell need creates/removes or changed_when to be idempotent."
+  ],
+  "reference_solution": [
+    "Find the always-changed task",
+    "Replace with an idempotent module / add creates/changed_when",
+    "Prove run #2 is changed=0"
+  ],
+  "alternative_solution": [
+    "Gate the task with a fact/stat check so it only runs when the state truly differs."
+  ],
+  "edge_cases": [
+    "Template whitespace/ordering churn flags 'changed' though content is equivalent."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Infrastructure-as-Code: an Ansible play is not idempotent (changed every run). Ripristina uno stato coerente e riproducibile.",
+  "failure_check": null,
+  "tags": [
+    "iac",
+    "iac",
+    "ansible_idempotent"
+  ],
+  "golden": false,
+  "family": "iac",
+  "schema_version": "1.0",
+  "signature": "eed71cf30a9fc786"
+}

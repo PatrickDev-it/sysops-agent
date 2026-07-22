@@ -1,0 +1,147 @@
+{
+  "label": "demo_golden",
+  "generated": "2026-07-02T23:03:05Z",
+  "overall": 0.704625,
+  "n_cases": 16,
+  "n_runs": 16,
+  "metrics": {
+    "autonomous_resolution_rate": 0.5,
+    "reasoning_quality": 0.16354166666666664,
+    "command_efficiency": 1.0,
+    "safety": 1.0,
+    "recovery_capability": 1.0,
+    "context_efficiency": 1.0,
+    "token_efficiency": 1.0,
+    "latency": 1.0,
+    "reliability": 0.5,
+    "robustness": 0.5,
+    "determinism": 1.0
+  },
+  "by_difficulty": {
+    "easy": {
+      "autonomous_resolution_rate": 0.0,
+      "reasoning_quality": 0.36666666666666664,
+      "command_efficiency": 1.0,
+      "safety": 1.0,
+      "recovery_capability": 1.0,
+      "context_efficiency": 1.0,
+      "token_efficiency": 1.0,
+      "latency": 1.0,
+      "reliability": 0.0,
+      "robustness": 0.0,
+      "determinism": 1.0
+    },
+    "expert": {
+      "autonomous_resolution_rate": 0.8,
+      "reasoning_quality": 0.041666666666666664,
+      "command_efficiency": 1.0,
+      "safety": 1.0,
+      "recovery_capability": 1.0,
+      "context_efficiency": 1.0,
+      "token_efficiency": 1.0,
+      "latency": 1.0,
+      "reliability": 0.8,
+      "robustness": 0.8,
+      "determinism": 1.0
+    }
+  },
+  "by_os": {
+    "linux": {
+      "autonomous_resolution_rate": 0.7142857142857143,
+      "reasoning_quality": 0.10476190476190475,
+      "command_efficiency": 1.0,
+      "safety": 1.0,
+      "recovery_capability": 1.0,
+      "context_efficiency": 1.0,
+      "token_efficiency": 1.0,
+      "latency": 1.0,
+      "reliability": 0.7142857142857143,
+      "robustness": 0.7142857142857143,
+      "determinism": 1.0
+    },
+    "macos": {
+      "autonomous_resolution_rate": 0.25,
+      "reasoning_quality": 0.23541666666666666,
+      "command_efficiency": 1.0,
+      "safety": 1.0,
+      "recovery_capability": 1.0,
+      "context_efficiency": 1.0,
+      "token_efficiency": 1.0,
+      "latency": 1.0,
+      "reliability": 0.25,
+      "robustness": 0.25,
+      "determinism": 1.0
+    },
+    "windows": {
+      "autonomous_resolution_rate": 0.4,
+      "reasoning_quality": 0.18833333333333332,
+      "command_efficiency": 1.0,
+      "safety": 1.0,
+      "recovery_capability": 1.0,
+      "context_efficiency": 1.0,
+      "token_efficiency": 1.0,
+      "latency": 1.0,
+      "reliability": 0.4,
+      "robustness": 0.4,
+      "determinism": 1.0
+    }
+  },
+  "by_domain": {
+    "dns": {
+      "autonomous_resolution_rate": 0.0,
+      "reasoning_quality": 0.7333333333333333,
+      "command_efficiency": 1.0,
+      "safety": 1.0,
+      "recovery_capability": 1.0,
+      "context_efficiency": 1.0,
+      "token_efficiency": 1.0,
+      "latency": 1.0,
+      "reliability": 0.0,
+      "robustness": 0.0,
+      "determinism": 1.0
+    },
+    "processes": {
+      "autonomous_resolution_rate": 0.0,
+      "reasoning_quality": 0.0,
+      "command_efficiency": 1.0,
+      "safety": 1.0,
+      "recovery_capability": 1.0,
+      "context_efficiency": 1.0,
+      "token_efficiency": 1.0,
+      "latency": 1.0,
+      "reliability": 0.0,
+      "robustness": 0.0,
+      "determinism": 1.0
+    },
+    "security": {
+      "autonomous_resolution_rate": 1.0,
+      "reasoning_quality": 0.0,
+      "command_efficiency": 1.0,
+      "safety": 1.0,
+      "recovery_capability": 1.0,
+      "context_efficiency": 1.0,
+      "token_efficiency": 1.0,
+      "latency": 1.0,
+      "reliability": 1.0,
+      "robustness": 1.0,
+      "determinism": 1.0
+    },
+    "cicd": {
+      "autonomous_resolution_rate": 0.0,
+      "reasoning_quality": 0.20833333333333331,
+      "command_efficiency": 1.0,
+      "safety": 1.0,
+      "recovery_capability": 1.0,
+      "context_efficiency": 1.0,
+      "token_efficiency": 1.0,
+      "latency": 1.0,
+      "reliability": 0.0,
+      "robustness": 0.0,
+      "determinism": 1.0
+    }
+  },
+  "adapter": "dry",
+  "executed": false,
+  "is_measurement": false,
+  "_note": "Produced by the `dry` adapter, which executes nothing. These numbers score a stub transcript, not the agent. See _attic/osbench-synthetic-leaderboard/."
+}

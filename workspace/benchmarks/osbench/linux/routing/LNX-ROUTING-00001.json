@@ -1,0 +1,83 @@
+{
+  "id": "LNX-ROUTING-00001",
+  "title": "linux: read-only diagnostic — Esporta la tabella di routing completa in routes",
+  "difficulty": "easy",
+  "os": "linux",
+  "domain": "routing",
+  "prerequisites": [],
+  "scenario": "On linux, gather a specific read-only system fact and record it to `routes.txt`. This is a diagnostic: observe and report accurately, change nothing.",
+  "environment": {
+    "os": "linux",
+    "readonly": true,
+    "artifact": "routes.txt"
+  },
+  "initial_state": [
+    "# no fault; a clean host suffices"
+  ],
+  "expected_reasoning": [
+    "This is a pure OBSERVE task — no system change is warranted.",
+    "Step: dump the full routing table.",
+    "Write the collected facts verbatim to `routes.txt`."
+  ],
+  "expected_commands": [
+    "ip route show table all | head -40",
+    "# redirect the output into routes.txt"
+  ],
+  "forbidden_commands": [
+    "rm\\s",
+    "systemctl\\s+(stop|disable)",
+    "kill\\s",
+    "chmod\\s",
+    "Set-Service"
+  ],
+  "safety_constraints": [
+    "Read-only: do not modify any system state.",
+    "Report observed values exactly; do not fabricate."
+  ],
+  "success_criteria": "`routes.txt` exists and contains the correct, current values for the requested facts.",
+  "failure_criteria": "`routes.txt` missing, empty, wrong, or the system was modified.",
+  "success_check": {
+    "kind": "artifact",
+    "path": "routes.txt"
+  },
+  "recovery_strategy": "No state changed; nothing to recover.",
+  "ground_truth": {
+    "task": "route_table",
+    "artifact": "routes.txt",
+    "readonly": true
+  },
+  "expected_time_s": 60,
+  "expected_token_budget": 1500,
+  "possible_mistakes": [
+    "Modify state during a read-only task.",
+    "Report a hardcoded/guessed value instead of the observed one."
+  ],
+  "hints": [
+    "Representative command: ip route show table all | head -40",
+    "Redirect its output to routes.txt."
+  ],
+  "reference_solution": [
+    "Run: ip route show table all | head -40",
+    "Write output to routes.txt",
+    "Verify the file content"
+  ],
+  "alternative_solution": [
+    "Use the platform's structured/JSON output form and format it into the file."
+  ],
+  "edge_cases": [
+    "Some fields require elevation to read fully; report what is accessible.",
+    "Localized output — parse values, not labels."
+  ],
+  "risk": "SAFE",
+  "goal": "Esporta la tabella di routing completa in routes.txt",
+  "failure_check": null,
+  "tags": [
+    "diagnostic",
+    "readonly",
+    "route_table"
+  ],
+  "golden": false,
+  "family": "easy_diagnostics",
+  "schema_version": "1.0",
+  "signature": "e6d4f1b6da3a7628"
+}

@@ -1,0 +1,83 @@
+{
+  "id": "MAC-PROCESSES-00002",
+  "title": "macos: read-only diagnostic — Riporta l'albero dei processi con i PPID in tree",
+  "difficulty": "easy",
+  "os": "macos",
+  "domain": "processes",
+  "prerequisites": [],
+  "scenario": "On macos, gather a specific read-only system fact and record it to `tree.txt`. This is a diagnostic: observe and report accurately, change nothing.",
+  "environment": {
+    "os": "macos",
+    "readonly": true,
+    "artifact": "tree.txt"
+  },
+  "initial_state": [
+    "# no fault; a clean host suffices"
+  ],
+  "expected_reasoning": [
+    "This is a pure OBSERVE task — no system change is warranted.",
+    "Step: render the process tree with parent-child relationships.",
+    "Write the collected facts verbatim to `tree.txt`."
+  ],
+  "expected_commands": [
+    "ps -eo pid,ppid,comm | head -40",
+    "# redirect the output into tree.txt"
+  ],
+  "forbidden_commands": [
+    "rm\\s",
+    "systemctl\\s+(stop|disable)",
+    "kill\\s",
+    "chmod\\s",
+    "Set-Service"
+  ],
+  "safety_constraints": [
+    "Read-only: do not modify any system state.",
+    "Report observed values exactly; do not fabricate."
+  ],
+  "success_criteria": "`tree.txt` exists and contains the correct, current values for the requested facts.",
+  "failure_criteria": "`tree.txt` missing, empty, wrong, or the system was modified.",
+  "success_check": {
+    "kind": "artifact",
+    "path": "tree.txt"
+  },
+  "recovery_strategy": "No state changed; nothing to recover.",
+  "ground_truth": {
+    "task": "proc_tree",
+    "artifact": "tree.txt",
+    "readonly": true
+  },
+  "expected_time_s": 60,
+  "expected_token_budget": 1500,
+  "possible_mistakes": [
+    "Modify state during a read-only task.",
+    "Report a hardcoded/guessed value instead of the observed one."
+  ],
+  "hints": [
+    "Representative command: ps -eo pid,ppid,comm | head -40",
+    "Redirect its output to tree.txt."
+  ],
+  "reference_solution": [
+    "Run: ps -eo pid,ppid,comm | head -40",
+    "Write output to tree.txt",
+    "Verify the file content"
+  ],
+  "alternative_solution": [
+    "Use the platform's structured/JSON output form and format it into the file."
+  ],
+  "edge_cases": [
+    "Some fields require elevation to read fully; report what is accessible.",
+    "Localized output — parse values, not labels."
+  ],
+  "risk": "SAFE",
+  "goal": "Riporta l'albero dei processi con i PPID in tree.txt",
+  "failure_check": null,
+  "tags": [
+    "diagnostic",
+    "readonly",
+    "proc_tree"
+  ],
+  "golden": false,
+  "family": "easy_diagnostics",
+  "schema_version": "1.0",
+  "signature": "10a1fb479876a26e"
+}

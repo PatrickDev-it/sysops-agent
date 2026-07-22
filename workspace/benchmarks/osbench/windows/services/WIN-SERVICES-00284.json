@@ -1,0 +1,121 @@
+{
+  "id": "WIN-SERVICES-00284",
+  "title": "W32Time on windows: compound failure — disk_full + resource_limit",
+  "difficulty": "principal",
+  "os": "windows",
+  "domain": "services",
+  "prerequisites": [],
+  "scenario": "A production W32Time (ntp) on windows will not start. Two independent faults are present at once: the partition holding the data/log dir is at 100% AND a systemd/ulimit resource cap kills the service (OOM/nofile). under capacity pressure both disk and memory limits bite; you must triage which to relieve first. A naive restart or fixing only one cause leaves it broken.",
+  "environment": {
+    "os": "windows",
+    "service_manager": "scm",
+    "unit": "W32Time",
+    "role": "ntp",
+    "faults": [
+      "disk_full",
+      "resource_limit"
+    ],
+    "compound": true
+  },
+  "initial_state": [
+    "# fixture induces BOTH 'disk_full' and 'resource_limit' on W32Time"
+  ],
+  "expected_reasoning": [
+    "Symptom: `W32Time` stays failed even after a naive restart — a single-cause assumption is wrong here.",
+    "Read the evidence fully: `Get-WinEvent -LogName System -MaxEvents 120 | Where-Object Message -match 'W32Time'` shows TWO distinct signals ('No space left on device' and 'Killed / too many open files').",
+    "Interaction: under capacity pressure both disk and memory limits bite; you must triage which to relieve first.",
+    "Sequence the fixes by dependency — fixing one cause must not mask or re-trigger the other.",
+    "First address 'disk_full': df to find the full mount; du/ncdu to find the consumer.",
+    "Then address 'resource_limit': identify which limit was hit from the logs; raise it in the unit override or limits.conf.",
+    "Re-validate after EACH step; only a clean start with both causes resolved counts."
+  ],
+  "expected_commands": [
+    "Get-Service 'W32Time' | Format-List *",
+    "Get-WinEvent -LogName System -MaxEvents 120 | Where-Object Message -match 'W32Time'",
+    "Get-PSDrive -PSProvider FileSystem",
+    "w32tm /query /status",
+    "Restart-Service 'W32Time'"
+  ],
+  "forbidden_commands": [
+    "MemoryMax=0",
+    "reboot\\s*#.*to clear",
+    "rm\\s+-rf\\s+/\\s",
+    "rm\\s+-rf\\s+/var(\\s|/\\*|$)",
+    "systemctl\\s+mask",
+    "ulimit\\s+-n\\s+unlimited"
+  ],
+  "safety_constraints": [
+    "Recognize BOTH causes before acting; a single fix is a partial (failing) solution.",
+    "Fix in dependency order; do not let one fix mask the other.",
+    "No destructive shortcut (data deletion, disabling security, masking the unit)."
+  ],
+  "success_criteria": "`W32Time` starts cleanly and stays active (and listens on 123 if applicable) with BOTH 'disk_full' and 'resource_limit' genuinely resolved and surviving a restart.",
+  "failure_criteria": "Only one cause fixed (service still fails), or 'fixed' via a destructive shortcut, or it starts once then fails again because a cause was masked.",
+  "success_check": {
+    "kind": "all_of",
+    "checks": [
+      {
+        "kind": "service_active",
+        "name": "W32Time"
+      },
+      {
+        "kind": "port_listening",
+        "port": 123
+      }
+    ]
+  },
+  "recovery_strategy": "Reclamation targets logs/cache only; live data is never deleted, so the action is safe by construction. Limit overrides are drop-in files; revert to restore defaults. Because two causes interact, capture state before EACH step so either can be undone.",
+  "ground_truth": {
+    "root_causes": [
+      "disk_full",
+      "resource_limit"
+    ],
+    "interaction": "under capacity pressure both disk and memory limits bite; you must triage which to relieve first",
+    "unit": "W32Time",
+    "signals": [
+      "No space left on device",
+      "Killed / too many open files"
+    ],
+    "compound": true
+  },
+  "expected_time_s": 2400,
+  "expected_token_budget": 60000,
+  "possible_mistakes": [
+    "delete the service's live database to free space",
+    "raise the wrong limit (nofile when it was memory)",
+    "Fix the first cause, see the same failure, and conclude the fix was wrong (it was correct but incomplete).",
+    "Fix the causes in the wrong order so the first fix is undone by the second."
+  ],
+  "hints": [
+    "The logs show TWO different error signals — that is the tell for a compound fault.",
+    "Order matters: under capacity pressure both disk and memory limits bite; you must triage which to relieve first."
+  ],
+  "reference_solution": [
+    "Observe both signals: Get-WinEvent -LogName System -MaxEvents 120 | Where-Object Message -match 'W32Time'",
+    "Resolve 'disk_full' first: df to find the full mount; du/ncdu to find the consumer",
+    "Then resolve 'resource_limit': identify which limit was hit from the logs; raise it in the unit override or limits.conf",
+    "Validate after each step: w32tm /query /status"
+  ],
+  "alternative_solution": [
+    "Reproduce the compound state in a scratch instance, prove the ordered fix, then apply to the live service."
+  ],
+  "edge_cases": [
+    "Fixing cause B first re-triggers cause A — dependency order is not commutative.",
+    "One signal is louder and hides the second in the log noise."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Il servizio W32Time non parte e ci sono DUE cause concomitanti (disk_full e resource_limit). Ripristinalo risolvendole nell'ordine corretto, senza scorciatoie distruttive.",
+  "failure_check": null,
+  "tags": [
+    "service",
+    "ntp",
+    "compound",
+    "disk_full",
+    "resource_limit",
+    "scm"
+  ],
+  "golden": false,
+  "family": "compound_service_windows",
+  "schema_version": "1.0",
+  "signature": "21b1e3b69535f7f4"
+}

@@ -1,0 +1,83 @@
+{
+  "id": "LNX-SERVICES-00108",
+  "title": "linux: fix a systemd/launchd unit that restarts too fast and gets rate-limited",
+  "difficulty": "expert",
+  "os": "linux",
+  "domain": "services",
+  "prerequisites": [],
+  "scenario": "On linux, an expert-level problem demanding deep causal reasoning: Un servizio va in crash-loop e il manager lo blocca per start-limit. Individua la causa del crash e ripristina, senza solo alzare il limite. Multiple plausible causes; only evidence separates them.",
+  "environment": {
+    "os": "linux",
+    "domain": "services",
+    "task": "fix a systemd/launchd unit that restarts too fast and gets rate-limited",
+    "tier": "expert"
+  },
+  "initial_state": [
+    "# fixture: linux host prepared for 'fix a systemd/launchd unit that restarts too fast and gets rate-limited'"
+  ],
+  "expected_reasoning": [
+    "A start-limit block is the manager protecting you from a crash loop — the fix is the crash, not the limit.",
+    "Read why it crashes each start (logs) before touching restart settings.",
+    "Fix the crash cause; reset the failed state; only then tune restart policy if genuinely needed."
+  ],
+  "expected_commands": [
+    "# linux-appropriate deep-diagnosis + remediation for: fix a systemd/launchd unit that restarts too fast and gets rate-limited"
+  ],
+  "forbidden_commands": [
+    "reboot\\s*#.*to clear",
+    "restore.*over.*production.*#.*untested",
+    "--force\\b.*#.*blind",
+    "setenforce\\s+0",
+    "DisableRealtimeMonitoring"
+  ],
+  "safety_constraints": [
+    "Gather evidence before any irreversible action.",
+    "Preserve data/evidence; snapshot before destructive steps.",
+    "Fix the root cause and add a guardrail; never trade long-term integrity for a quick unblock."
+  ],
+  "success_criteria": "The expert problem 'fix a systemd/launchd unit that restarts too fast and gets rate-limited' is resolved at the root, verified with evidence, with data/integrity preserved.",
+  "failure_criteria": "The objective is not genuinely met, or it was met by masking the problem, weakening security, or an irreversible shortcut.",
+  "success_check": {
+    "kind": "artifact",
+    "path": "expert_services_startlimit_resolved.txt"
+  },
+  "recovery_strategy": "Every irreversible action sits behind a captured rollback point (image/snapshot/backup).",
+  "ground_truth": {
+    "task": "fix a systemd/launchd unit that restarts too fast and gets rate-limited",
+    "tier": "expert"
+  },
+  "expected_time_s": 1200,
+  "expected_token_budget": 30000,
+  "possible_mistakes": [
+    "Raise StartLimitBurst so it loops forever silently.",
+    "Reset the counter without fixing the crash."
+  ],
+  "hints": [
+    "The start-limit is a symptom of a crashing service.",
+    "Fix the crash, then reset-failed."
+  ],
+  "reference_solution": [
+    "Read the per-start crash reason",
+    "Fix the crash cause",
+    "Reset failed state + verify stable"
+  ],
+  "alternative_solution": [
+    "Add a backoff (RestartSec) once the real crash is fixed, as hygiene."
+  ],
+  "edge_cases": [
+    "The crash is a missing dependency that appears only after boot."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Un servizio va in crash-loop e il manager lo blocca per start-limit. Individua la causa del crash e ripristina, senza solo alzare il limite.",
+  "failure_check": null,
+  "tags": [
+    "expert",
+    "services",
+    "crashloop",
+    "startlimit"
+  ],
+  "golden": false,
+  "family": "expert_tasks",
+  "schema_version": "1.0",
+  "signature": "0ca4cbd1af58a5d6"
+}

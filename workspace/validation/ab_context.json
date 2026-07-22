@@ -1,0 +1,423 @@
+{
+  "aggregate": {
+    "n": 68,
+    "tokenizer": "heuristic(chars/4)",
+    "budget": 1200,
+    "current_mean": 1193.9,
+    "current_median": 826.0,
+    "compiled_mean": 342.9,
+    "compiled_median": 245.5,
+    "mean_reduction": 0.7089,
+    "aggregate_reduction": 0.7128
+  },
+  "rows": [
+    {
+      "run_id": "run_1781526370",
+      "current": 110,
+      "compiled": 56,
+      "reduction": 0.4909
+    },
+    {
+      "run_id": "run_1781526395",
+      "current": 316,
+      "compiled": 82,
+      "reduction": 0.7405
+    },
+    {
+      "run_id": "run_1781526857",
+      "current": 366,
+      "compiled": 101,
+      "reduction": 0.724
+    },
+    {
+      "run_id": "run_1781526937",
+      "current": 578,
+      "compiled": 131,
+      "reduction": 0.7734
+    },
+    {
+      "run_id": "run_1781527279",
+      "current": 275,
+      "compiled": 110,
+      "reduction": 0.6
+    },
+    {
+      "run_id": "run_1781527690",
+      "current": 402,
+      "compiled": 194,
+      "reduction": 0.5174
+    },
+    {
+      "run_id": "run_1781527779",
+      "current": 402,
+      "compiled": 194,
+      "reduction": 0.5174
+    },
+    {
+      "run_id": "run_1781527835",
+      "current": 755,
+      "compiled": 235,
+      "reduction": 0.6887
+    },
+    {
+      "run_id": "run_1781527918",
+      "current": 829,
+      "compiled": 203,
+      "reduction": 0.7551
+    },
+    {
+      "run_id": "run_1781528008",
+      "current": 1201,
+      "compiled": 214,
+      "reduction": 0.8218
+    },
+    {
+      "run_id": "run_1781528150",
+      "current": 698,
+      "compiled": 176,
+      "reduction": 0.7479
+    },
+    {
+      "run_id": "run_1781528453",
+      "current": 430,
+      "compiled": 161,
+      "reduction": 0.6256
+    },
+    {
+      "run_id": "run_1781529762",
+      "current": 353,
+      "compiled": 84,
+      "reduction": 0.762
+    },
+    {
+      "run_id": "run_1781530021",
+      "current": 173,
+      "compiled": 69,
+      "reduction": 0.6012
+    },
+    {
+      "run_id": "run_1781530242",
+      "current": 152,
+      "compiled": 49,
+      "reduction": 0.6776
+    },
+    {
+      "run_id": "run_1781530334",
+      "current": 334,
+      "compiled": 59,
+      "reduction": 0.8234
+    },
+    {
+      "run_id": "run_1781530471",
+      "current": 386,
+      "compiled": 106,
+      "reduction": 0.7254
+    },
+    {
+      "run_id": "run_1781533071",
+      "current": 164,
+      "compiled": 60,
+      "reduction": 0.6341
+    },
+    {
+      "run_id": "run_1781533607",
+      "current": 192,
+      "compiled": 60,
+      "reduction": 0.6875
+    },
+    {
+      "run_id": "run_1781533689",
+      "current": 192,
+      "compiled": 60,
+      "reduction": 0.6875
+    },
+    {
+      "run_id": "run_1781626759",
+      "current": 996,
+      "compiled": 309,
+      "reduction": 0.6898
+    },
+    {
+      "run_id": "run_1781628368",
+      "current": 1071,
+      "compiled": 283,
+      "reduction": 0.7358
+    },
+    {
+      "run_id": "run_1781630043",
+      "current": 2395,
+      "compiled": 358,
+      "reduction": 0.8505
+    },
+    {
+      "run_id": "run_1781630348",
+      "current": 1982,
+      "compiled": 370,
+      "reduction": 0.8133
+    },
+    {
+      "run_id": "run_1781630516",
+      "current": 334,
+      "compiled": 211,
+      "reduction": 0.3683
+    },
+    {
+      "run_id": "run_1781630823",
+      "current": 1377,
+      "compiled": 290,
+      "reduction": 0.7894
+    },
+    {
+      "run_id": "run_1781631815",
+      "current": 334,
+      "compiled": 211,
+      "reduction": 0.3683
+    },
+    {
+      "run_id": "run_1781632104",
+      "current": 162,
+      "compiled": 58,
+      "reduction": 0.642
+    },
+    {
+      "run_id": "run_1781632851",
+      "current": 710,
+      "compiled": 130,
+      "reduction": 0.8169
+    },
+    {
+      "run_id": "run_1781633078",
+      "current": 729,
+      "compiled": 130,
+      "reduction": 0.8217
+    },
+    {
+      "run_id": "run_1781633207",
+      "current": 610,
+      "compiled": 130,
+      "reduction": 0.7869
+    },
+    {
+      "run_id": "run_1781635735",
+      "current": 624,
+      "compiled": 263,
+      "reduction": 0.5785
+    },
+    {
+      "run_id": "run_1781635977",
+      "current": 821,
+      "compiled": 258,
+      "reduction": 0.6857
+    },
+    {
+      "run_id": "run_1781636173",
+      "current": 821,
+      "compiled": 258,
+      "reduction": 0.6857
+    },
+    {
+      "run_id": "run_1781636388",
+      "current": 861,
+      "compiled": 258,
+      "reduction": 0.7003
+    },
+    {
+      "run_id": "run_1781636631",
+      "current": 861,
+      "compiled": 258,
+      "reduction": 0.7003
+    },
+    {
+      "run_id": "run_1781636781",
+      "current": 745,
+      "compiled": 258,
+      "reduction": 0.6537
+    },
+    {
+      "run_id": "run_1781636959",
+      "current": 745,
+      "compiled": 258,
+      "reduction": 0.6537
+    },
+    {
+      "run_id": "run_1781637120",
+      "current": 748,
+      "compiled": 233,
+      "reduction": 0.6885
+    },
+    {
+      "run_id": "run_1781637419",
+      "current": 745,
+      "compiled": 258,
+      "reduction": 0.6537
+    },
+    {
+      "run_id": "run_1781637569",
+      "current": 1599,
+      "compiled": 411,
+      "reduction": 0.743
+    },
+    {
+      "run_id": "run_1781637970",
+      "current": 745,
+      "compiled": 258,
+      "reduction": 0.6537
+    },
+    {
+      "run_id": "run_1781638525",
+      "current": 700,
+      "compiled": 259,
+      "reduction": 0.63
+    },
+    {
+      "run_id": "run_1781639689",
+      "current": 922,
+      "compiled": 259,
+      "reduction": 0.7191
+    },
+    {
+      "run_id": "run_1781640895",
+      "current": 1082,
+      "compiled": 288,
+      "reduction": 0.7338
+    },
+    {
+      "run_id": "run_1781641187",
+      "current": 1057,
+      "compiled": 236,
+      "reduction": 0.7767
+    },
+    {
+      "run_id": "run_1781641437",
+      "current": 886,
+      "compiled": 258,
+      "reduction": 0.7088
+    },
+    {
+      "run_id": "run_1781648046",
+      "current": 9110,
+      "compiled": 5497,
+      "reduction": 0.3966
+    },
+    {
+      "run_id": "run_1781650763",
+      "current": 823,
+      "compiled": 305,
+      "reduction": 0.6294
+    },
+    {
+      "run_id": "run_1781651429",
+      "current": 1030,
+      "compiled": 331,
+      "reduction": 0.6786
+    },
+    {
+      "run_id": "run_1781651796",
+      "current": 1526,
+      "compiled": 359,
+      "reduction": 0.7647
+    },
+    {
+      "run_id": "run_1782550800",
+      "current": 1059,
+      "compiled": 150,
+      "reduction": 0.8584
+    },
+    {
+      "run_id": "run_1782554207",
+      "current": 1561,
+      "compiled": 302,
+      "reduction": 0.8065
+    },
+    {
+      "run_id": "run_1782555233",
+      "current": 1345,
+      "compiled": 283,
+      "reduction": 0.7896
+    },
+    {
+      "run_id": "run_1782555587",
+      "current": 1479,
+      "compiled": 226,
+      "reduction": 0.8472
+    },
+    {
+      "run_id": "run_1782555959",
+      "current": 2342,
+      "compiled": 285,
+      "reduction": 0.8783
+    },
+    {
+      "run_id": "run_1782556651",
+      "current": 1407,
+      "compiled": 251,
+      "reduction": 0.8216
+    },
+    {
+      "run_id": "run_1782557078",
+      "current": 2230,
+      "compiled": 322,
+      "reduction": 0.8556
+    },
+    {
+      "run_id": "run_1782557360",
+      "current": 1313,
+      "compiled": 203,
+      "reduction": 0.8454
+    },
+    {
+      "run_id": "run_1782557702",
+      "current": 1231,
+      "compiled": 194,
+      "reduction": 0.8424
+    },
+    {
+      "run_id": "run_1782558902",
+      "current": 2474,
+      "compiled": 812,
+      "reduction": 0.6718
+    },
+    {
+      "run_id": "run_1782559260",
+      "current": 4818,
+      "compiled": 1198,
+      "reduction": 0.7513
+    },
+    {
+      "run_id": "run_1782560404",
+      "current": 1807,
+      "compiled": 1175,
+      "reduction": 0.3498
+    },
+    {
+      "run_id": "run_1782560843",
+      "current": 3532,
+      "compiled": 1196,
+      "reduction": 0.6614
+    },
+    {
+      "run_id": "run_1782565568",
+      "current": 1738,
+      "compiled": 232,
+      "reduction": 0.8665
+    },
+    {
+      "run_id": "run_1782573753",
+      "current": 3356,
+      "compiled": 318,
+      "reduction": 0.9052
+    },
+    {
+      "run_id": "run_1782575505",
+      "current": 2461,
+      "compiled": 280,
+      "reduction": 0.8862
+    },
+    {
+      "run_id": "run_1782576370",
+      "current": 1576,
+      "compiled": 240,
+      "reduction": 0.8477
+    }
+  ]
+}

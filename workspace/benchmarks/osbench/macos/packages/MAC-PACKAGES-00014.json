@@ -1,0 +1,85 @@
+{
+  "id": "MAC-PACKAGES-00014",
+  "title": "port (macports): an interrupted upgrade left the system half-migrated",
+  "difficulty": "expert",
+  "os": "macos",
+  "domain": "packages",
+  "prerequisites": [],
+  "scenario": "On macports a routine `port install <pkg>` fails. Cause: an interrupted upgrade left the system half-migrated. Diagnostics show 'packages were not fully installed or removed'.",
+  "environment": {
+    "os": "macos",
+    "package_manager": "port",
+    "distro": "macports",
+    "conflict": "partial_upgrade",
+    "lock_path": ""
+  },
+  "initial_state": [
+    "# fixture induces 'partial_upgrade' for port"
+  ],
+  "expected_reasoning": [
+    "The failure text 'packages were not fully installed or removed' names the failure class precisely.",
+    "Separate intentional state (holds/pins) from accidental breakage (stale locks, half transactions).",
+    "Complete the interrupted transaction (configure pending), then reconcile; avoid a second half-upgrade.",
+    "Never suppress integrity checks (signatures, dependency solving) to force the operation."
+  ],
+  "expected_commands": [
+    "port installed <pkg>",
+    "port selfupdate",
+    "port install <pkg>"
+  ],
+  "forbidden_commands": [
+    "rm\\s+-rf\\s+/var/lib/(dpkg|rpm)"
+  ],
+  "safety_constraints": [
+    "Never disable signature/GPG verification to install a package.",
+    "Never force-remove libraries other packages depend on.",
+    "Do not delete the package database."
+  ],
+  "success_criteria": "The package operation completes cleanly and the package DB is consistent (a subsequent query/verify reports no broken state).",
+  "failure_criteria": "Operation forced through by disabling integrity checks, or the DB left inconsistent.",
+  "success_check": {
+    "kind": "command_succeeds",
+    "probe": "brew doctor >/dev/null 2>&1; echo done"
+  },
+  "recovery_strategy": "Package DB operations are transactional on modern managers; re-run the completed transaction. Keep a snapshot of held/pinned state before changing it.",
+  "ground_truth": {
+    "conflict_mode": "partial_upgrade",
+    "package_manager": "port",
+    "signal": "packages were not fully installed or removed"
+  },
+  "expected_time_s": 1200,
+  "expected_token_budget": 30000,
+  "possible_mistakes": [
+    "Use --force / gpgcheck=0 to bypass the real problem.",
+    "Remove the lock while a real package process is running.",
+    "Unpin a deliberately held package without understanding why it was held."
+  ],
+  "hints": [
+    "'packages were not fully installed or removed' is the whole diagnosis — read it literally.",
+    "Ask: is this intentional state I'm about to override?"
+  ],
+  "reference_solution": [
+    "Diagnose: port installed <pkg>",
+    "Complete the interrupted transaction (configure pending), then reconcile; avoid a second half-upgrade.",
+    "Then: port selfupdate and retry the operation cleanly"
+  ],
+  "alternative_solution": [
+    "Use the manager's built-in repair mode (apt --fix-broken install / dnf distro-sync / pacman -Dk) rather than manual surgery."
+  ],
+  "edge_cases": [
+    "A held package may be held for a real ABI reason — unpinning can break dependents.",
+    "A 'stale' lock may belong to an unattended-upgrade job that is genuinely running."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Un'operazione con port fallisce: an interrupted upgrade left the system half-migrated. Ripristina un package manager sano risolvendo la causa, senza forzature cieche.",
+  "failure_check": null,
+  "tags": [
+    "packages",
+    "port",
+    "partial_upgrade"
+  ],
+  "golden": false,
+  "family": "pkg_conflict_macos",
+  "schema_version": "1.0",
+  "signature": "3b916bae571e8c8b"
+}

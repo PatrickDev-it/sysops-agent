@@ -1,0 +1,84 @@
+{
+  "id": "MAC-NETWORKING-00002",
+  "title": "macos: read-only diagnostic — Riporta gateway di default, interfacce e resolve",
+  "difficulty": "easy",
+  "os": "macos",
+  "domain": "networking",
+  "prerequisites": [],
+  "scenario": "On macos, gather a specific read-only system fact and record it to `net.txt`. This is a diagnostic: observe and report accurately, change nothing.",
+  "environment": {
+    "os": "macos",
+    "readonly": true,
+    "artifact": "net.txt"
+  },
+  "initial_state": [
+    "# no fault; a clean host suffices"
+  ],
+  "expected_reasoning": [
+    "This is a pure OBSERVE task — no system change is warranted.",
+    "Step: read the default route/gateway.",
+    "Step: read interfaces and DNS resolvers.",
+    "Write the collected facts verbatim to `net.txt`."
+  ],
+  "expected_commands": [
+    "route -n get default; ifconfig; scutil --dns",
+    "# redirect the output into net.txt"
+  ],
+  "forbidden_commands": [
+    "rm\\s",
+    "systemctl\\s+(stop|disable)",
+    "kill\\s",
+    "chmod\\s",
+    "Set-Service"
+  ],
+  "safety_constraints": [
+    "Read-only: do not modify any system state.",
+    "Report observed values exactly; do not fabricate."
+  ],
+  "success_criteria": "`net.txt` exists and contains the correct, current values for the requested facts.",
+  "failure_criteria": "`net.txt` missing, empty, wrong, or the system was modified.",
+  "success_check": {
+    "kind": "artifact",
+    "path": "net.txt"
+  },
+  "recovery_strategy": "No state changed; nothing to recover.",
+  "ground_truth": {
+    "task": "default_route",
+    "artifact": "net.txt",
+    "readonly": true
+  },
+  "expected_time_s": 60,
+  "expected_token_budget": 1500,
+  "possible_mistakes": [
+    "Modify state during a read-only task.",
+    "Report a hardcoded/guessed value instead of the observed one."
+  ],
+  "hints": [
+    "Representative command: route -n get default; ifconfig; scutil --dns",
+    "Redirect its output to net.txt."
+  ],
+  "reference_solution": [
+    "Run: route -n get default; ifconfig; scutil --dns",
+    "Write output to net.txt",
+    "Verify the file content"
+  ],
+  "alternative_solution": [
+    "Use the platform's structured/JSON output form and format it into the file."
+  ],
+  "edge_cases": [
+    "Some fields require elevation to read fully; report what is accessible.",
+    "Localized output — parse values, not labels."
+  ],
+  "risk": "SAFE",
+  "goal": "Riporta gateway di default, interfacce e resolver DNS in net.txt",
+  "failure_check": null,
+  "tags": [
+    "diagnostic",
+    "readonly",
+    "default_route"
+  ],
+  "golden": false,
+  "family": "easy_diagnostics",
+  "schema_version": "1.0",
+  "signature": "2fee60dff5a7b053"
+}

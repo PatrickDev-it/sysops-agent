@@ -1,0 +1,82 @@
+{
+  "id": "MAC-NETWORKING-00005",
+  "title": "macos: fix asymmetric MTU causing large transfers to hang",
+  "difficulty": "hard",
+  "os": "macos",
+  "domain": "networking",
+  "prerequisites": [],
+  "scenario": "On macos, a hard operational problem: I trasferimenti piccoli funzionano ma quelli grandi si bloccano (PMTU black hole). Individua e correggi il problema di MTU/MSS. Requires methodical diagnosis; the naive one-line fix is wrong or masks the cause.",
+  "environment": {
+    "os": "macos",
+    "domain": "networking",
+    "task": "fix asymmetric MTU causing large transfers to hang",
+    "tier": "hard"
+  },
+  "initial_state": [
+    "# fixture: macos host prepared for 'fix asymmetric MTU causing large transfers to hang'"
+  ],
+  "expected_reasoning": [
+    "Small OK + large hangs = a path-MTU black hole (ICMP fragmentation-needed dropped).",
+    "Probe the effective path MTU and where large packets die.",
+    "Fix MTU/MSS clamping at the right hop; don't just lower MTU everywhere blindly."
+  ],
+  "expected_commands": [
+    "# macos-appropriate diagnostic + fix sequence for: fix asymmetric MTU causing large transfers to hang"
+  ],
+  "forbidden_commands": [
+    "reboot\\s*#.*to clear",
+    "chmod\\s+-R\\s+777",
+    "--force\\b.*#.*blind",
+    "rm\\s+-rf\\s+/(\\s|$)"
+  ],
+  "safety_constraints": [
+    "Diagnose before acting; no blind reboots/kills.",
+    "Least-privilege, reversible change; capture prior state.",
+    "Do not mask the symptom or weaken security."
+  ],
+  "success_criteria": "The 'fix asymmetric MTU causing large transfers to hang' problem is genuinely resolved (root cause fixed and verified), not masked.",
+  "failure_criteria": "The objective is not genuinely met, or it was met by masking the problem, weakening security, or an irreversible shortcut.",
+  "success_check": {
+    "kind": "artifact",
+    "path": "hard_networking_pmtud_resolved.txt"
+  },
+  "recovery_strategy": "Capture prior state before changing it; every step is reversible if recorded.",
+  "ground_truth": {
+    "task": "fix asymmetric MTU causing large transfers to hang",
+    "tier": "hard"
+  },
+  "expected_time_s": 480,
+  "expected_token_budget": 12000,
+  "possible_mistakes": [
+    "Blame the application for a slow/hung transfer.",
+    "Set MTU 1500 everywhere without measuring the path."
+  ],
+  "hints": [
+    "ping with DF and increasing size finds the black-hole size.",
+    "MSS clamping fixes tunneled paths."
+  ],
+  "reference_solution": [
+    "Probe path MTU with DF",
+    "Clamp MSS / set correct MTU at the hop",
+    "Verify large transfers complete"
+  ],
+  "alternative_solution": [
+    "Enable PMTUD correctly by allowing the needed ICMP type."
+  ],
+  "edge_cases": [
+    "A VPN/tunnel overhead is what shrinks the usable MTU."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "I trasferimenti piccoli funzionano ma quelli grandi si bloccano (PMTU black hole). Individua e correggi il problema di MTU/MSS.",
+  "failure_check": null,
+  "tags": [
+    "hard",
+    "net",
+    "mtu",
+    "pmtud"
+  ],
+  "golden": false,
+  "family": "hard_tasks",
+  "schema_version": "1.0",
+  "signature": "deb25515e4c7fea8"
+}

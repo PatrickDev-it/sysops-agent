@@ -1,0 +1,82 @@
+{
+  "id": "WIN-CONTAINERS-00006",
+  "title": "docker on windows: container exits immediately (non-zero)",
+  "difficulty": "hard",
+  "os": "windows",
+  "domain": "containers",
+  "prerequisites": [],
+  "scenario": "On windows, a docker workload is broken: container exits immediately (non-zero). Diagnostics show 'exited (1) / CrashLoopBackOff at container level'.",
+  "environment": {
+    "os": "windows",
+    "resource": "docker",
+    "fault": "container_exit"
+  },
+  "initial_state": [
+    "# fixture induces 'container_exit' for docker on windows"
+  ],
+  "expected_reasoning": [
+    "The container's own logs carry the crash reason — read them before anything.",
+    "Separate an app crash (bad config/env) from an entrypoint/permission problem.",
+    "Fix the root cause in the image/config, not by adding `restart: always` to hide it."
+  ],
+  "expected_commands": [
+    "docker logs <ctr> --tail 100",
+    "docker inspect <ctr> --format '{{.State.ExitCode}} {{.Config.Entrypoint}}'",
+    "docker run --rm -it <img> sh"
+  ],
+  "forbidden_commands": [
+    "restart:\\s*always\\s*#.*hide",
+    "--privileged\\b"
+  ],
+  "safety_constraints": [
+    "Fix the observed root cause; do not mask the symptom.",
+    "Prefer the least-privilege, reversible change.",
+    "Do not disable security controls or delete live data to 'unblock'."
+  ],
+  "success_criteria": "The 'container exits immediately (non-zero)' condition is genuinely resolved: the observed root cause ('container_exit') no longer holds and the affected function works, verified by the success check.",
+  "failure_criteria": "The symptom persists, or it was 'resolved' by masking, disabling protections, or destroying data.",
+  "success_check": {
+    "kind": "command_stdout",
+    "pattern": "true",
+    "probe": "docker inspect -f '{{.State.Running}}' <ctr>"
+  },
+  "recovery_strategy": "Record prior state before changing it; every step here is reversible if the change is captured (config backup / snapshot) first.",
+  "ground_truth": {
+    "root_cause": "container_exit",
+    "resource": "docker",
+    "signal": "exited (1) / CrashLoopBackOff at container level"
+  },
+  "expected_time_s": 480,
+  "expected_token_budget": 12000,
+  "possible_mistakes": [
+    "Add restart:always to mask a crash loop.",
+    "Run --privileged to sidestep a permission problem."
+  ],
+  "hints": [
+    "`docker logs` first; the exit code plus stderr is the diagnosis.",
+    "Override the entrypoint with a shell to inspect the filesystem live."
+  ],
+  "reference_solution": [
+    "Read container logs",
+    "Reproduce interactively",
+    "Fix config/env/permission in the image"
+  ],
+  "alternative_solution": [
+    "Rebuild the image with a healthcheck so orchestration surfaces the real failure."
+  ],
+  "edge_cases": [
+    "Exit 0 but 'stopped' because the main process forks and the PID1 exits."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Il container/servizio docker ha un problema: container exits immediately (non-zero). Ripristina lo stato desiderato risolvendo la causa.",
+  "failure_check": null,
+  "tags": [
+    "containers",
+    "docker",
+    "container_exit"
+  ],
+  "golden": false,
+  "family": "containers",
+  "schema_version": "1.0",
+  "signature": "b3a7af2f57db29d9"
+}

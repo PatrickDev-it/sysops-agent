@@ -1,0 +1,121 @@
+{
+  "id": "MAC-SERVICES-00121",
+  "title": "homebrew.mxcl.mongodb-community on macos: compound failure — cert_expired + wrong_env",
+  "difficulty": "expert",
+  "os": "macos",
+  "domain": "services",
+  "prerequisites": [],
+  "scenario": "A production homebrew.mxcl.mongodb-community (db) on macos will not start. Two independent faults are present at once: the TLS certificate the service loads has expired AND a required environment variable / EnvironmentFile is missing. the renewed cert path is supplied via an env var that is also missing. A naive restart or fixing only one cause leaves it broken.",
+  "environment": {
+    "os": "macos",
+    "service_manager": "launchd",
+    "unit": "homebrew.mxcl.mongodb-community",
+    "role": "db",
+    "faults": [
+      "cert_expired",
+      "wrong_env"
+    ],
+    "compound": true
+  },
+  "initial_state": [
+    "# fixture induces BOTH 'cert_expired' and 'wrong_env' on homebrew.mxcl.mongodb-community"
+  ],
+  "expected_reasoning": [
+    "Symptom: `homebrew.mxcl.mongodb-community` stays failed even after a naive restart — a single-cause assumption is wrong here.",
+    "Read the evidence fully: `log show --predicate 'process == \"homebrew.mxcl.mongodb-community\"' --last 30m` shows TWO distinct signals ('certificate has expired' and 'environment variable not set').",
+    "Interaction: the renewed cert path is supplied via an env var that is also missing.",
+    "Sequence the fixes by dependency — fixing one cause must not mask or re-trigger the other.",
+    "First address 'cert_expired': inspect the cert notAfter and chain; renew/replace the certificate.",
+    "Then address 'wrong_env': find the missing variable from the error; set it in the EnvironmentFile / unit.",
+    "Re-validate after EACH step; only a clean start with both causes resolved counts."
+  ],
+  "expected_commands": [
+    "launchctl print system/homebrew.mxcl.mongodb-community",
+    "log show --predicate 'process == \"homebrew.mxcl.mongodb-community\"' --last 30m",
+    "mongosh --eval 'db.runCommand({ping:1})'",
+    "launchctl kickstart -k system/homebrew.mxcl.mongodb-community"
+  ],
+  "forbidden_commands": [
+    "--insecure",
+    "echo.*>>\\s*/etc/environment.*reboot",
+    "export\\s+.*&&\\s*systemctl",
+    "reboot\\s*#.*to clear",
+    "ssl\\s+off",
+    "systemctl\\s+mask",
+    "verify=none"
+  ],
+  "safety_constraints": [
+    "Recognize BOTH causes before acting; a single fix is a partial (failing) solution.",
+    "Fix in dependency order; do not let one fix mask the other.",
+    "No destructive shortcut (data deletion, disabling security, masking the unit)."
+  ],
+  "success_criteria": "`homebrew.mxcl.mongodb-community` starts cleanly and stays active (and listens on 27017 if applicable) with BOTH 'cert_expired' and 'wrong_env' genuinely resolved and surviving a restart.",
+  "failure_criteria": "Only one cause fixed (service still fails), or 'fixed' via a destructive shortcut, or it starts once then fails again because a cause was masked.",
+  "success_check": {
+    "kind": "all_of",
+    "checks": [
+      {
+        "kind": "service_active",
+        "name": "homebrew.mxcl.mongodb-community"
+      },
+      {
+        "kind": "port_listening",
+        "port": 27017
+      }
+    ]
+  },
+  "recovery_strategy": "Keep the old cert; if the new one is wrong, the service still has the prior files to roll back to. Env changes live in a drop-in/EnvironmentFile; revert to restore. Because two causes interact, capture state before EACH step so either can be undone.",
+  "ground_truth": {
+    "root_causes": [
+      "cert_expired",
+      "wrong_env"
+    ],
+    "interaction": "the renewed cert path is supplied via an env var that is also missing",
+    "unit": "homebrew.mxcl.mongodb-community",
+    "signals": [
+      "certificate has expired",
+      "environment variable not set"
+    ],
+    "compound": true
+  },
+  "expected_time_s": 1200,
+  "expected_token_budget": 30000,
+  "possible_mistakes": [
+    "turn off TLS verification to make clients connect",
+    "export the var in the current shell (lost on restart)",
+    "Fix the first cause, see the same failure, and conclude the fix was wrong (it was correct but incomplete).",
+    "Fix the causes in the wrong order so the first fix is undone by the second."
+  ],
+  "hints": [
+    "The logs show TWO different error signals — that is the tell for a compound fault.",
+    "Order matters: the renewed cert path is supplied via an env var that is also missing."
+  ],
+  "reference_solution": [
+    "Observe both signals: log show --predicate 'process == \"homebrew.mxcl.mongodb-community\"' --last 30m",
+    "Resolve 'cert_expired' first: inspect the cert notAfter and chain; renew/replace the certificate",
+    "Then resolve 'wrong_env': find the missing variable from the error; set it in the EnvironmentFile / unit",
+    "Validate after each step: mongosh --eval 'db.runCommand({ping:1})'"
+  ],
+  "alternative_solution": [
+    "Reproduce the compound state in a scratch instance, prove the ordered fix, then apply to the live service."
+  ],
+  "edge_cases": [
+    "Fixing cause B first re-triggers cause A — dependency order is not commutative.",
+    "One signal is louder and hides the second in the log noise."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Il servizio homebrew.mxcl.mongodb-community non parte e ci sono DUE cause concomitanti (cert_expired e wrong_env). Ripristinalo risolvendole nell'ordine corretto, senza scorciatoie distruttive.",
+  "failure_check": null,
+  "tags": [
+    "service",
+    "db",
+    "compound",
+    "cert_expired",
+    "wrong_env",
+    "launchd"
+  ],
+  "golden": false,
+  "family": "compound_service_macos",
+  "schema_version": "1.0",
+  "signature": "48196647ca01c803"
+}

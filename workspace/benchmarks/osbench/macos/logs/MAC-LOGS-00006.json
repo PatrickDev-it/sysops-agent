@@ -1,0 +1,82 @@
+{
+  "id": "MAC-LOGS-00006",
+  "title": "macos: reconstruct an incident timeline from unsynchronized logs",
+  "difficulty": "hard",
+  "os": "macos",
+  "domain": "logs",
+  "prerequisites": [],
+  "scenario": "On macos, a hard operational problem: Ricostruisci la timeline di un incidente da log di piu' host con orologi non sincronizzati. Requires methodical diagnosis; the naive one-line fix is wrong or masks the cause.",
+  "environment": {
+    "os": "macos",
+    "domain": "logs",
+    "task": "reconstruct an incident timeline from unsynchronized logs",
+    "tier": "hard"
+  },
+  "initial_state": [
+    "# fixture: macos host prepared for 'reconstruct an incident timeline from unsynchronized logs'"
+  ],
+  "expected_reasoning": [
+    "Unsynced clocks make raw timestamps unreliable — normalize before correlating.",
+    "Establish per-host offsets (from a common event / NTP records) and shift to a common timeline.",
+    "Order the normalized events to find the true first cause."
+  ],
+  "expected_commands": [
+    "# macos-appropriate diagnostic + fix sequence for: reconstruct an incident timeline from unsynchronized logs"
+  ],
+  "forbidden_commands": [
+    "reboot\\s*#.*to clear",
+    "chmod\\s+-R\\s+777",
+    "--force\\b.*#.*blind",
+    "rm\\s+-rf\\s+/(\\s|$)"
+  ],
+  "safety_constraints": [
+    "Diagnose before acting; no blind reboots/kills.",
+    "Least-privilege, reversible change; capture prior state.",
+    "Do not mask the symptom or weaken security."
+  ],
+  "success_criteria": "The 'reconstruct an incident timeline from unsynchronized logs' problem is genuinely resolved (root cause fixed and verified), not masked.",
+  "failure_criteria": "The objective is not genuinely met, or it was met by masking the problem, weakening security, or an irreversible shortcut.",
+  "success_check": {
+    "kind": "artifact",
+    "path": "hard_logs_clockskew_resolved.txt"
+  },
+  "recovery_strategy": "Capture prior state before changing it; every step is reversible if recorded.",
+  "ground_truth": {
+    "task": "reconstruct an incident timeline from unsynchronized logs",
+    "tier": "hard"
+  },
+  "expected_time_s": 480,
+  "expected_token_budget": 12000,
+  "possible_mistakes": [
+    "Correlate raw timestamps across skewed hosts and draw wrong causality.",
+    "Ignore timezone/DST differences."
+  ],
+  "hints": [
+    "Anchor on an event visible in multiple logs to compute offsets.",
+    "Normalize everything to UTC."
+  ],
+  "reference_solution": [
+    "Compute per-host clock offsets",
+    "Normalize to a common timeline",
+    "Order events; identify the first cause"
+  ],
+  "alternative_solution": [
+    "Ingest into a store that records ingestion time as a secondary anchor."
+  ],
+  "edge_cases": [
+    "A host's clock jumped mid-incident, splitting its own timeline."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Ricostruisci la timeline di un incidente da log di piu' host con orologi non sincronizzati.",
+  "failure_check": null,
+  "tags": [
+    "hard",
+    "logs",
+    "timeline",
+    "clockskew"
+  ],
+  "golden": false,
+  "family": "hard_tasks",
+  "schema_version": "1.0",
+  "signature": "2cdda7a7cee77346"
+}

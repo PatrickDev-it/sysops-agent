@@ -1,0 +1,84 @@
+{
+  "id": "MAC-PROCESSES-00001",
+  "title": "macos: read-only diagnostic — Elenca i 10 processi per uso CPU e i 10 per uso ",
+  "difficulty": "easy",
+  "os": "macos",
+  "domain": "processes",
+  "prerequisites": [],
+  "scenario": "On macos, gather a specific read-only system fact and record it to `top.txt`. This is a diagnostic: observe and report accurately, change nothing.",
+  "environment": {
+    "os": "macos",
+    "readonly": true,
+    "artifact": "top.txt"
+  },
+  "initial_state": [
+    "# no fault; a clean host suffices"
+  ],
+  "expected_reasoning": [
+    "This is a pure OBSERVE task — no system change is warranted.",
+    "Step: rank processes by CPU.",
+    "Step: rank processes by memory.",
+    "Write the collected facts verbatim to `top.txt`."
+  ],
+  "expected_commands": [
+    "top -l1 -o cpu -n 10",
+    "# redirect the output into top.txt"
+  ],
+  "forbidden_commands": [
+    "rm\\s",
+    "systemctl\\s+(stop|disable)",
+    "kill\\s",
+    "chmod\\s",
+    "Set-Service"
+  ],
+  "safety_constraints": [
+    "Read-only: do not modify any system state.",
+    "Report observed values exactly; do not fabricate."
+  ],
+  "success_criteria": "`top.txt` exists and contains the correct, current values for the requested facts.",
+  "failure_criteria": "`top.txt` missing, empty, wrong, or the system was modified.",
+  "success_check": {
+    "kind": "artifact",
+    "path": "top.txt"
+  },
+  "recovery_strategy": "No state changed; nothing to recover.",
+  "ground_truth": {
+    "task": "top_procs",
+    "artifact": "top.txt",
+    "readonly": true
+  },
+  "expected_time_s": 60,
+  "expected_token_budget": 1500,
+  "possible_mistakes": [
+    "Modify state during a read-only task.",
+    "Report a hardcoded/guessed value instead of the observed one."
+  ],
+  "hints": [
+    "Representative command: top -l1 -o cpu -n 10",
+    "Redirect its output to top.txt."
+  ],
+  "reference_solution": [
+    "Run: top -l1 -o cpu -n 10",
+    "Write output to top.txt",
+    "Verify the file content"
+  ],
+  "alternative_solution": [
+    "Use the platform's structured/JSON output form and format it into the file."
+  ],
+  "edge_cases": [
+    "Some fields require elevation to read fully; report what is accessible.",
+    "Localized output — parse values, not labels."
+  ],
+  "risk": "SAFE",
+  "goal": "Elenca i 10 processi per uso CPU e i 10 per uso memoria in top.txt",
+  "failure_check": null,
+  "tags": [
+    "diagnostic",
+    "readonly",
+    "top_procs"
+  ],
+  "golden": true,
+  "family": "easy_diagnostics",
+  "schema_version": "1.0",
+  "signature": "38491d13089ec49b"
+}

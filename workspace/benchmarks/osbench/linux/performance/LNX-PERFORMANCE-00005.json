@@ -1,0 +1,82 @@
+{
+  "id": "LNX-PERFORMANCE-00005",
+  "title": "linux: reduce excessive context-switching degrading throughput",
+  "difficulty": "hard",
+  "os": "linux",
+  "domain": "performance",
+  "prerequisites": [],
+  "scenario": "On linux, a hard operational problem: Un carico soffre di context-switching eccessivo che degrada il throughput. Individua la causa (troppi thread / lock contention) e riduci lo switching. Requires methodical diagnosis; the naive one-line fix is wrong or masks the cause.",
+  "environment": {
+    "os": "linux",
+    "domain": "performance",
+    "task": "reduce excessive context-switching degrading throughput",
+    "tier": "hard"
+  },
+  "initial_state": [
+    "# fixture: linux host prepared for 'reduce excessive context-switching degrading throughput'"
+  ],
+  "expected_reasoning": [
+    "High involuntary context switches point at oversubscription or lock contention, not raw CPU shortage.",
+    "Measure voluntary vs involuntary switches and thread counts vs cores.",
+    "Right-size concurrency / fix the contended lock; verify throughput improves as switching drops."
+  ],
+  "expected_commands": [
+    "# linux-appropriate diagnostic + fix sequence for: reduce excessive context-switching degrading throughput"
+  ],
+  "forbidden_commands": [
+    "reboot\\s*#.*to clear",
+    "chmod\\s+-R\\s+777",
+    "--force\\b.*#.*blind",
+    "rm\\s+-rf\\s+/(\\s|$)"
+  ],
+  "safety_constraints": [
+    "Diagnose before acting; no blind reboots/kills.",
+    "Least-privilege, reversible change; capture prior state.",
+    "Do not mask the symptom or weaken security."
+  ],
+  "success_criteria": "The 'reduce excessive context-switching degrading throughput' problem is genuinely resolved (root cause fixed and verified), not masked.",
+  "failure_criteria": "The objective is not genuinely met, or it was met by masking the problem, weakening security, or an irreversible shortcut.",
+  "success_check": {
+    "kind": "artifact",
+    "path": "hard_performance_concurrency_resolved.txt"
+  },
+  "recovery_strategy": "Capture prior state before changing it; every step is reversible if recorded.",
+  "ground_truth": {
+    "task": "reduce excessive context-switching degrading throughput",
+    "tier": "hard"
+  },
+  "expected_time_s": 480,
+  "expected_token_budget": 12000,
+  "possible_mistakes": [
+    "Add more threads, worsening oversubscription.",
+    "Add CPUs when the wall is lock contention."
+  ],
+  "hints": [
+    "Involuntary switches ~ oversubscription; voluntary ~ blocking/locks.",
+    "Threads >> cores is a red flag."
+  ],
+  "reference_solution": [
+    "Measure switch types + thread/core ratio",
+    "Right-size concurrency / fix contention",
+    "Verify throughput up"
+  ],
+  "alternative_solution": [
+    "Pin threads / use a thread pool sized to cores to cut switching."
+  ],
+  "edge_cases": [
+    "A busy-wait spinlock burns CPU without showing as blocking."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Un carico soffre di context-switching eccessivo che degrada il throughput. Individua la causa (troppi thread / lock contention) e riduci lo switching.",
+  "failure_check": null,
+  "tags": [
+    "hard",
+    "perf",
+    "contextswitch",
+    "concurrency"
+  ],
+  "golden": false,
+  "family": "hard_tasks",
+  "schema_version": "1.0",
+  "signature": "61d664230ea12059"
+}

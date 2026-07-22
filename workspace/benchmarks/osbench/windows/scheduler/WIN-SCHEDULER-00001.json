@@ -1,0 +1,83 @@
+{
+  "id": "WIN-SCHEDULER-00001",
+  "title": "windows: read-only diagnostic — Elenca i job schedulati (cron/timer/task) in job",
+  "difficulty": "easy",
+  "os": "windows",
+  "domain": "scheduler",
+  "prerequisites": [],
+  "scenario": "On windows, gather a specific read-only system fact and record it to `jobs.txt`. This is a diagnostic: observe and report accurately, change nothing.",
+  "environment": {
+    "os": "windows",
+    "readonly": true,
+    "artifact": "jobs.txt"
+  },
+  "initial_state": [
+    "# no fault; a clean host suffices"
+  ],
+  "expected_reasoning": [
+    "This is a pure OBSERVE task — no system change is warranted.",
+    "Step: enumerate scheduled jobs for the system and users.",
+    "Write the collected facts verbatim to `jobs.txt`."
+  ],
+  "expected_commands": [
+    "Get-ScheduledTask | Where State -ne Disabled | Select TaskName,State",
+    "# redirect the output into jobs.txt"
+  ],
+  "forbidden_commands": [
+    "rm\\s",
+    "systemctl\\s+(stop|disable)",
+    "kill\\s",
+    "chmod\\s",
+    "Set-Service"
+  ],
+  "safety_constraints": [
+    "Read-only: do not modify any system state.",
+    "Report observed values exactly; do not fabricate."
+  ],
+  "success_criteria": "`jobs.txt` exists and contains the correct, current values for the requested facts.",
+  "failure_criteria": "`jobs.txt` missing, empty, wrong, or the system was modified.",
+  "success_check": {
+    "kind": "artifact",
+    "path": "jobs.txt"
+  },
+  "recovery_strategy": "No state changed; nothing to recover.",
+  "ground_truth": {
+    "task": "scheduled_jobs",
+    "artifact": "jobs.txt",
+    "readonly": true
+  },
+  "expected_time_s": 60,
+  "expected_token_budget": 1500,
+  "possible_mistakes": [
+    "Modify state during a read-only task.",
+    "Report a hardcoded/guessed value instead of the observed one."
+  ],
+  "hints": [
+    "Representative command: Get-ScheduledTask | Where State -ne Disabled | Select TaskName,State",
+    "Redirect its output to jobs.txt."
+  ],
+  "reference_solution": [
+    "Run: Get-ScheduledTask | Where State -ne Disabled | Select TaskName,State",
+    "Write output to jobs.txt",
+    "Verify the file content"
+  ],
+  "alternative_solution": [
+    "Use the platform's structured/JSON output form and format it into the file."
+  ],
+  "edge_cases": [
+    "Some fields require elevation to read fully; report what is accessible.",
+    "Localized output — parse values, not labels."
+  ],
+  "risk": "SAFE",
+  "goal": "Elenca i job schedulati (cron/timer/task) in jobs.txt",
+  "failure_check": null,
+  "tags": [
+    "diagnostic",
+    "readonly",
+    "scheduled_jobs"
+  ],
+  "golden": false,
+  "family": "easy_diagnostics",
+  "schema_version": "1.0",
+  "signature": "5219f463da72c7cc"
+}

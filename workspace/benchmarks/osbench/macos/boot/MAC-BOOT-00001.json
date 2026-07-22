@@ -1,0 +1,82 @@
+{
+  "id": "MAC-BOOT-00001",
+  "title": "macos: recover a host stuck waiting on a network mount at boot",
+  "difficulty": "hard",
+  "os": "macos",
+  "domain": "boot",
+  "prerequisites": [],
+  "scenario": "On macos, a hard operational problem: Un host si blocca in boot in attesa di un mount di rete non disponibile. Rendi il boot resiliente senza rinunciare al mount quando disponibile. Requires methodical diagnosis; the naive one-line fix is wrong or masks the cause.",
+  "environment": {
+    "os": "macos",
+    "domain": "boot",
+    "task": "recover a host stuck waiting on a network mount at boot",
+    "tier": "hard"
+  },
+  "initial_state": [
+    "# fixture: macos host prepared for 'recover a host stuck waiting on a network mount at boot'"
+  ],
+  "expected_reasoning": [
+    "A required network mount can hang boot indefinitely — make it non-blocking while still mounting when present.",
+    "Identify the blocking mount and mark it nofail/automount so boot proceeds.",
+    "Verify the host boots without the share and mounts it automatically once reachable."
+  ],
+  "expected_commands": [
+    "# macos-appropriate diagnostic + fix sequence for: recover a host stuck waiting on a network mount at boot"
+  ],
+  "forbidden_commands": [
+    "reboot\\s*#.*to clear",
+    "chmod\\s+-R\\s+777",
+    "--force\\b.*#.*blind",
+    "rm\\s+-rf\\s+/(\\s|$)"
+  ],
+  "safety_constraints": [
+    "Diagnose before acting; no blind reboots/kills.",
+    "Least-privilege, reversible change; capture prior state.",
+    "Do not mask the symptom or weaken security."
+  ],
+  "success_criteria": "The 'recover a host stuck waiting on a network mount at boot' problem is genuinely resolved (root cause fixed and verified), not masked.",
+  "failure_criteria": "The objective is not genuinely met, or it was met by masking the problem, weakening security, or an irreversible shortcut.",
+  "success_check": {
+    "kind": "artifact",
+    "path": "hard_boot_nofail_resolved.txt"
+  },
+  "recovery_strategy": "Capture prior state before changing it; every step is reversible if recorded.",
+  "ground_truth": {
+    "task": "recover a host stuck waiting on a network mount at boot",
+    "tier": "hard"
+  },
+  "expected_time_s": 480,
+  "expected_token_budget": 12000,
+  "possible_mistakes": [
+    "Remove the mount entirely, losing it when the share IS available.",
+    "Leave it hard-required, risking future hangs."
+  ],
+  "hints": [
+    "nofail + automount lets boot proceed and mount later.",
+    "x-systemd.automount defers the mount to first access."
+  ],
+  "reference_solution": [
+    "Identify the blocking mount",
+    "Make it nofail/automount",
+    "Verify boot without it + auto-mount when present"
+  ],
+  "alternative_solution": [
+    "Move the dependency to a service that needs the share, gated on its readiness."
+  ],
+  "edge_cases": [
+    "The share is up but slow; a mount timeout is needed, not removal."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Un host si blocca in boot in attesa di un mount di rete non disponibile. Rendi il boot resiliente senza rinunciare al mount quando disponibile.",
+  "failure_check": null,
+  "tags": [
+    "hard",
+    "boot",
+    "netmount",
+    "nofail"
+  ],
+  "golden": false,
+  "family": "hard_tasks",
+  "schema_version": "1.0",
+  "signature": "a085c73aac25d6a8"
+}

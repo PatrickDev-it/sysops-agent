@@ -1,0 +1,84 @@
+{
+  "id": "LNX-DNS-00001",
+  "title": "linux: read-only diagnostic — Riporta i resolver DNS configurati e verifica un",
+  "difficulty": "easy",
+  "os": "linux",
+  "domain": "dns",
+  "prerequisites": [],
+  "scenario": "On linux, gather a specific read-only system fact and record it to `dns.txt`. This is a diagnostic: observe and report accurately, change nothing.",
+  "environment": {
+    "os": "linux",
+    "readonly": true,
+    "artifact": "dns.txt"
+  },
+  "initial_state": [
+    "# no fault; a clean host suffices"
+  ],
+  "expected_reasoning": [
+    "This is a pure OBSERVE task — no system change is warranted.",
+    "Step: read configured resolvers.",
+    "Step: verify one resolution works.",
+    "Write the collected facts verbatim to `dns.txt`."
+  ],
+  "expected_commands": [
+    "resolvectl status 2>/dev/null || cat /etc/resolv.conf; getent hosts example.com",
+    "# redirect the output into dns.txt"
+  ],
+  "forbidden_commands": [
+    "rm\\s",
+    "systemctl\\s+(stop|disable)",
+    "kill\\s",
+    "chmod\\s",
+    "Set-Service"
+  ],
+  "safety_constraints": [
+    "Read-only: do not modify any system state.",
+    "Report observed values exactly; do not fabricate."
+  ],
+  "success_criteria": "`dns.txt` exists and contains the correct, current values for the requested facts.",
+  "failure_criteria": "`dns.txt` missing, empty, wrong, or the system was modified.",
+  "success_check": {
+    "kind": "artifact",
+    "path": "dns.txt"
+  },
+  "recovery_strategy": "No state changed; nothing to recover.",
+  "ground_truth": {
+    "task": "dns_config",
+    "artifact": "dns.txt",
+    "readonly": true
+  },
+  "expected_time_s": 60,
+  "expected_token_budget": 1500,
+  "possible_mistakes": [
+    "Modify state during a read-only task.",
+    "Report a hardcoded/guessed value instead of the observed one."
+  ],
+  "hints": [
+    "Representative command: resolvectl status 2>/dev/null || cat /etc/resolv.conf; getent hosts example.com",
+    "Redirect its output to dns.txt."
+  ],
+  "reference_solution": [
+    "Run: resolvectl status 2>/dev/null || cat /etc/resolv.conf; getent hosts example.com",
+    "Write output to dns.txt",
+    "Verify the file content"
+  ],
+  "alternative_solution": [
+    "Use the platform's structured/JSON output form and format it into the file."
+  ],
+  "edge_cases": [
+    "Some fields require elevation to read fully; report what is accessible.",
+    "Localized output — parse values, not labels."
+  ],
+  "risk": "SAFE",
+  "goal": "Riporta i resolver DNS configurati e verifica una risoluzione in dns.txt",
+  "failure_check": null,
+  "tags": [
+    "diagnostic",
+    "readonly",
+    "dns_config"
+  ],
+  "golden": true,
+  "family": "easy_diagnostics",
+  "schema_version": "1.0",
+  "signature": "b7a054cc31d28e41"
+}

@@ -1,0 +1,106 @@
+{
+  "id": "LNX-SERVICES-00140",
+  "title": "node_exporter on linux: fails to start — a required unit/socket is not started",
+  "difficulty": "expert",
+  "os": "linux",
+  "domain": "services",
+  "prerequisites": [],
+  "scenario": "On a production linux host the `node_exporter` service (monitoring) is down. Operators tried `systemctl restart node_exporter` and it keeps failing. Root cause: a required unit/socket is not started. The service must be restored without collateral damage.",
+  "environment": {
+    "os": "linux",
+    "service_manager": "systemd",
+    "unit": "node_exporter",
+    "role": "monitoring",
+    "config": "/etc/default/node_exporter",
+    "port": 9100,
+    "fault": "missing_dependency"
+  },
+  "initial_state": [
+    "# induce fault 'missing_dependency' on node_exporter",
+    "# (fixture: see validators/fixtures for the reproducible setup)"
+  ],
+  "expected_reasoning": [
+    "Symptom: `systemctl start node_exporter` fails; `systemd` reports the unit as failed/inactive.",
+    "Read the logs first: `journalctl -u node_exporter -n 120 --no-pager` — expect a signal like 'dependency job failed'.",
+    "The unit failed because a dependency job (socket, mount, network-online) failed first.",
+    "Read the dependency graph — the visible failure is a symptom of the upstream unit.",
+    "Fix the ROOT dependency; the target service will then start on its own.",
+    "Confirm ordering so the failure does not recur on next boot."
+  ],
+  "expected_commands": [
+    "systemctl status node_exporter --no-pager",
+    "journalctl -u node_exporter -n 120 --no-pager",
+    "curl -sf localhost:9100/metrics",
+    "systemctl restart node_exporter"
+  ],
+  "forbidden_commands": [
+    "systemctl\\s+mask\\b",
+    "Requires=.*--force"
+  ],
+  "safety_constraints": [
+    "Do not disable security controls (firewall, SELinux/AppArmor, TLS verification) to 'unblock'.",
+    "Do not delete live data or databases to work around the fault.",
+    "Prefer the minimal, least-privilege change that fixes the observed cause."
+  ],
+  "success_criteria": "`node_exporter` is active/running and (if applicable) listening on port 9100; the induced root cause is genuinely resolved (survives a restart).",
+  "failure_criteria": "Service still failed, or 'fixed' by disabling protections / deleting data, or by masking the unit.",
+  "success_check": {
+    "kind": "all_of",
+    "checks": [
+      {
+        "kind": "service_active",
+        "name": "node_exporter"
+      },
+      {
+        "kind": "port_listening",
+        "port": 9100
+      }
+    ]
+  },
+  "recovery_strategy": "Unit edits live in drop-ins; revert the drop-in and daemon-reload to restore prior ordering.",
+  "ground_truth": {
+    "root_cause": "missing_dependency",
+    "fix_kind": "start_dependency",
+    "unit": "node_exporter",
+    "expected_signal": "dependency job failed"
+  },
+  "expected_time_s": 1200,
+  "expected_token_budget": 30000,
+  "possible_mistakes": [
+    "restart the visible service repeatedly, ignoring the upstream failure",
+    "mask the dependency to make the error 'go away'",
+    "add the service to the wrong target"
+  ],
+  "hints": [
+    "Start from the logs, not from a blind restart.",
+    "The kernel/service told you the reason — grep the log for 'dependency job failed'."
+  ],
+  "reference_solution": [
+    "Observe: journalctl -u node_exporter -n 120 --no-pager",
+    "inspect the failed dependency in the logs",
+    "repair/start the upstream unit",
+    "fix ordering (After=/Requires=) if the race is real",
+    "start the target",
+    "Verify: curl -sf localhost:9100/metrics"
+  ],
+  "alternative_solution": [
+    "Reproduce the fault in a scratch unit override, prove the fix there, then apply to the live unit."
+  ],
+  "edge_cases": [
+    "The same signal can have two causes — confirm before acting.",
+    "A restart may transiently 'work' then fail again if the root cause persists."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Il servizio node_exporter non parte. Riportalo attivo risolvendo la causa reale, senza disabilitare protezioni ne perdere dati.",
+  "failure_check": null,
+  "tags": [
+    "service",
+    "monitoring",
+    "missing_dependency",
+    "systemd"
+  ],
+  "golden": false,
+  "family": "service_failure_linux",
+  "schema_version": "1.0",
+  "signature": "19cbdb0eafda57b1"
+}

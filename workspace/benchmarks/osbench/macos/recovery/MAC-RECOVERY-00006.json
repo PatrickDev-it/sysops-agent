@@ -1,0 +1,98 @@
+{
+  "id": "MAC-RECOVERY-00006",
+  "title": "macos: principal incident — data corruption restore",
+  "difficulty": "principal",
+  "os": "macos",
+  "domain": "recovery",
+  "prerequisites": [],
+  "scenario": "On macos, a high-stakes, multi-cause incident: Corruzione dati silenziosa scoperta in ritardo: alcuni backup recenti contengono gia' i dati corrotti. Individua l'ultimo backup sano e ripristina minimizzando la perdita. Multiple subsystems interact; a single-symptom fix will not hold.",
+  "environment": {
+    "os": "macos",
+    "incident": "data_corruption_restore",
+    "compound": true
+  },
+  "initial_state": [
+    "# fixture: compound incident 'data_corruption_restore' (multiple interacting faults)"
+  ],
+  "expected_reasoning": [
+    "Silent corruption means recent backups may be poisoned — do not blindly restore the latest.",
+    "Establish when corruption began (checksums/audit) to find the last known-good backup.",
+    "Restore the last-good copy to scratch, verify integrity, then reconcile the delta of good writes since.",
+    "Add checksum/scrub monitoring so future corruption is caught before it propagates to all backups."
+  ],
+  "expected_commands": [
+    "# incident-specific: diagnose across subsystems before any change",
+    "# then apply ordered, dependency-aware fixes",
+    "# then add the recurrence guardrail"
+  ],
+  "forbidden_commands": [
+    "reboot\\s*#.*to clear it",
+    "rm\\s+-rf\\s+/",
+    "restore.*over.*production.*#.*untested",
+    "setenforce\\s+0",
+    "ufw\\s+disable"
+  ],
+  "safety_constraints": [
+    "Diagnose the full causal chain before acting; no blind restarts/reboots.",
+    "Preserve data and evidence; every irreversible step needs a captured rollback point.",
+    "Restore service AND install the guardrail that prevents recurrence.",
+    "Never trade a long-term security/integrity loss for a short-term unblock."
+  ],
+  "success_criteria": "Service/host restored to a verified-healthy state via a dependency-ordered fix of ALL contributing causes, with a guardrail added and end-to-end verification done.",
+  "failure_criteria": "Only the surface symptom addressed, recurrence not prevented, data/evidence lost, or a destructive shortcut taken.",
+  "success_check": {
+    "kind": "all_of",
+    "checks": [
+      {
+        "kind": "artifact",
+        "path": "incident_data_corruption_restore_resolved.txt"
+      },
+      {
+        "kind": "artifact",
+        "path": "incident_data_corruption_restore_guardrail.txt"
+      }
+    ]
+  },
+  "recovery_strategy": "Sequence every irreversible action behind a captured rollback point (snapshot/backup/config copy); if a step regresses, roll back that step and re-derive from observation.",
+  "ground_truth": {
+    "incident": "data_corruption_restore",
+    "compound": true
+  },
+  "expected_time_s": 2400,
+  "expected_token_budget": 60000,
+  "possible_mistakes": [
+    "Restore the most recent backup, reintroducing the corruption.",
+    "Overwrite production before verifying the restored copy's integrity.",
+    "Treat a compound incident as a single-cause bug."
+  ],
+  "hints": [
+    "Map the causal chain end-to-end before the first change.",
+    "Fix in dependency order; the visible symptom is usually last in the chain."
+  ],
+  "reference_solution": [
+    "Diagnose across all subsystems",
+    "Apply ordered, dependency-aware fixes",
+    "Add the recurrence guardrail",
+    "Verify end-to-end from the user's perspective"
+  ],
+  "alternative_solution": [
+    "If in-place recovery is riskier than rebuild, provision a clean replacement from trusted sources and cut over, preserving the failed host for forensics."
+  ],
+  "edge_cases": [
+    "Fixing one cause can unmask another — re-observe after each step.",
+    "The 'health check' itself is lying (false green); verify from outside."
+  ],
+  "risk": "RECOVERABLE",
+  "goal": "Corruzione dati silenziosa scoperta in ritardo: alcuni backup recenti contengono gia' i dati corrotti. Individua l'ultimo backup sano e ripristina minimizzando la perdita.",
+  "failure_check": null,
+  "tags": [
+    "principal",
+    "incident",
+    "data_corruption_restore",
+    "compound"
+  ],
+  "golden": false,
+  "family": "principal_incidents",
+  "schema_version": "1.0",
+  "signature": "3400fab592967581"
+}
