@@ -1461,8 +1461,11 @@ class Orchestrator:
             )
             return RunVerdict.REFUSED, _risk_reason
         if _risk == RECOVERABLE:
-            console.print(f"[bold yellow]CAUTION (RECOVERABLE):[/] {_risk_reason}")
-            console.print("[dim]Destructive but bounded — proceeding.[/]")
+            console.print(f"[bold red]REFUSED (REVIEW REQUIRED):[/] {_risk_reason}")
+            console.print(
+                "[dim]Only goals classified SAFE may reach the planner in this release.[/]"
+            )
+            return RunVerdict.REFUSED, _risk_reason
 
         # Inject OCKE platform context into the supervisor's environment snapshot.
         # This tells the LLM what package managers exist, what is forbidden, and

@@ -74,9 +74,17 @@ def test_fatal_patterns_apply_even_with_no_root(monkeypatch):
     assert c.check("diskpart /s script.txt") is not None
 
 
-def test_opting_out_is_explicit(monkeypatch, tmp_path):
+def test_environment_cannot_opt_out_of_confinement(monkeypatch, tmp_path):
     monkeypatch.setenv("SISTEMISTA_UNCONFINED", "1")
-    assert not Confinement.for_workspace(tmp_path).rooted
+    c = Confinement.for_workspace(tmp_path)
+    assert c.rooted
+    assert c.check(r"Out-File C:\outside.txt") is not None
+
+
+def test_powershell_launcher_does_not_bypass_execution_policy():
+    source = (SRC / "tools/session.py").read_text(encoding="utf-8")
+    assert '"-ExecutionPolicy"' not in source
+    assert '"Bypass"' not in source
 
 
 # ── Relative paths resolve against the real cwd ──────────────────────────────

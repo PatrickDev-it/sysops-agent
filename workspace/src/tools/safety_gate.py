@@ -10,8 +10,8 @@ Two-layer design:
      reliable even if the model is unavailable.
   2. An LLM classifier reasons about scope and reversibility for the rest.
 
-Defaults to SAFE on any error: a false block stalls a legitimate task, and the
-deterministic layer already covers the catastrophic cases.
+Only SAFE goals may proceed. Classifier failures and malformed output become
+RECOVERABLE, which the orchestrator refuses before planning.
 """
 
 from __future__ import annotations
@@ -95,7 +95,6 @@ def classify(goal: str) -> tuple[str, str]:
         # goal proceeded to planning.
         #
         # RECOVERABLE rather than DESTRUCTIVE: an unreachable classifier is not evidence that
-        # the goal is destructive, and refusing every goal whenever a model server hiccups
-        # would make the agent unusable. RECOVERABLE is the "proceed, loudly, without the
-        # benefit of the doubt" state — and unlike SAFE it is visible in the record.
-        return RECOVERABLE, f"safety classifier unavailable — proceeding unclassified ({exc})"
+        # the goal is destructive. The orchestrator permits only SAFE, so this state is still
+        # fail-closed and visible without mislabelling the operator's intent.
+        return RECOVERABLE, f"safety classifier unavailable — refusing unclassified goal ({exc})"

@@ -498,7 +498,10 @@ def safety_call(ctx: dict) -> dict:
     except Exception as exc:
         # A safety classifier that cannot answer must not silently open the gate.
         print(f"[safety] classifier unavailable: {exc}", file=sys.stderr)
-        return {"risk": "SAFE", "reason": "classifier unavailable — defaulting safe"}
+        return {
+            "risk": "RECOVERABLE",
+            "reason": "classifier unavailable — refusing unclassified goal",
+        }
 
 
 def enhance_call(ctx: dict) -> dict:

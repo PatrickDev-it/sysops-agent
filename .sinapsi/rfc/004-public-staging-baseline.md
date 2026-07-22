@@ -77,7 +77,9 @@ Adottare la pubblicazione progressiva: prima alpha pubblica minima e onesta su
   obbligatori, blocco delete e force-push; bypass admin consentito soltanto via PR.
 - Secret scanning, push protection, Dependabot security updates e private reporting abilitati.
 - Gate locale: 692 passed, 3 skipped; Ruff/format, build, pip-audit e Gitleaks verdi.
-- Chiusura RFC subordinata alla prima esecuzione remota verde di CI e Security.
+- La PR bootstrap ha registrato CI, ma il dispatch restituisce HTTP 500 e Security non viene
+  indicizzato mentre l'organizzazione è flagged; chiusura subordinata al ripristino GitHub e
+  alla prima esecuzione remota verde di entrambi i workflow.
 
 ## Falsification / stop conditions
 

@@ -30,7 +30,10 @@ and distinct process exit codes.
 
 ## Current limitations
 
-- The safety classifier is not yet a hard authorization boundary. RFC-005 tracks this P0 work.
+- Only goals classified `SAFE` reach planning; review-required, malformed, or unavailable
+  classification fails closed before any command runs.
+- The current policy is read-anywhere/write-workspace. Host package, service, registry, ACL,
+  account, power, and process mutations are refused; there is no unconfined environment flag.
 - Windows is the actively exercised platform. Unix paths exist but are not yet certified.
 - Hardware capacity and throughput depend on the chosen quantization and llama.cpp backend;
   no minimum-VRAM or performance guarantee is made.
@@ -134,6 +137,7 @@ until the validation evidence and release supply chain meet the promotion gate.
 Read [SECURITY.md](SECURITY.md) before deployment or vulnerability reporting. Sistemista is
 local-first, but an enabled remote oracle receives redacted operational context. Redaction is a
 defense-in-depth control, not a guarantee that arbitrary sensitive content cannot leave the host.
+Confinement is an application policy, not kernel isolation.
 
 ## License
 

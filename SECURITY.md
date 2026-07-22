@@ -28,6 +28,12 @@ Use a disposable least-privilege VM, review objectives, keep secrets outside the
 do not expose llama-server ports to untrusted networks. Model files are executable inputs from a
 supply-chain perspective; verify their source and digest before use.
 
+The current application policy admits only objectives classified `SAFE`, confines writes to the
+run workspace, rejects unresolved dynamic write destinations, and blocks known host-level
+mutations. Classifier failures and malformed responses fail closed before planning. These controls
+reduce accidental host impact; they are not a sandbox and do not defend against parser bypasses or
+a compromised interpreter.
+
 ## Credentials
 
 Never commit tokens, private keys, `.env` files, runtime traces, or real infrastructure data.

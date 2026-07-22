@@ -57,10 +57,17 @@ _PATH_MUTATING = re.compile(
 #    Note the verb qualifiers: `reg query` and `sc query` are reads and must pass.
 _SYSTEM_MUTATING = re.compile(
     r"(?<![\w-])(shutdown|Stop-Computer|Restart-Computer|Remove-Service|Stop-Service|"
-    r"Start-Service|Set-Service|Set-Acl|icacls|attrib|cipher|takeown)(?![\w-])"
+    r"Start-Service|Set-Service|Set-Acl|icacls|attrib|cipher|takeown|setx|"
+    r"Stop-Process|taskkill)(?![\w-])"
     r"|(?<![\w-])reg(\.exe)?\s+(add|delete|import|copy|restore|load)(?![\w-])"
     r"|(?<![\w-])sc(\.exe)?\s+(delete|create|config|stop|start)(?![\w-])"
-    r"|(?<![\w-])net(\.exe)?\s+(user|localgroup|stop|start)(?![\w-])",
+    r"|(?<![\w-])net(\.exe)?\s+(user|localgroup|stop|start)(?![\w-])"
+    r"|(?<![\w-])(winget|choco|scoop)\s+(install|uninstall|upgrade|update)(?![\w-])"
+    r"|(?<![\w-])(sudo\s+)?(apt|apt-get|dnf|yum|pacman|zypper|apk|brew)\s+"
+    r"(install|remove|uninstall|upgrade|update)(?![\w-])"
+    r"|(?<![\w-])(python\s+-m\s+pip|pip3?|uv\s+pip)\s+(install|uninstall)(?![\w-])"
+    r"|(?<![\w-])(npm|pnpm)\s+(install|add|remove|uninstall)\b[^|;]*(\s-g|--global)"
+    r"|(?<![\w-])yarn\s+global\s+(add|remove)(?![\w-])",
     re.IGNORECASE,
 )
 
@@ -82,6 +89,17 @@ _REGISTRY = re.compile(r"^(HKLM|HKCU|HKCR|HKU|HKCC|HKEY_[A-Z_]+):", re.IGNORECAS
 _HAS_EXPANSION = re.compile(r"[$%`]|\$\(|\bsubst\b")
 _SEPARATOR = re.compile(r"[\\/]")
 _EXTENSION = re.compile(r"\.[A-Za-z0-9]{1,6}$")
+
+# A dynamic VALUE is legitimate (`Set-Content report.txt -Value $totalRAM`); a dynamic write
+# DESTINATION is not. The parent process cannot resolve shell variables safely, so accepting one
+# makes the path boundary depend on model-authored runtime state. These expressions identify only
+# target positions: redirection, explicit path flags, and the first positional operand of a
+# mutating verb. They are deliberately checked before token/path heuristics.
+_DYNAMIC_REDIRECT_TARGET = re.compile(r"(?<![0-9<>])>>?(?!&)\s*['\"]?[$%`]")
+_DYNAMIC_FLAG_TARGET = re.compile(
+    r"-(?:Path|LiteralPath|Destination|FilePath)\s+['\"]?[$%`]", re.IGNORECASE
+)
+_DYNAMIC_POSITIONAL_TARGET = re.compile(rf"{_PATH_MUTATING.pattern}\s+['\"]?[$%`]", re.IGNORECASE)
 
 
 def _is_path_candidate(tok: str) -> bool:
@@ -154,8 +172,8 @@ class Confinement:
     only guards a model-authored command passed were the placeholder check, the
     self-truncating-redirect check and OS-platform validity.
 
-    Opting out of path scoping is now explicit (`SISTEMISTA_UNCONFINED=1`) and still cannot
-    switch off the fatal set.
+    There is no environment-variable opt-out. An env flag is not a capability boundary: any
+    wrapper that can set it could silently reopen writes to the whole host.
     """
 
     def __init__(self, root: str | Path | None) -> None:
@@ -173,8 +191,6 @@ class Confinement:
         guard is indistinguishable from no guard at all — which is precisely how this one
         disappeared from production for the lifetime of the project.
         """
-        if os.environ.get("SISTEMISTA_UNCONFINED") == "1":
-            return cls(None)
         root = os.environ.get("SISTEMISTA_CONFINE_ROOT") or workspace
         return cls(root) if root else cls(None)
 
@@ -239,6 +255,13 @@ class Confinement:
         # scope can justify, and they apply whether or not a root was configured.
         if self.root is None:
             return None
+
+        if (
+            _DYNAMIC_REDIRECT_TARGET.search(cmd)
+            or _DYNAMIC_FLAG_TARGET.search(cmd)
+            or _DYNAMIC_POSITIONAL_TARGET.search(cmd)
+        ):
+            return "mutating command has a dynamic destination that cannot be confined"
 
         # Evaluate scope only where a path mutation actually happens, so that reading
         # outside the root and writing inside it — the shape of a diagnostic task — passes.

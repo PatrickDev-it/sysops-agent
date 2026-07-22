@@ -204,7 +204,8 @@ graph traversal che rimpiazzano euristiche, token di prompt risparmiati, invaria
 4. **Recovery deriva dall'errore osservato** — `error_classifier` vincola le recovery ammesse.
 5. **Discovery prima di action** — step DISCOVERY precede i MODIFY che usano valori runtime.
 6. **Nessuna recursione da root** — discovery bounded a root noti, max depth 3.
-7. **Goal DESTRUCTIVE rifiutati** — `safety_gate.classify()` prima della pianificazione.
+7. **Solo goal SAFE pianificati** — `DESTRUCTIVE`, `RECOVERABLE`, malformed e classifier offline
+   sono rifiutati da `safety_gate.classify()` prima della pianificazione.
 8. **pyte riceve raw bytes** — `VirtualScreen.feed()` richiede bytes con ANSI intatti, mai testo decoded.
 9. **Artifact check = esiste E ha contenuto** — un file vuoto è un placeholder, non un artefatto; i criteri sono **predicati tipizzati** (`predicates.py`) valutati **senza eseguire nulla**.
 10. **Solo belief PROVEN guidano l'esecuzione** — i REFUTED bloccano i retry (`reasoning.py`).

@@ -66,6 +66,14 @@ def test_blocks_writes_outside_root(c, cmd):
         r"net user attacker P@ss /add",
         r"shutdown /s /t 0",
         r"icacls C:\ /grant Everyone:F",
+        r"winget install Git.Git",
+        r"choco upgrade git -y",
+        r"sudo apt-get install nginx",
+        r"python -m pip install requests",
+        r"npm install -g typescript",
+        r"setx PATH C:\tools",
+        r"Stop-Process -Name explorer",
+        r"taskkill /IM explorer.exe /F",
     ],
 )
 def test_blocks_pathless_system_mutations(c, cmd):
@@ -92,10 +100,22 @@ def test_bare_variables_are_values_not_paths(c, cmd):
     assert c.check(cmd) is None
 
 
-def test_known_false_negative_is_documented(c):
-    """A variable holding an absolute path is NOT caught. This is the filter's accepted
-    blind spot, pinned here so it is a decision and not a surprise."""
-    assert c.check(r"Out-File $target") is None
+@pytest.mark.parametrize(
+    "cmd",
+    [
+        r"Out-File $target",
+        r"Set-Content -Path $target -Value x",
+        r"Remove-Item ${target} -Recurse",
+        r"Get-ChildItem . > $target",
+        r"Copy-Item source.txt -Destination $target",
+    ],
+)
+def test_dynamic_write_targets_fail_closed(c, cmd):
+    assert c.check(cmd) is not None
+
+
+def test_dynamic_values_are_not_mistaken_for_write_targets(c):
+    assert c.check(r"Set-Content report.txt -Value $totalRAM") is None
 
 
 def test_redirect_target_is_checked_even_when_source_is_outside(c):

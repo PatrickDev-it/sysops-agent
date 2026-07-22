@@ -5,6 +5,24 @@ Format per entry: `symptom → root cause → fix / how to avoid`. Consult befor
 
 ---
 
+### GitHub Actions non parte e il dispatch restituisce HTTP 500
+**Sintomo.** CI è registrato dopo la PR bootstrap, Security non compare e `workflow_dispatch`
+restituisce HTTP 500 senza creare run.
+**Causa.** L'organizzazione Ignoryx è flagged e nascosta; repository, ruleset e Actions permissions
+sono configurati, quindi il blocco è nel backend GitHub e richiede il ticket di reinstatement.
+**Fix.** Non indebolire required checks né dichiarare verde il remoto. Conservare i gate locali,
+attendere il ripristino e rieseguire CI + Security prima di promuovere a `validation`.
+
+---
+
+### Una destinazione dinamica può aggirare un controllo path basato sul testo
+**Sintomo.** Un comando come `Out-File $target` non espone al parser il path effettivo della write.
+**Causa.** Il confinement statico vede il nome della variabile, non il valore risolto dalla shell.
+**Fix.** RFC-005 rifiuta destinazioni dinamiche per mutatori e redirection; valori dinamici non
+usati come sink restano ammessi. Nessun parser applicativo va descritto come sandbox.
+
+---
+
 ### `Access to the path '...' is denied` rinominando una directory su Windows
 **Sintomo.** `mv` / `Rename-Item` falliscono su una directory, mentre rinominare una sua *sottodirectory*
 o una directory nuova nello stesso parent funziona.

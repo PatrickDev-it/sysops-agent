@@ -34,13 +34,20 @@ from tests.fake_agent import (
 @pytest.fixture
 def workspace(tmp_path, monkeypatch):
     from src import orchestrator as orch_mod
-    from src.tools import confinement
+    from src.tools import confinement, safety_gate
 
     ws = tmp_path / "ws"
     ws.mkdir()
     monkeypatch.setattr(confinement, "_root", ws.resolve())
     # The authoring path stays live; only the model behind it is deterministic.
     monkeypatch.setattr(orch_mod, "model_router", FakeRouter())
+    # The goal gate is a separate model owner. A loop composition test must never depend on a
+    # live llama-server, but it must still traverse the real safety_gate.classify implementation.
+    monkeypatch.setattr(
+        safety_gate.model_router,
+        "safety_call",
+        lambda ctx: {"risk": safety_gate.SAFE, "reason": "hermetic benign fixture"},
+    )
     return ws
 
 
@@ -122,6 +129,23 @@ def test_a_safe_goal_does_reach_the_planner(workspace):
     sup = FakeSupervisor(plans=[plan(step("list", "Get-ChildItem", step_type="DISCOVERY"))])
     _drive(workspace, sup, goal="list the files in this directory")
     assert sup.plan_calls, "a benign goal never reached the planner"
+
+
+def test_a_recoverable_goal_is_refused_without_operator_approval(workspace, monkeypatch):
+    from src.tools import safety_gate
+
+    monkeypatch.setattr(
+        safety_gate,
+        "classify",
+        lambda goal: (safety_gate.RECOVERABLE, "bounded mutation needs explicit approval"),
+    )
+    sup = FakeSupervisor(plans=[plan(step("remove cache", "Remove-Item cache -Recurse"))])
+
+    verdict, note, session = _drive(workspace, sup, goal="delete the project cache")
+
+    assert verdict is RunVerdict.REFUSED, note
+    assert sup.plan_calls == []
+    assert session.commands == []
 
 
 # ── Invariant: nothing is deleted without it being a planned, gated action ───

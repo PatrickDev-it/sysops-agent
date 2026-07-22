@@ -20,10 +20,16 @@ gate.
 
 ## Latest verification
 
+- 2026-07-22 — RFC-005 local gate: boundary mirato **83 passed**; suite completa
+  **712 passed, 3 skipped**; Ruff check clean e **149 file** conformi; wheel/sdist `0.1.0a1`,
+  dependency audit e curated-tree Gitleaks verdi. Test di composizione provano il rifiuto
+  pre-planner di `RECOVERABLE`/malformed, dynamic write target fail-closed, nessun opt-out
+  ambientale e nessun `ExecutionPolicy Bypass`. GitHub Actions è un blocker esterno: dispatch
+  CI HTTP 500 e workflow Security non indicizzato mentre l'organizzazione è flagged.
 - 2026-07-22 — RFC-004 local gate: Ruff check clean; all 148 Python files formatted;
   **692 passed, 3 skipped**; targeted security/redaction tests **78 passed**; wheel and sdist
   `0.1.0a1` built in isolation with prompts 8/8, KB 8/8, LICENSE and NOTICE; dependency audit
   reports no known vulnerabilities after removal of unused `diskcache`; curated-tree Gitleaks
   scan reports no leaks. Remote Actions and rulesets remain to be verified after first push.
-- Static typing is not yet a release gate: the baseline has 30 Mypy errors and RFC-005/RFC-006
-  must introduce a ratchet rather than suppressing them globally.
+- Static typing is not yet a release gate: la baseline ha 30 errori Mypy; RFC-006 deve
+  introdurre un ratchet senza soppressioni globali.

@@ -1060,3 +1060,24 @@ tramite PR, lasciando audit trail.
 GitHub non ha creato run per i push che precedevano la selezione del default branch. Aggiunto
 `workflow_dispatch` a CI su un branch operativo: la PR verso `development` verifica ora insieme
 workflow e ruleset prima della chiusura di RFC-004.
+
+---
+
+## 2026-07-22 — RFC-005: execution boundary fail-closed
+
+**Policy.** Soltanto goal `SAFE` raggiungono il planner. `RECOVERABLE`, classifier offline e
+risposte malformate terminano `REFUSED` senza comandi. Rimosso l'opt-out
+`SISTEMISTA_UNCONFINED`; destinazioni dinamiche di write e mutazioni host note sono rifiutate.
+PowerShell non viene più avviato con `ExecutionPolicy Bypass`.
+
+**Contratto.** Il boundary resta una policy applicativa read-anywhere/write-workspace, non una
+sandbox. Isolamento di processo/filesystem/network e input ostile non sono certificati; una
+capability di mutazione host richiederà backend kernel/VM e RFC separata.
+
+**Validazione.** Boundary mirato **83 passed**; suite completa **712 passed, 3 skipped**; Ruff e
+format verdi su 149 file; wheel/sdist, pip-audit e Gitleaks verdi. I test di composizione provano
+che i verdetti non-SAFE fermano planner ed executor.
+
+**Remoto.** CI è registrato dopo la PR bootstrap, ma il dispatch GitHub restituisce HTTP 500 e
+Security non viene indicizzato mentre Ignoryx è flagged. RFC-005 è implementata localmente;
+promozione a `validation` vietata fino a run remoti verdi.

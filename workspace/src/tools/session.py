@@ -380,7 +380,8 @@ class Session:
         # set — so in every production run this was None and the `if self._confine is not
         # None:` guards below silently evaluated to nothing, `_ALWAYS_FATAL` included.
         # Reading outside the root stays allowed (a sysops agent must diagnose the system);
-        # it is WRITES that are scoped, and SISTEMISTA_UNCONFINED=1 is the explicit opt-out.
+        # it is WRITES that are scoped. There is no environment-variable opt-out: host mutation
+        # needs a future isolated capability backend, not a process-wide bypass switch.
         self._confine = Confinement.current()
 
         self._save_state()
@@ -595,8 +596,6 @@ class Session:
                 "powershell.exe",
                 "-NoProfile",
                 "-NonInteractive",
-                "-ExecutionPolicy",
-                "Bypass",
                 "-Command",
                 command,
             ]
