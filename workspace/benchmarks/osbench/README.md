@@ -108,6 +108,7 @@ see `_attic/osbench-synthetic-leaderboard/` for why that guard exists:
 
 ```python
 from benchmarks.osbench.scoring.report import write_comparison
+
 write_comparison({"sistemista": card_a, "other-agent": card_b})  # both must be executed
 ```
 
