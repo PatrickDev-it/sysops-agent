@@ -22,6 +22,10 @@ sono configurati, quindi il blocco è nel backend GitHub e richiede il ticket di
 **Fix.** Non indebolire required checks né dichiarare verde il remoto. Conservare i gate locali,
 attendere il ripristino e rieseguire CI + Security prima di promuovere a `validation`.
 
+**Risoluzione operativa 2026-07-22.** Il repository personale esegue i workflow: Security è verde
+e CI ha prodotto log reali. La copia organizzativa è stata cancellata dopo la PR personale verde;
+questo blocker resta soltanto come record storico della causa.
+
 ---
 
 ### Una destinazione dinamica può aggirare un controllo path basato sul testo

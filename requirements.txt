@@ -2,8 +2,8 @@
 # Sistemista talks to a separate llama-server process; llama-cpp-python is not required.
 Jinja2==3.1.6
 MarkupSafe==3.0.3
-numpy==2.4.6
-typing_extensions==4.15.0
+numpy==2.5.1
+typing_extensions==4.16.0
 
 # UI / formatting
 rich>=13.7.0

@@ -3,13 +3,13 @@ requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "sistemista"
+name = "sysops-agent"
 version = "0.1.0a1"
 description = "Local-first, model-assisted system operations with bounded execution and audit trails"
 readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE", "NOTICE"]
-authors = [{ name = "Ignoryx contributors" }]
+authors = [{ name = "SysOps Agent contributors" }]
 requires-python = ">=3.12"
 keywords = ["ai-agent", "llama-cpp", "local-first", "privacy", "sysops"]
 classifiers = [
@@ -28,8 +28,8 @@ classifiers = [
 dependencies = [
     "Jinja2==3.1.6",
     "MarkupSafe==3.0.3",
-    "numpy==2.4.6",
-    "typing_extensions==4.15.0",
+    "numpy==2.5.1",
+    "typing_extensions==4.16.0",
     "rich>=13.7.0",
     "pydantic>=2.7.0",
     "ddgs>=9.0.0",
@@ -50,10 +50,10 @@ dev = [
     "pytest==9.1.1",
     "pytest-cov==7.1.0",
     "pytest-timeout>=2.3",
-    "ruff==0.14.5",
+    "ruff==0.16.0",
     "pip-audit>=2.7",
     "mypy==2.3.0",
-    "types-PyYAML==6.0.12.20260518",
+    "types-PyYAML==6.0.12.20260724",
 ]
 
 [tool.mypy]
@@ -65,12 +65,14 @@ warn_redundant_casts = true
 no_error_summary = true
 
 [project.urls]
-Homepage = "https://github.com/Ignoryx/sistemista"
-Documentation = "https://github.com/Ignoryx/sistemista#readme"
-Issues = "https://github.com/Ignoryx/sistemista/issues"
-Source = "https://github.com/Ignoryx/sistemista"
+Homepage = "https://github.com/PatrickDev-it/sysops-agent"
+Documentation = "https://github.com/PatrickDev-it/sysops-agent#readme"
+Issues = "https://github.com/PatrickDev-it/sysops-agent/issues"
+Source = "https://github.com/PatrickDev-it/sysops-agent"
 
 [project.scripts]
+sysops-agent = "src.main:cli_entry"
+# Compatibility alias retained during the public-alpha cycle.
 sistemista = "src.main:cli_entry"
 
 # ── Test configuration — the suite's own invariants ──────────────────────────

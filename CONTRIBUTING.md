@@ -1,6 +1,6 @@
 # Contributing
 
-Sistemista accepts focused, evidence-backed contributions. The project is security-sensitive:
+SysOps Agent accepts focused, evidence-backed contributions. The project is security-sensitive:
 behavioral claims must be reproducible, and safety controls must fail closed.
 
 ## Before opening a change
