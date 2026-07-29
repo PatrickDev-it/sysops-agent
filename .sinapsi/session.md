@@ -1141,3 +1141,47 @@ contribution/security policy e NOTICE; package e comando primario diventano `sys
 L'alias CLI `sistemista` resta temporaneamente per compatibilità durante l'alpha. `origin` punta
 al nuovo URL canonico. Gate locale: Ruff e format verdi, Mypy zero, **713 passed, 3 skipped**,
 wheel/sdist `sysops_agent-0.1.0a1` costruiti in isolamento.
+
+---
+
+## 2026-07-30 — Sweep Dependabot: sette bump integrati e ratchet ruff 0.16
+
+**Contesto.** Sette PR Dependabot aperte su `development`, tutte bloccate. Nessuna era bloccata
+dalla stessa causa, quindi nessuna si sarebbe sbloccata da sola: quattro attendevano solo
+l'approvazione del ruleset `19557677`, una aveva `Lint` rosso, tre erano `BEHIND` con
+`Test (ubuntu-latest)` rosso.
+
+**La causa dei tre rossi non era nei bump.** `#1`, `#2` e `#3` (`actions/setup-python` 5→7,
+`actions/checkout` 4→7, `gitleaks/gitleaks-action` 2→3) portavano ancora i log del 22 luglio:
+sono le stesse **9 failure non ermetiche** che quel giorno il primo CI Ubuntu reale aveva
+scoperto e che erano già state corrette su `development`. Il rosso era storico, non causale.
+Riportarle sulla base corrente le ha rese verdi senza toccare né i workflow né i test.
+
+**Il solo fix di codice: ruff 0.16 formatta i fence Markdown.** `#10` (ruff 0.14.5 → 0.16.0)
+falliva `ruff format --check` su `workspace/benchmarks/osbench/README.md`. Non è una regressione
+del repo: 0.16 estende il formatter ai blocchi Python dentro Markdown, e il fence di
+`write_comparison` non aveva la riga vuota dopo l'import. Il conteggio dei file conformi passa da
+**149 a 275** proprio perché il perimetro del formatter è cresciuto. Fix: `ruff format` con 0.16,
++1 riga, nessun cambio di prosa né di semantica.
+
+**Ordine imposto dal ruleset.** `strict_required_status_checks_policy` rende ogni PR `BEHIND`
+dopo ogni merge, e tutti i bump pip toccano `pyproject.toml` e `requirements.txt`: la sequenza è
+quindi obbligatoriamente seriale. I quattro già verdi sono stati integrati in bypass admin
+(`bypass_mode: pull_request`, solo il requisito di review); per `#10`, `#1`, `#2`, `#3` la CI è
+stata rieseguita sulla base aggiornata **prima** del merge, così ogni combinazione risultante è
+stata osservata verde e non solo dedotta.
+
+**Osservazione su Dependabot.** Sui conflitti in `pyproject.toml` Dependabot rebasa da sé, con la
+stessa risoluzione ovvia (versione della PR per il proprio pacchetto, `development` per gli altri).
+Rifarlo a mano è lavoro sprecato e perde la corsa col force-push del bot: conviene attendere che il
+branch diventi discendente di `development` e solo allora aggiungere i propri commit.
+
+**Metriche di semplificazione.** LOC runtime **+0** (l'unica riga aggiunta è in un README);
+owner duplicati rimossi 0; branch di runtime rimossi 0; decisioni LLM→deterministiche 0;
+invarianti +0/−0. Debito residuo: nessuno introdotto. Il perimetro del formatter è cresciuto di
+126 file senza che sia cambiata una riga di codice — il ratchet è di tooling, non di runtime.
+
+**Validazione.** Ruff 0.16.0 check clean e **275 file** conformi; Mypy 2.3.0 exit 0 senza output;
+**713 passed, 3 skipped**; `pip-audit -r requirements.txt` senza vulnerabilità note. Su
+`development` (`2cd9893`) i sei required check sono verdi: Lint, Gitleaks, Test ubuntu, Test
+windows, Package, Dependency audit.

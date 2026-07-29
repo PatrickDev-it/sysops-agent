@@ -51,3 +51,9 @@ gate.
   scan reports no leaks. Remote Actions and rulesets remain to be verified after first push.
 - Static typing è un release gate: Mypy 2.3.0 controlla tutto `workspace/src` con
   `check_untyped_defs` e baseline zero-error, senza soppressioni globali.
+- 2026-07-30 — Sweep Dependabot (sette bump): gate locale con la baseline integrata. Ruff **0.16.0**
+  check clean e **275 file** conformi (149 → 275 perché 0.16 formatta i fence Python nei Markdown);
+  Mypy 2.3.0 exit 0 senza output; **713 passed, 3 skipped**; `pip-audit -r requirements.txt` senza
+  vulnerabilità note. Su `development` (`2cd9893`) i sei required check sono verdi: Lint, Gitleaks,
+  Test ubuntu, Test windows, Package, Dependency audit. Ogni PR è stata verificata sulla base
+  aggiornata prima del merge; il bypass admin ha coperto solo il requisito di review, mai un check.

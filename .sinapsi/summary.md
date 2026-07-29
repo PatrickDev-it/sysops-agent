@@ -52,6 +52,7 @@ patch: the project's shape (above), the last sessions at a glance, and a short r
      agent at the end of every patch, at the same time it appends session.md. Drop the
      11th; the full history is in session.md and, once archived, in archive/. -->
 
+- 2026-07-30 — Integrate sette PR Dependabot; ruff 0.16 estende il format ai Markdown: 149→275 file.
 - 2026-07-22 — Rinominato in SysOps Agent: repo, package, CLI primaria e superfici OSS allineate.
 - 2026-07-22 — Chiusa migrazione personale: PR #7 con sei check verdi; copia Ignoryx eliminata.
 - 2026-07-22 — Migrata storia pubblica al profilo personale; fixate 9 failure CI Ubuntu non ermetiche.
@@ -69,9 +70,9 @@ patch: the project's shape (above), the last sessions at a glance, and a short r
 
 - Repository canonico: `PatrickDev-it/sysops-agent`; storia, tre branch, ruleset e pin preservati.
 - Nome pubblico, package, CLI primaria e documentazione OSS allineati a **SysOps Agent**.
-- Alias CLI `sistemista` mantenuto temporaneamente per compatibilità alpha.
-- RFC-005 integrata; RFC-006 chiusa con Mypy 30→0 senza suppress globali.
-- Gate locale: 713 passed/3 skipped; Ruff/format/type, build, audit e Gitleaks verdi.
-- Wheel/sdist `sysops_agent-0.1.0a1` verdi con 8 prompt, 8 KB YAML, LICENSE e NOTICE.
-- Ruleset `19557677` e security features personali attivi.
-- Prossimo: PR verde del rebrand, quindi RFC-007 SBOM/provenance; nessuna promozione anticipata.
+- Nessuna PR aperta: `development` è a `2cd9893` con i sei required check verdi.
+- Baseline dipendenze: `numpy 2.5.1`, `typing_extensions 4.16.0`, `ruff 0.16.0`; Actions v7/v7/v3.
+- ruff 0.16 formatta i fence Python nei `.md`: perimetro 149→275 file, esempi nei doc ora sono codice.
+- Gate locale: 713 passed/3 skipped; Ruff/format/Mypy e `pip-audit` verdi.
+- Installare `-e ".[dev]"`: `pip install -e .` lascia il tooling indietro e non riproduce la CI.
+- Prossimo: RFC-007 SBOM/provenance; nessuna promozione anticipata a `validation`.

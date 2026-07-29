@@ -266,3 +266,34 @@ backslash (`str(ws).replace` su ogni backslash) — e `Path()`, che su Windows i
 lettera seguita da due punti come drive.
 **Come procedere.** Il fingerprint del piano ora in traccia non basta: serve il launcher completo.
 Riprodurre con `--ids T33` stampando il piano prima dell'esecuzione.
+
+---
+
+### `ruff format --check` rosso su un README, senza che nessun `.py` sia cambiato
+**Sintomo.** Dopo il bump di ruff da 0.14.5 a 0.16.0, `ruff check .` passa ma
+`ruff format --check .` falla su `workspace/benchmarks/osbench/README.md:1:1`, e il messaggio cita
+righe di codice Python che in quel file stanno dentro un fence. Il conteggio dei file conformi
+salta da 149 a 275 senza che nessun file sia stato aggiunto al repo.
+**Causa.** ruff 0.16 estende il formatter ai **blocchi Python dentro Markdown**. Il perimetro non è
+più `*.py`: un fence ```python in un `.md` è codice formattabile. Il nostro fence non aveva la riga
+vuota dopo l'import, cosa che il formatter richiede.
+**Fix.** Non escludere i `.md` e non disattivare il check: eseguire `ruff format` con la versione
+pinnata nel pyproject e committare il risultato. Da qui in avanti, **un esempio Python in un `.md`
+va scritto già formattato**, altrimenti blocca la CI come lo bloccherebbe un sorgente.
+**Trappola collegata.** `pip install -e .` non aggiorna il tooling — le pin di `ruff`/`mypy`/`pytest`
+vivono nell'extra `[dev]`. Una venv con `ruff 0.15.x` mentre il pyproject pinna `0.16.0` conta 149
+file, dice "già formattati" e **non riproduce la CI**. Installare `-e ".[dev]"` prima di credere a
+un gate verde in locale.
+
+---
+
+### Tre PR Dependabot rosse per una failure già corretta settimane prima
+**Sintomo.** `Test (ubuntu-latest)` rosso su tre PR di bump delle GitHub Actions, con 9 failure su
+path Windows e SQLite. Le stesse PR non toccano né i test né il codice: solo un SHA in un workflow.
+**Causa.** I check erano stati eseguiti alla creazione delle PR e mai più. Le 9 failure sono quelle
+che il primo CI Ubuntu reale aveva scoperto lo stesso giorno, già corrette su `development`. Il
+rosso era un log storico, non un risultato sulla base corrente.
+**Fix.** Prima di indagare un check rosso su una PR vecchia, confronta la data del run con l'ultimo
+commit della base: se la base è andata avanti, aggiorna il branch e rileggi il risultato. Su questo
+repo `strict_required_status_checks_policy` lo impone comunque prima del merge, ma il tempo perso a
+leggere log obsoleti si risparmia solo guardando prima la data.
