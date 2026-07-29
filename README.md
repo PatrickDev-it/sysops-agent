@@ -1,19 +1,19 @@
-# Sistemista
+# SysOps Agent
 
 Local-first, model-assisted system operations with deterministic execution controls,
 verification predicates, recovery loops, and a redacted audit trail.
 
-> **Status: public alpha (`0.1.0a1`).** Sistemista executes commands on the host. It is not
+> **Status: public alpha (`0.1.0a1`).** SysOps Agent executes commands on the host. It is not
 > production-ready, does not provide a security sandbox, and must not be run unattended or
 > against untrusted objectives. Use an isolated disposable machine or VM.
 
-[![CI](https://github.com/Ignoryx/sistemista/actions/workflows/ci.yml/badge.svg?branch=development)](https://github.com/Ignoryx/sistemista/actions/workflows/ci.yml)
-[![Security](https://github.com/Ignoryx/sistemista/actions/workflows/security.yml/badge.svg?branch=development)](https://github.com/Ignoryx/sistemista/actions/workflows/security.yml)
+[![CI](https://github.com/PatrickDev-it/sysops-agent/actions/workflows/ci.yml/badge.svg?branch=development)](https://github.com/PatrickDev-it/sysops-agent/actions/workflows/ci.yml)
+[![Security](https://github.com/PatrickDev-it/sysops-agent/actions/workflows/security.yml/badge.svg?branch=development)](https://github.com/PatrickDev-it/sysops-agent/actions/workflows/security.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
 ## What it is
 
-Sistemista is an experimental Python control plane around two locally hosted GGUF models:
+SysOps Agent is an experimental Python control plane around two locally hosted GGUF models:
 
 | Role | Default artifact | Responsibility |
 |---|---|---|
@@ -51,14 +51,14 @@ Prerequisites:
   [`workspace/models/README.md`](workspace/models/README.md)
 
 ```powershell
-git clone https://github.com/Ignoryx/sistemista.git
-cd sistemista
+git clone https://github.com/PatrickDev-it/sysops-agent.git
+cd sysops-agent
 py -3.12 -m venv .venv
 .\.venv\Scripts\python -m pip install --upgrade pip
 .\.venv\Scripts\python -m pip install -e .
 $env:SISTEMISTA_LLAMA_SERVER_BIN = "C:\path\to\llama-server.exe"
 $env:SISTEMISTA_ORACLE = "0"
-.\.venv\Scripts\sistemista "inspect disk pressure" --workspace C:\safe\disposable-workspace
+.\.venv\Scripts\sysops-agent "inspect disk pressure" --workspace C:\safe\disposable-workspace
 ```
 
 On Unix-like hosts, activate `.venv/bin/activate` and use POSIX paths. This path is available
@@ -136,7 +136,7 @@ until the validation evidence and release supply chain meet the promotion gate.
 
 ## Security and privacy
 
-Read [SECURITY.md](SECURITY.md) before deployment or vulnerability reporting. Sistemista is
+Read [SECURITY.md](SECURITY.md) before deployment or vulnerability reporting. SysOps Agent is
 local-first, but an enabled remote oracle receives redacted operational context. Redaction is a
 defense-in-depth control, not a guarantee that arbitrary sensitive content cannot leave the host.
 Confinement is an application policy, not kernel isolation.

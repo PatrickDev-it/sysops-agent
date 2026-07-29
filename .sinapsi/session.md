@@ -1101,3 +1101,43 @@ divergenze, ma non equivale a type completeness strict.
 **Validazione.** Mypy **30→0**; Ruff/format verdi su 149 file; test mirati **74 passed**; suite
 **713 passed, 3 skipped**; build isolata, pip-audit e Gitleaks storia+diff verdi. GitHub Actions
 resta bloccato dal flag organizzativo, quindi nessuna promozione a `validation`.
+
+---
+
+## 2026-07-22 — Migrazione al profilo personale e primo CI multi-OS reale
+
+**Migrazione.** Il transfer nativo `Ignoryx/sistemista → PatrickDev-it/sistemista` è stato vietato
+da GitHub (`422`, transfer non disponibile per account flagged). Creato il repository personale
+e replicati `development`, `validation`, `production`; SHA confrontati e identici. L'archive locale
+pre-pubblicazione non è stato pubblicato. Default, ruleset, topics, Discussions, private reporting,
+secret scanning, push protection e Dependabot sono stati ricreati sul nuovo owner.
+
+**CI reale.** Sul profilo personale Security è passata. Ubuntu ha finalmente eseguito la suite e
+ha scoperto 9 failure mascherate da Windows: fixture path Windows su POSIX, SQLite collocato dentro
+il task workspace e basename dipendente dall'OS. Corrette le cause: fixture native, state esterno
+al workspace e canonicalizzazione di entrambi i separatori.
+
+**Branding.** README, package URL, author metadata e NOTICE puntano a `PatrickDev-it/sistemista`;
+il checkout usa il nuovo repository come `origin`. Lo storico pubblico resta intatto.
+
+**Validazione locale.** **713 passed, 3 skipped**; 28 test mirati verdi; Ruff/format/Mypy,
+wheel/sdist, pip-audit e Gitleaks verdi. Cancellazione della copia organizzativa subordinata alla
+PR personale CI+Security verde; pin del profilo richiede l'interfaccia GitHub, non esiste API pubblica.
+
+### Chiusura migrazione remota
+
+PR personale [#7](https://github.com/PatrickDev-it/sistemista/pull/7) integrata in `development`
+con Lint, Ubuntu, Windows, Package, Dependency audit e Gitleaks verdi. Ruleset `19557677` attivo;
+default e security features verificati. `Ignoryx/sistemista` eliminata tramite il credential helper
+e verificata inesistente; rimosso anche il remote locale organizzativo. Unico residuo operativo:
+selezionare `PatrickDev-it/sistemista` nel dialogo web **Customize your pins**, non automatizzabile
+tramite API GitHub pubblica.
+
+### English product identity
+
+Repository personale rinominato da `sistemista` a `sysops-agent`, preservando branch, storia,
+ruleset e pin. Identità pubblica aggiornata a **SysOps Agent** in README, metadata Python,
+contribution/security policy e NOTICE; package e comando primario diventano `sysops-agent`.
+L'alias CLI `sistemista` resta temporaneamente per compatibilità durante l'alpha. `origin` punta
+al nuovo URL canonico. Gate locale: Ruff e format verdi, Mypy zero, **713 passed, 3 skipped**,
+wheel/sdist `sysops_agent-0.1.0a1` costruiti in isolamento.

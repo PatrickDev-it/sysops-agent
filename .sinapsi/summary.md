@@ -52,6 +52,9 @@ patch: the project's shape (above), the last sessions at a glance, and a short r
      agent at the end of every patch, at the same time it appends session.md. Drop the
      11th; the full history is in session.md and, once archived, in archive/. -->
 
+- 2026-07-22 — Rinominato in SysOps Agent: repo, package, CLI primaria e superfici OSS allineate.
+- 2026-07-22 — Chiusa migrazione personale: PR #7 con sei check verdi; copia Ignoryx eliminata.
+- 2026-07-22 — Migrata storia pubblica al profilo personale; fixate 9 failure CI Ubuntu non ermetiche.
 - 2026-07-22 — Chiusa RFC-006: Mypy 30→0, 713 test verdi e runtime netto -26 LOC.
 - 2026-07-22 — Implementata RFC-005 fail-closed: 712 test verdi; promozione bloccata da Actions HTTP 500.
 - 2026-07-22 — Pubblicato Ignoryx/sistemista: tre branch, security features e ruleset attivi; CI remota da provare.
@@ -64,10 +67,11 @@ patch: the project's shape (above), the last sessions at a glance, and a short r
      fragile, what the next action is. Rewritten (not appended) from session.md + handoff.md
      at the end of every patch. If it grows past 10 lines it has stopped being a summary. -->
 
-- Repository pubblico: `Ignoryx/sistemista`; storia privata preservata solo in archive locale.
-- RFC-005 integrata; RFC-006 chiusa localmente con Mypy 30→0 senza suppress globali.
+- Repository canonico: `PatrickDev-it/sysops-agent`; storia, tre branch, ruleset e pin preservati.
+- Nome pubblico, package, CLI primaria e documentazione OSS allineati a **SysOps Agent**.
+- Alias CLI `sistemista` mantenuto temporaneamente per compatibilità alpha.
+- RFC-005 integrata; RFC-006 chiusa con Mypy 30→0 senza suppress globali.
 - Gate locale: 713 passed/3 skipped; Ruff/format/type, build, audit e Gitleaks verdi.
-- Wheel/sdist `0.1.0a1` verdi con 8 prompt, 8 KB YAML, LICENSE e NOTICE.
-- `development` default; `validation`/`production` protetti da ruleset e security features.
-- GitHub Actions bloccato: dispatch CI HTTP 500, Security non indicizzato con org flagged.
-- Prossimo passo: integrare RFC-006 su development, poi RFC-007 SBOM/provenance.
+- Wheel/sdist `sysops_agent-0.1.0a1` verdi con 8 prompt, 8 KB YAML, LICENSE e NOTICE.
+- Ruleset `19557677` e security features personali attivi.
+- Prossimo: PR verde del rebrand, quindi RFC-007 SBOM/provenance; nessuna promozione anticipata.
