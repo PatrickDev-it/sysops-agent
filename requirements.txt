@@ -1,7 +1,7 @@
 # Compatibility manifest. pyproject.toml is the canonical dependency source.
 # Sistemista talks to a separate llama-server process; llama-cpp-python is not required.
 Jinja2==3.1.6
-MarkupSafe==3.0.3
+MarkupSafe==3.0.4
 numpy==2.5.1
 typing_extensions==4.16.0
 
