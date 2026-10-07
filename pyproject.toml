@@ -27,7 +27,7 @@ classifiers = [
 # contradicts the "any OS" thesis.
 dependencies = [
     "Jinja2==3.1.6",
-    "MarkupSafe==3.0.3",
+    "MarkupSafe==3.0.4",
     "numpy==2.5.1",
     "typing_extensions==4.16.0",
     "rich>=13.7.0",
